@@ -118,7 +118,7 @@ class Session {
 		$wrapper = is_php('8.0') ? 'PHP8SessionWrapper' : 'OldSessionWrapper';
 		require_once(ADMIN_ROOT.'libraries/Session/'.$wrapper.'.php');
 		$prefix = config_item('subclass_prefix');
-		if ( ! class_exists('CI_Session_driver', FALSE))
+		if ( ! class_exists('Session_driver', FALSE))
 		{
 			require_once(
 				file_exists(APPPATH.'libraries/Session/Session_driver.php')
@@ -139,13 +139,13 @@ class Session {
 				return $class;
 			}
 		}
-		if ( ! class_exists('CI_'.$class, FALSE))
+		if ( ! class_exists(''.$class, FALSE))
 		{
 			if (file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$class.'.php') OR file_exists($file_path = ADMIN_ROOT.'libraries/Session/drivers/'.$class.'.php'))
 			{
 				require_once($file_path);
 			}
-			if ( ! class_exists('CI_'.$class, FALSE) && ! class_exists($class, FALSE))
+			if ( ! class_exists(''.$class, FALSE) && ! class_exists($class, FALSE))
 			{
 				throw new UnexpectedValueException("Session: Configured driver '".$driver."' was not found. Aborting.");
 			}
@@ -159,7 +159,7 @@ class Session {
 			}
 			log_message('debug', 'Session: '.$prefix.$class.".php found but it doesn't declare class ".$prefix.$class.'.');
 		}
-		return 'CI_'.$class;
+		return ''.$class;
 	}
 	protected function _configure(&$params)
 	{

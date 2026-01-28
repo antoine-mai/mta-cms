@@ -90,10 +90,10 @@ if ( ! is_php('5.4'))
 	{
 		ini_set('php.internal_encoding', $charset);
 	}
-	require_once(ADMIN_ROOT.'core/compat/mbstring.php');
-	require_once(ADMIN_ROOT.'core/compat/hash.php');
-	require_once(ADMIN_ROOT.'core/compat/password.php');
-	require_once(ADMIN_ROOT.'core/compat/standard.php');
+	require_once(ADMIN_ROOT.'helpers/mbstring.php');
+	require_once(ADMIN_ROOT.'helpers/hash.php');
+	require_once(ADMIN_ROOT.'helpers/password.php');
+	require_once(ADMIN_ROOT.'helpers/standard.php');
 	$UNI =& load_class('Utf8', 'core');
 	$URI =& load_class('URI', 'core');
 	$RTR =& load_class('Router', 'core', isset($routing) ? $routing : NULL);

@@ -12,7 +12,7 @@ class Driver_Library {
 		$prefix = config_item('subclass_prefix');
 		if ( ! isset($this->lib_name))
 		{
-			$this->lib_name = str_replace(array('CI_', $prefix), '', get_class($this));
+			$this->lib_name = str_replace(array('', $prefix), '', get_class($this));
 		}
 		$child_name = $this->lib_name.'_'.$child;
 		if ( ! in_array($child, $this->valid_drivers))
@@ -48,7 +48,7 @@ class Driver_Library {
 		}
 		if ( ! $found)
 		{
-			$class_name = 'CI_'.$child_name;
+			$class_name = ''.$child_name;
 			if ( ! class_exists($class_name, FALSE))
 			{
 				foreach ($paths as $path)

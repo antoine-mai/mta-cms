@@ -232,7 +232,7 @@ abstract class DB_driver {
 	}
 	public function load_rdriver()
 	{
-		$driver = 'CI_DB_'.$this->dbdriver.'_result';
+		$driver = 'DB_'.$this->dbdriver.'_result';
 		if ( ! class_exists($driver, FALSE))
 		{
 			require_once(ADMIN_ROOT.'database/DB_result.php');
@@ -705,7 +705,7 @@ abstract class DB_driver {
 	}
 	protected function _cache_init()
 	{
-		if ( ! class_exists('CI_DB_Cache', FALSE))
+		if ( ! class_exists('DB_Cache', FALSE))
 		{
 			require_once(ADMIN_ROOT.'database/DB_cache.php');
 		}

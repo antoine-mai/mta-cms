@@ -89,7 +89,7 @@ class Loader {
 		{
 			throw new RuntimeException('The model name you are loading is the name of a resource that is already being used: '.$name);
 		}
-		if ($db_conn !== FALSE && ! class_exists('CI_DB', FALSE))
+		if ($db_conn !== FALSE && ! class_exists('DB', FALSE))
 		{
 			if ($db_conn === TRUE)
 			{
@@ -176,12 +176,12 @@ class Loader {
 		$CI =& get_instance();
 		if ( ! is_object($db) OR ! ($db instanceof CI_DB))
 		{
-			class_exists('CI_DB', FALSE) OR $this->database();
+			class_exists('DB', FALSE) OR $this->database();
 			$db =& $CI->db;
 		}
 		require_once(ADMIN_ROOT.'database/DB_utility.php');
 		require_once(ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_utility.php');
-		$class = 'CI_DB_'.$db->dbdriver.'_utility';
+		$class = 'DB_'.$db->dbdriver.'_utility';
 		if ($return === TRUE)
 		{
 			return new $class($db);
@@ -194,7 +194,7 @@ class Loader {
 		$CI =& get_instance();
 		if ( ! is_object($db) OR ! ($db instanceof CI_DB))
 		{
-			class_exists('CI_DB', FALSE) OR $this->database();
+			class_exists('DB', FALSE) OR $this->database();
 			$db =& $CI->db;
 		}
 		require_once(ADMIN_ROOT.'database/DB_forge.php');
@@ -205,12 +205,12 @@ class Loader {
 			if (file_exists($driver_path))
 			{
 				require_once($driver_path);
-				$class = 'CI_DB_'.$db->dbdriver.'_'.$db->subdriver.'_forge';
+				$class = 'DB_'.$db->dbdriver.'_'.$db->subdriver.'_forge';
 			}
 		}
 		else
 		{
-			$class = 'CI_DB_'.$db->dbdriver.'_forge';
+			$class = 'DB_'.$db->dbdriver.'_forge';
 		}
 		if ($return === TRUE)
 		{
@@ -258,7 +258,7 @@ class Loader {
 		{
 			$filename = basename($helper);
 			$filepath = ($filename === $helper) ? '' : substr($helper, 0, strlen($helper) - strlen($filename));
-			$filename = strtolower(preg_replace('#(_helper)?(\.php)?$#i', '', $filename)).'_helper';
+			$filename = strtolower(preg_replace('#(_helper)?(\.php)?$#i', '', $filename));
 			$helper   = $filepath.$filename;
 			if (isset($this->_ci_helpers[$helper]))
 			{
@@ -337,7 +337,7 @@ class Loader {
 		{
 			return FALSE;
 		}
-		if ( ! class_exists('CI_Driver_Library', FALSE))
+		if ( ! class_exists('Driver_Library', FALSE))
 		{
 			require ADMIN_ROOT.'libraries/Driver.php';
 		}
@@ -526,7 +526,7 @@ class Loader {
 	}
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name)
 	{
-		$prefix = 'CI_';
+		$prefix = '';
 		if (class_exists($prefix.$library_name, FALSE))
 		{
 			if (class_exists(config_item('subclass_prefix').$library_name, FALSE))

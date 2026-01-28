@@ -202,9 +202,9 @@ class DB_sqlsrv_driver extends DB {
 				$select = implode(', ', $select);
 			}
 			return 'SELECT '.$select." FROM (\n\n"
-				.preg_replace('/^(SELECT( DISTINCT)?)/i', '\\1 ROW_NUMBER() OVER('.trim($orderby).') AS '.$this->escape_identifiers('CI_rownum').', ', $sql)
-				."\n\n) ".$this->escape_identifiers('CI_subquery')
-				."\nWHERE ".$this->escape_identifiers('CI_rownum').' BETWEEN '.($this->qb_offset + 1).' AND '.$limit;
+				.preg_replace('/^(SELECT( DISTINCT)?)/i', '\\1 ROW_NUMBER() OVER('.trim($orderby).') AS '.$this->escape_identifiers('rownum').', ', $sql)
+				."\n\n) ".$this->escape_identifiers('subquery')
+				."\nWHERE ".$this->escape_identifiers('rownum').' BETWEEN '.($this->qb_offset + 1).' AND '.$limit;
 		}
 		return preg_replace('/(^\SELECT (DISTINCT)?)/i','\\1 TOP '.$limit.' ', $sql);
 	}

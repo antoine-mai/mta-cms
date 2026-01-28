@@ -83,19 +83,19 @@ function &DB($params = '', $query_builder_override = NULL)
 	if ( ! isset($query_builder) OR $query_builder === TRUE)
 	{
 		require_once(ADMIN_ROOT.'database/DB_query_builder.php');
-		if ( ! class_exists('CI_DB', FALSE))
+		if ( ! class_exists('DB', FALSE))
 		{
 			class DB extends DB_query_builder { }
 		}
 	}
-	elseif ( ! class_exists('CI_DB', FALSE))
+	elseif ( ! class_exists('DB', FALSE))
 	{
 		class DB extends DB_driver { }
 	}
 	$driver_file = ADMIN_ROOT.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
 	file_exists($driver_file) OR show_error('Invalid DB driver');
 	require_once($driver_file);
-	$driver = 'CI_DB_'.$params['dbdriver'].'_driver';
+	$driver = 'DB_'.$params['dbdriver'].'_driver';
 	$DB = new $driver($params);
 	if ( ! empty($DB->subdriver))
 	{
@@ -103,7 +103,7 @@ function &DB($params = '', $query_builder_override = NULL)
 		if (file_exists($driver_file))
 		{
 			require_once($driver_file);
-			$driver = 'CI_DB_'.$DB->dbdriver.'_'.$DB->subdriver.'_driver';
+			$driver = 'DB_'.$DB->dbdriver.'_'.$DB->subdriver.'_driver';
 			$DB = new $driver($params);
 		}
 	}

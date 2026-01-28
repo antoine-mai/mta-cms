@@ -11,7 +11,7 @@ class Migration {
 	protected $_error_string = '';
 	public function __construct($config = array())
 	{
-		if ( ! in_array(get_class($this), array('CI_Migration', config_item('subclass_prefix').'Migration'), TRUE))
+		if ( ! in_array(get_class($this), array('Migration', config_item('subclass_prefix').'Migration'), TRUE))
 		{
 			return;
 		}
