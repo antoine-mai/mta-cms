@@ -1,4 +1,7 @@
 <?php namespace Admin\Core;
+/**
+ * 
+ */
 class Exceptions {
 	public $ob_level;
 	public $levels = [

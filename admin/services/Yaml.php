@@ -1,7 +1,8 @@
 <?php namespace Admin\Services;
+
 /**
- * 
-**/
+ * Yaml class for simple YAML parsing and dumping.
+ */
 class Yaml
 {
     /**
@@ -12,15 +13,15 @@ class Yaml
      */
     public function parse($file)
     {
-        if (!file_exists($file)) {
+        if (!file_exists((string)$file)) {
             return [];
         }
 
         if (function_exists('yaml_parse_file')) {
-            return yaml_parse_file($file);
+            return (array)yaml_parse_file((string)$file);
         }
 
-        return $this->simpleParse(file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+        return $this->simpleParse(file((string)$file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
     }
 
     /**
@@ -30,12 +31,11 @@ class Yaml
     protected function simpleParse($lines)
     {
         $data = [];
-        $lastIndent = 0;
         $context = [&$data];
         $path = [0];
 
         foreach ($lines as $line) {
-            $line = rtrim($line);
+            $line = rtrim((string)$line);
             if (empty($line) || strpos(ltrim($line), '#') === 0) {
                 continue;
             }
@@ -98,30 +98,30 @@ class Yaml
     public function dump($file, $data)
     {
         if (function_exists('yaml_emit_file')) {
-            return yaml_emit_file($file, $data);
+            return yaml_emit_file((string)$file, (array)$data);
         }
 
-        $content = $this->simpleDump($data);
-        return file_put_contents($file, $content);
+        $content = $this->simpleDump((array)$data);
+        return file_put_contents((string)$file, $content);
     }
 
-    protected function simpleDump($data, $indent = 0)
+    protected function simpleDump(array $data, $indent = 0)
     {
         $output = '';
-        $spacing = str_repeat('  ', $indent);
+        $spacing = str_repeat('  ', (int)$indent);
 
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 if (array_keys($value) === range(0, count($value) - 1)) {
                     // Indexed array (list)
-                    $output .= $spacing . $key . ":\n";
+                    $output .= $spacing . (string)$key . ":\n";
                     foreach ($value as $item) {
-                        $output .= $spacing . '  - ' . $item . "\n";
+                        $output .= $spacing . '  - ' . (string)$item . "\n";
                     }
                 } else {
                     // Associative array
-                    $output .= $spacing . $key . ":\n";
-                    $output .= $this->simpleDump($value, $indent + 1);
+                    $output .= $spacing . (string)$key . ":\n";
+                    $output .= $this->simpleDump($value, (int)$indent + 1);
                 }
             } else {
                 $rawVal = $value;
@@ -129,7 +129,7 @@ class Yaml
                 elseif (is_string($value) && (strpos($value, ':') !== false || strpos($value, '#') !== false)) {
                      $rawVal = '"' . $value . '"';
                 }
-                $output .= $spacing . $key . ': ' . $rawVal . "\n";
+                $output .= $spacing . (string)$key . ': ' . (string)$rawVal . "\n";
             }
         }
         return $output;

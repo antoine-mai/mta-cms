@@ -1,23 +1,27 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
+<?php namespace Admin\Services;
+
 class Parser {
 	public $l_delim = '{';
 	public $r_delim = '}';
 	protected $CI;
+
 	public function __construct()
 	{
 		$this->CI =& get_instance();
 		log_message('info', 'Parser Class Initialized');
 	}
+
 	public function parse($template, $data, $return = FALSE)
 	{
-		$template = $this->CI->load->view($template, $data, TRUE);
-		return $this->_parse($template, $data, $return);
+		$template = $this->CI->load->view((string)$template, $data, TRUE);
+		return $this->_parse((string)$template, $data, $return);
 	}
+
 	public function parse_string($template, $data, $return = FALSE)
 	{
-		return $this->_parse($template, $data, $return);
+		return $this->_parse((string)$template, $data, $return);
 	}
+
 	protected function _parse($template, $data, $return = FALSE)
 	{
 		if ($template === '')
@@ -35,28 +39,31 @@ class Parser {
 			);
 		}
 		unset($data);
-		$template = strtr($template, $replace);
+		$template = strtr((string)$template, $replace);
 		if ($return === FALSE)
 		{
 			$this->CI->output->append_output($template);
 		}
-		return $template;
+		return (string)$template;
 	}
+
 	public function set_delimiters($l = '{', $r = '}')
 	{
 		$this->l_delim = $l;
 		$this->r_delim = $r;
 	}
+
 	protected function _parse_single($key, $val, $string)
 	{
 		return [$this->l_delim.$key.$this->r_delim => (string) $val];
 	}
+
 	protected function _parse_pair($variable, $data, $string)
 	{
 		$replace = [];
 		preg_match_all(
 			'#'.preg_quote($this->l_delim.$variable.$this->r_delim).'(.+?)'.preg_quote($this->l_delim.'/'.$variable.$this->r_delim).'#s',
-			$string,
+			(string)$string,
 			$matches,
 			PREG_SET_ORDER
 		);
@@ -77,7 +84,7 @@ class Parser {
 						}
 						continue;
 					}
-					$temp[$this->l_delim.$key.$this->r_delim] = $val;
+					$temp[(string)$this->l_delim.$key.(string)$this->r_delim] = (string)$val;
 				}
 				$str .= strtr($match[1], $temp);
 			}

@@ -138,7 +138,6 @@ class Output
 	}
 	public function _display($output = '')
 	{
-		$BM =& load_class('Benchmark', 'core');
 		$CFG =& load_class('Config', 'core');
 		if (class_exists('Controller', FALSE))
 		{
@@ -152,7 +151,7 @@ class Output
 		{
 			$this->_write_cache($output);
 		}
-		$elapsed = $BM->elapsed_time('total_execution_time_start', 'total_execution_time_end');
+		$elapsed = 0;
 		if ($this->parse_exec_vars === TRUE)
 		{
 			$memory	= round(memory_get_usage() / 1024 / 1024, 2).'MB';

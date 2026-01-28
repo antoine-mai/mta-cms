@@ -1,6 +1,13 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Cache extends Driver_Library {
+<?php namespace Admin\Services\Cache;
+/**
+ * 
+**/
+use Admin\Services\Driver;
+/**
+ * 
+**/
+class Cache extends Driver
+{
 	protected $valid_drivers = [
 		'apc',
 		'dummy',
@@ -9,15 +16,18 @@ class Cache extends Driver_Library {
 		'redis',
 		'wincache'
 	];
+
 	protected $_cache_path = NULL;
 	protected $_adapter = 'dummy';
 	protected $_backup_driver = 'dummy';
 	public $key_prefix = '';
+
 	public function __construct($config = [])
 	{
 		isset($config['adapter']) && $this->_adapter = $config['adapter'];
 		isset($config['backup']) && $this->_backup_driver = $config['backup'];
 		isset($config['key_prefix']) && $this->key_prefix = $config['key_prefix'];
+
 		if ( ! $this->is_supported($this->_adapter))
 		{
 			if ( ! $this->is_supported($this->_backup_driver))
@@ -32,42 +42,51 @@ class Cache extends Driver_Library {
 			}
 		}
 	}
+
 	public function get($id)
 	{
-		return $this->{$this->_adapter}->get($this->key_prefix.$id);
+		return $this->{$this->_adapter}->get((string)$this->key_prefix.$id);
 	}
+
 	public function save($id, $data, $ttl = 60, $raw = FALSE)
 	{
-		return $this->{$this->_adapter}->save($this->key_prefix.$id, $data, $ttl, $raw);
+		return $this->{$this->_adapter}->save((string)$this->key_prefix.$id, $data, $ttl, $raw);
 	}
+
 	public function delete($id)
 	{
-		return $this->{$this->_adapter}->delete($this->key_prefix.$id);
+		return $this->{$this->_adapter}->delete((string)$this->key_prefix.$id);
 	}
+
 	public function increment($id, $offset = 1)
 	{
-		return $this->{$this->_adapter}->increment($this->key_prefix.$id, $offset);
+		return $this->{$this->_adapter}->increment((string)$this->key_prefix.$id, $offset);
 	}
+
 	public function decrement($id, $offset = 1)
 	{
-		return $this->{$this->_adapter}->decrement($this->key_prefix.$id, $offset);
+		return $this->{$this->_adapter}->decrement((string)$this->key_prefix.$id, $offset);
 	}
+
 	public function clean()
 	{
 		return $this->{$this->_adapter}->clean();
 	}
+
 	public function cache_info($type = 'user')
 	{
 		return $this->{$this->_adapter}->cache_info($type);
 	}
+
 	public function get_metadata($id)
 	{
-		return $this->{$this->_adapter}->get_metadata($this->key_prefix.$id);
+		return $this->{$this->_adapter}->get_metadata((string)$this->key_prefix.$id);
 	}
+
 	public function is_supported($driver)
 	{
 		static $support;
-		if ( ! isset($support, $support[$driver]))
+		if ( ! isset($support[$driver]))
 		{
 			$support[$driver] = $this->{$driver}->is_supported();
 		}

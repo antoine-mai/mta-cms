@@ -13,7 +13,7 @@ class Loader
 	protected $_ci_helpers =	[];
 	protected $_ci_varmap =	[
 		'unit_test' => 'unit',
-		'user_agent' => 'agent'
+		'agent' => 'agent'
 	];
 	public function __construct()
 	{
@@ -200,10 +200,7 @@ class Loader
 		{
 			return FALSE;
 		}
-		if ( ! class_exists('Driver_Library', FALSE))
-		{
-			require ADMIN_ROOT.'libraries/Driver.php';
-		}
+
 		if ( ! strpos($library, '/'))
 		{
 			$library = ucfirst($library).'/'.$library;
@@ -453,14 +450,18 @@ class Loader
 				$found = FALSE;
 				foreach ($config_component->_config_paths as $path)
 				{
-					if (($path === ADMIN_ROOT) ? file_exists(ROOT_DIR . '/config/admin/'.strtolower($class).'.php') : file_exists($path.'config/'.strtolower($class).'.php'))
+                    $config_file = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.strtolower($class).'.yaml' : $path.'config/'.strtolower($class).'.yaml';
+					if (file_exists($config_file))
 					{
-						include(($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.strtolower($class).'.php' : $path.'config/'.strtolower($class).'.php');
+                        $yaml = new \Admin\Services\Yaml();
+						$config = $yaml->parse($config_file);
 						$found = TRUE;
 					}
-					elseif (($path === ADMIN_ROOT) ? file_exists(ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.php') : file_exists($path.'config/'.ucfirst(strtolower($class)).'.php'))
+					elseif (($path === ADMIN_ROOT) ? file_exists(ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.yaml') : file_exists($path.'config/'.ucfirst(strtolower($class)).'.yaml'))
 					{
-						include(($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.php' : $path.'config/'.ucfirst(strtolower($class)).'.php');
+                        $config_file = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.yaml' : $path.'config/'.ucfirst(strtolower($class)).'.yaml';
+                        $yaml = new \Admin\Services\Yaml();
+						$config = $yaml->parse($config_file);
 						$found = TRUE;
 					}
 					if ($found === TRUE)
@@ -501,10 +502,12 @@ class Loader
 	}
 	protected function _ci_autoloader()
 	{
-		if (file_exists(ROOT_DIR . '/config/admin/'.'autoload.php'))
+		if (file_exists(ROOT_DIR . '/config/admin/'.'autoload.yaml'))
 		{
-			include(ROOT_DIR . '/config/admin/'.'autoload.php');
+            $yaml = new \Admin\Services\Yaml();
+			$autoload = $yaml->parse(ROOT_DIR . '/config/admin/'.'autoload.yaml');
 		}
+
 		if ( ! isset($autoload))
 		{
 			return;

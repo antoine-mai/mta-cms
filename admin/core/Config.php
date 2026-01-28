@@ -10,27 +10,6 @@ class Config
 	public function __construct()
 	{
 		$this->config =& get_config();
-		if (empty($this->config['base_url']))
-		{
-			if (isset($_SERVER['SERVER_ADDR']))
-			{
-				if (strpos($_SERVER['SERVER_ADDR'], ':') !== FALSE)
-				{
-					$server_addr = '['.$_SERVER['SERVER_ADDR'].']';
-				}
-				else
-				{
-					$server_addr = $_SERVER['SERVER_ADDR'];
-				}
-				$base_url = (is_https() ? 'https' : 'http').'://'.$server_addr
-					.substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'], basename($_SERVER['SCRIPT_FILENAME'])));
-			}
-			else
-			{
-				$base_url = 'http://localhost/';
-			}
-			$this->set_item('base_url', $base_url);
-		}
 		log_message('info', 'Config Class Initialized');
 	}
 	public function load($file = '', $use_sections = FALSE, $fail_gracefully = FALSE)
@@ -41,7 +20,7 @@ class Config
 		{
 			foreach ([$file] as $location)
 			{
-				$file_path = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.$location.'.php' : $path.'config/'.$location.'.php';
+				$file_path = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.$location.'.yaml' : $path.'config/'.$location.'.yaml';
 				if (in_array($file_path, $this->is_loaded, TRUE))
 				{
 					return TRUE;
@@ -50,7 +29,10 @@ class Config
 				{
 					continue;
 				}
-				include($file_path);
+				
+                $yaml = new \Admin\Services\Yaml();
+                $config = $yaml->parse($file_path);
+
 				if ( ! isset($config) OR ! is_array($config))
 				{
 					if ($fail_gracefully === TRUE)
@@ -83,7 +65,7 @@ class Config
 		{
 			return FALSE;
 		}
-		show_error('The configuration file '.$file.'.php does not exist.');
+		show_error('The configuration file '.$file.'.yaml does not exist.');
 	}
 	public function item($item, $index = '')
 	{

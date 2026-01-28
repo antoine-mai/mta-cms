@@ -25,7 +25,6 @@ class Admin
         $CFG = self::loadConfig();
 
         // 2. Load Helpers, Libraries
-        self::loadHelpers();
 
         // 3. Load Core
         list($URI, $RTR, $OUT) = self::loadCore($CFG);
@@ -68,14 +67,9 @@ class Admin
         return $CFG;
     }
 
-    protected static function loadHelpers()
-    {
-        require_once(ADMIN_ROOT . 'services/standard.php');
-    }
 
     protected static function loadCore($CFG)
     {
-        load_class('Benchmark', 'core'); // Optional, but usually needed for Output
         load_class('Utf8', 'core');
         $URI =& load_class('URI', 'core');
         $RTR =& load_class('Router', 'core');
@@ -184,9 +178,5 @@ class Admin
         if (is_php('5.6')) {
             ini_set('php.internal_encoding', $charset);
         }
-        
-        require_once(ADMIN_ROOT . 'services/mbstring.php');
-        require_once(ADMIN_ROOT . 'services/hash.php');
-        require_once(ADMIN_ROOT . 'services/password.php');
     }
 }

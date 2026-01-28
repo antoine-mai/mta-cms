@@ -18,9 +18,9 @@ class Autoload
         self::$loader = $loader = new self();
 
         $loader->register(true);
-        $loader->addPsr4('Admin\\Core\\', __DIR__ . '/core');
+        $loader->addPsr4('Admin\\Services\\', __DIR__ . '/services');
         $loader->addPsr4('Admin\\Routes\\', __DIR__ . '/routes');
-
+        $loader->addPsr4('Admin\\Core\\', __DIR__ . '/core');
         return $loader;
     }
 

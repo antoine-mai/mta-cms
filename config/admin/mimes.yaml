@@ -1,0 +1,27 @@
+jpg:
+  - image/jpeg
+  - image/pjpeg
+jpeg:
+  - image/jpeg
+  - image/pjpeg
+png:
+  - image/png
+  - image/x-png
+gif: image/gif
+txt: text/plain
+zip:
+  - application/x-zip
+  - application/zip
+  - application/x-zip-compressed
+  - application/s-compressed
+  - multipart/x-zip
+json:
+  - application/json
+  - text/json
+php:
+  - application/x-httpd-php
+  - application/php
+  - application/x-php
+  - text/php
+  - text/x-php
+  - application/x-httpd-php-source

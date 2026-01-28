@@ -1,0 +1,165 @@
+<?php namespace Admin\Services\Cache\Drivers;
+
+use Admin\Services\Driver;
+use Redis as NativeRedis;
+use RedisException;
+
+class Redis extends Driver
+{
+	protected static $_default_config = [
+		'socket_type' => 'tcp',
+		'host' => '127.0.0.1',
+		'password' => NULL,
+		'port' => 6379,
+		'timeout' => 0
+	];
+
+	protected $_redis;
+	protected $_serialized = [];
+	protected static $_delete_name;
+	protected static $_sRemove_name;
+
+	public function __construct()
+	{
+		if ( ! $this->is_supported())
+		{
+			log_message('error', 'Cache: Failed to create Redis object; extension not loaded?');
+			return;
+		}
+
+		if ( ! isset(static::$_delete_name, static::$_sRemove_name))
+		{
+			if (version_compare((string)phpversion('redis'), '5', '>='))
+			{
+				static::$_delete_name  = 'del';
+				static::$_sRemove_name = 'sRem';
+			}
+			else
+			{
+				static::$_delete_name  = 'delete';
+				static::$_sRemove_name = 'sRemove';
+			}
+		}
+
+		$CI =& get_instance();
+		if ($CI->config->load('redis', TRUE, TRUE))
+		{
+			$config = array_merge(self::$_default_config, $CI->config->item('redis'));
+		}
+		else
+		{
+			$config = self::$_default_config;
+		}
+
+		$this->_redis = new NativeRedis();
+		try
+		{
+			if (isset($config['socket_type']) && $config['socket_type'] === 'unix')
+			{
+				$success = $this->_redis->connect((string)$config['socket']);
+			}
+			else // tcp socket
+			{
+				$success = $this->_redis->connect((string)$config['host'], (int)$config['port'], (float)$config['timeout']);
+			}
+
+			if ( ! $success)
+			{
+				log_message('error', 'Cache: Redis connection failed. Check your configuration.');
+			}
+
+			if (isset($config['password']) && ! $this->_redis->auth((string)$config['password']))
+			{
+				log_message('error', 'Cache: Redis authentication failed.');
+			}
+		}
+		catch (RedisException $e)
+		{
+			log_message('error', 'Cache: Redis connection refused ('.$e->getMessage().')');
+		}
+	}
+
+	public function get($key)
+	{
+		$value = $this->_redis->get((string)$key);
+		if ($value !== FALSE && $this->_redis->sIsMember('_ci_redis_serialized', (string)$key))
+		{
+			return unserialize((string)$value);
+		}
+		return $value;
+	}
+
+	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	{
+		if (is_array($data) OR is_object($data))
+		{
+			if ( ! $this->_redis->sIsMember('_ci_redis_serialized', (string)$id) && ! $this->_redis->sAdd('_ci_redis_serialized', (string)$id))
+			{
+				return FALSE;
+			}
+			isset($this->_serialized[$id]) OR $this->_serialized[$id] = TRUE;
+			$data = serialize($data);
+		}
+		else
+		{
+			$this->_redis->{static::$_sRemove_name}('_ci_redis_serialized', (string)$id);
+		}
+		return $this->_redis->set((string)$id, $data, (int)$ttl);
+	}
+
+	public function delete($key)
+	{
+		if ($this->_redis->{static::$_delete_name}((string)$key) !== 1)
+		{
+			return FALSE;
+		}
+		$this->_redis->{static::$_sRemove_name}('_ci_redis_serialized', (string)$key);
+		return TRUE;
+	}
+
+	public function increment($id, $offset = 1)
+	{
+		return $this->_redis->incrBy((string)$id, (int)$offset);
+	}
+
+	public function decrement($id, $offset = 1)
+	{
+		return $this->_redis->decrBy((string)$id, (int)$offset);
+	}
+
+	public function clean()
+	{
+		return $this->_redis->flushDB();
+	}
+
+	public function cache_info($type = NULL)
+	{
+		return $this->_redis->info();
+	}
+
+	public function get_metadata($key)
+	{
+		$value = $this->get($key);
+		if ($value !== FALSE)
+		{
+			return [
+				'expire' => time() + $this->_redis->ttl((string)$key),
+				'data' => $value
+			];
+		}
+		return FALSE;
+	}
+
+	public function is_supported()
+	{
+		return extension_loaded('redis');
+	}
+
+	public function __destruct()
+	{
+		if ($this->_redis)
+		{
+			$this->_redis->close();
+		}
+	}
+}

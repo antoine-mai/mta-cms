@@ -29,10 +29,15 @@ class Router
 	}
 	protected function _set_routing()
 	{
-		if (file_exists(ADMIN_ROOT.'config/routes.php'))
+		if (file_exists(ADMIN_ROOT.'config/routes.yaml'))
 		{
-			include(ADMIN_ROOT.'config/routes.php');
+            if (!class_exists('Admin\Services\Yaml')) {
+                require_once ADMIN_ROOT . 'services/Yaml.php';
+            }
+            $yaml = new \Admin\Services\Yaml();
+			$route = $yaml->parse(ADMIN_ROOT.'config/routes.yaml');
 		}
+
 		if (isset($route) && is_array($route))
 		{
 			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];

@@ -102,12 +102,13 @@ if ( ! function_exists('get_config'))
 		static $config;
 		if (empty($config))
 		{
-			$file_path = CONFPATH.'config.php';
+			$file_path = CONFPATH.'config.yaml';
 			$found = FALSE;
 			if (file_exists($file_path))
 			{
 				$found = TRUE;
-				require($file_path);
+                $yaml = new \Admin\Services\Yaml();
+				$config = $yaml->parse($file_path);
 			}
 			elseif ( ! $found)
 			{
@@ -148,9 +149,13 @@ if ( ! function_exists('get_mimes'))
 		static $_mimes;
 		if (empty($_mimes))
 		{
-			$_mimes = file_exists(ADMIN_ROOT.'config/mimes.php')
-				? include(ADMIN_ROOT.'config/mimes.php')
-				: [];
+            $file_path = ADMIN_ROOT.'config/mimes.yaml';
+			if (file_exists($file_path)) {
+                $yaml = new \Admin\Services\Yaml();
+                $_mimes = $yaml->parse($file_path);
+            } else {
+                $_mimes = [];
+            }
 		}
 		return $_mimes;
 	}
