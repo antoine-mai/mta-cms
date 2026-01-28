@@ -55,7 +55,11 @@ trait BrowserKitAssertionsTrait
     {
         $constraint = new ResponseConstraint\ResponseIsRedirected($verbose ?? self::$defaultVerboseMode);
         if ($expectedLocation) {
-            $locationConstraint = new ResponseConstraint\ResponseHeaderLocationSame(self::getRequest(), $expectedLocation);
+            if (class_exists(ResponseConstraint\ResponseHeaderLocationSame::class)) {
+                $locationConstraint = new ResponseConstraint\ResponseHeaderLocationSame(self::getRequest(), $expectedLocation);
+            } else {
+                $locationConstraint = new ResponseConstraint\ResponseHeaderSame('Location', $expectedLocation);
+            }
 
             $constraint = LogicalAnd::fromConstraints($constraint, $locationConstraint);
         }

@@ -1,1 +1,0 @@
-symfony server:start --document-root=public

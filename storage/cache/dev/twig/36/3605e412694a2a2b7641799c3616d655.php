@@ -47,57 +47,144 @@ class __TwigTemplate_16a7cae8fe33fd41d4c112cd2dc8ae32 extends Template
         // line 1
         yield "<!DOCTYPE html>
 <html>
-<head>
-    <meta charset=\"UTF-8\">
-    <title>MTA-APP | Admin Login</title>
-    <style>
-        body { font-family: sans-serif; background: #0a0a0c; color: #white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-card { background: #141416; padding: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h1 { margin-top: 0; color: #fff; text-align: center; font-size: 24px; margin-bottom: 24px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0a0a0c; color: white; box-sizing: border-box; }
-        input:focus { outline: none; border-color: #6366f1; }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #6366f1; color: white; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        button:hover { background: #4f46e5; }
-        .error { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #94a3b8; }
-    </style>
-</head>
-<body>
-    <div class=\"login-card\">
-        <h1>MTA-APP Admin</h1>
-        
-        ";
-        // line 25
-        if ((($tmp = (isset($context["error"]) || array_key_exists("error", $context) ? $context["error"] : (function () { throw new RuntimeError('Variable "error" does not exist.', 25, $this->source); })())) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
-            // line 26
-            yield "            <div class=\"error\">";
-            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape((isset($context["error"]) || array_key_exists("error", $context) ? $context["error"] : (function () { throw new RuntimeError('Variable "error" does not exist.', 26, $this->source); })()), "html", null, true);
-            yield "</div>
-        ";
-        }
-        // line 28
-        yield "
-        <form method=\"post\">
-            <div class=\"form-group\">
-                <label for=\"username\">Username</label>
-                <input type=\"text\" id=\"username\" name=\"username\" required autofocus>
-            </div>
-            <div class=\"form-group\">
-                <label for=\"password\">Password</label>
-                <input type=\"password\" id=\"password\" name=\"password\" required>
-            </div>
-            <button type=\"submit\">Login</button>
-        </form>
+\t<head>
+\t\t<meta charset=\"UTF-8\">
+\t\t<title>MTA-APP | Admin Login</title>
+\t\t<style>
+\t\t\tbody {
+\t\t\t\tfont-family: sans-serif;
+\t\t\t\tbackground: #0a0a0c;
+\t\t\t\tcolor: #white;
+\t\t\t\tdisplay: flex;
+\t\t\t\talign-items: center;
+\t\t\t\tjustify-content: center;
+\t\t\t\theight: 100vh;
+\t\t\t\tmargin: 0;
+\t\t\t}
+\t\t\t.login-card {
+\t\t\t\tbackground: #141416;
+\t\t\t\tpadding: 40px;
+\t\t\t\tborder-radius: 12px;
+\t\t\t\tborder: 1px solid rgba(255, 255, 255, 0.1);
+\t\t\t\twidth: 100%;
+\t\t\t\tmax-width: 400px;
+\t\t\t\tbox-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+\t\t\t}
+\t\t\th1 {
+\t\t\t\tmargin-top: 0;
+\t\t\t\tcolor: #fff;
+\t\t\t\ttext-align: center;
+\t\t\t\tfont-size: 24px;
+\t\t\t\tmargin-bottom: 24px;
+\t\t\t}
+\t\t\t.form-group {
+\t\t\t\tmargin-bottom: 20px;
+\t\t\t}
+\t\t\tlabel {
+\t\t\t\tdisplay: block;
+\t\t\t\tmargin-bottom: 8px;
+\t\t\t\tcolor: #94a3b8;
+\t\t\t\tfont-size: 14px;
+\t\t\t}
+\t\t\tinput {
+\t\t\t\twidth: 100%;
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tborder: 1px solid rgba(255, 255, 255, 0.1);
+\t\t\t\tbackground: #0a0a0c;
+\t\t\t\tcolor: white;
+\t\t\t\tbox-sizing: border-box;
+\t\t\t}
+\t\t\tinput:focus {
+\t\t\t\toutline: none;
+\t\t\t\tborder-color: #6366f1;
+\t\t\t}
+\t\t\tbutton {
+\t\t\t\twidth: 100%;
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tborder: none;
+\t\t\t\tbackground: #6366f1;
+\t\t\t\tcolor: white;
+\t\t\t\tfont-weight: 600;
+\t\t\t\tcursor: pointer;
+\t\t\t\ttransition: background 0.2s;
+\t\t\t\tmargin-top: 10px;
+\t\t\t}
+\t\t\tbutton:hover {
+\t\t\t\tbackground: #4f46e5;
+\t\t\t}
+\t\t\t.error {
+\t\t\t\tcolor: #ef4444;
+\t\t\t\tbackground: rgba(239, 68, 68, 0.1);
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tmargin-bottom: 20px;
+\t\t\t\tfont-size: 14px;
+\t\t\t\ttext-align: center;
+\t\t\t}
+\t\t\t.back-link {
+\t\t\t\tdisplay: block;
+\t\t\t\ttext-align: center;
+\t\t\t\tmargin-top: 20px;
+\t\t\t\tcolor: #64748b;
+\t\t\t\ttext-decoration: none;
+\t\t\t\tfont-size: 14px;
+\t\t\t}
+\t\t\t.back-link:hover {
+\t\t\t\tcolor: #94a3b8;
+\t\t\t}
+\t\t</style>
+\t</head>
+\t<body>
+\t\t<div class=\"login-card\">
+\t\t\t<h1>MTA-APP Admin</h1>
 
-        <a href=\"";
-        // line 41
+\t\t\t";
+        // line 96
+        $context['_parent'] = $context;
+        $context['_seq'] = CoreExtension::ensureTraversable(CoreExtension::getAttribute($this->env, $this->source, (isset($context["app"]) || array_key_exists("app", $context) ? $context["app"] : (function () { throw new RuntimeError('Variable "app" does not exist.', 96, $this->source); })()), "flashes", ["error"], "method", false, false, false, 96));
+        foreach ($context['_seq'] as $context["_key"] => $context["message"]) {
+            // line 97
+            yield "\t\t\t\t<div class=\"error\">";
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($context["message"], "html", null, true);
+            yield "</div>
+\t\t\t";
+        }
+        $_parent = $context['_parent'];
+        unset($context['_seq'], $context['_key'], $context['message'], $context['_parent']);
+        $context = array_intersect_key($context, $_parent) + $_parent;
+        // line 99
+        yield "
+\t\t\t";
+        // line 100
+        if ((($tmp = (isset($context["error"]) || array_key_exists("error", $context) ? $context["error"] : (function () { throw new RuntimeError('Variable "error" does not exist.', 100, $this->source); })())) && $tmp instanceof Markup ? (string) $tmp : $tmp)) {
+            // line 101
+            yield "\t\t\t\t<div class=\"error\">";
+            yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape((isset($context["error"]) || array_key_exists("error", $context) ? $context["error"] : (function () { throw new RuntimeError('Variable "error" does not exist.', 101, $this->source); })()), "html", null, true);
+            yield "</div>
+\t\t\t";
+        }
+        // line 103
+        yield "
+\t\t\t<form method=\"post\">
+\t\t\t\t<div class=\"form-group\">
+\t\t\t\t\t<label for=\"username\">Username</label>
+\t\t\t\t\t<input type=\"text\" id=\"username\" name=\"username\" required autofocus>
+\t\t\t\t</div>
+\t\t\t\t<div class=\"form-group\">
+\t\t\t\t\t<label for=\"password\">Password</label>
+\t\t\t\t\t<input type=\"password\" id=\"password\" name=\"password\" required>
+\t\t\t\t</div>
+\t\t\t\t<button type=\"submit\">Login</button>
+\t\t\t</form>
+
+\t\t\t<a href=\"";
+        // line 116
         yield $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("index");
         yield "\" class=\"back-link\">← Back to Site</a>
-    </div>
-</body>
+\t\t</div>
+\t</body>
 </html>
 ";
         
@@ -130,54 +217,129 @@ class __TwigTemplate_16a7cae8fe33fd41d4c112cd2dc8ae32 extends Template
      */
     public function getDebugInfo(): array
     {
-        return array (  97 => 41,  82 => 28,  76 => 26,  74 => 25,  48 => 1,);
+        return array (  184 => 116,  169 => 103,  163 => 101,  161 => 100,  158 => 99,  149 => 97,  145 => 96,  48 => 1,);
     }
 
     public function getSourceContext(): Source
     {
         return new Source("<!DOCTYPE html>
 <html>
-<head>
-    <meta charset=\"UTF-8\">
-    <title>MTA-APP | Admin Login</title>
-    <style>
-        body { font-family: sans-serif; background: #0a0a0c; color: #white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-card { background: #141416; padding: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h1 { margin-top: 0; color: #fff; text-align: center; font-size: 24px; margin-bottom: 24px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0a0a0c; color: white; box-sizing: border-box; }
-        input:focus { outline: none; border-color: #6366f1; }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #6366f1; color: white; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        button:hover { background: #4f46e5; }
-        .error { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #94a3b8; }
-    </style>
-</head>
-<body>
-    <div class=\"login-card\">
-        <h1>MTA-APP Admin</h1>
-        
-        {% if error %}
-            <div class=\"error\">{{ error }}</div>
-        {% endif %}
+\t<head>
+\t\t<meta charset=\"UTF-8\">
+\t\t<title>MTA-APP | Admin Login</title>
+\t\t<style>
+\t\t\tbody {
+\t\t\t\tfont-family: sans-serif;
+\t\t\t\tbackground: #0a0a0c;
+\t\t\t\tcolor: #white;
+\t\t\t\tdisplay: flex;
+\t\t\t\talign-items: center;
+\t\t\t\tjustify-content: center;
+\t\t\t\theight: 100vh;
+\t\t\t\tmargin: 0;
+\t\t\t}
+\t\t\t.login-card {
+\t\t\t\tbackground: #141416;
+\t\t\t\tpadding: 40px;
+\t\t\t\tborder-radius: 12px;
+\t\t\t\tborder: 1px solid rgba(255, 255, 255, 0.1);
+\t\t\t\twidth: 100%;
+\t\t\t\tmax-width: 400px;
+\t\t\t\tbox-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+\t\t\t}
+\t\t\th1 {
+\t\t\t\tmargin-top: 0;
+\t\t\t\tcolor: #fff;
+\t\t\t\ttext-align: center;
+\t\t\t\tfont-size: 24px;
+\t\t\t\tmargin-bottom: 24px;
+\t\t\t}
+\t\t\t.form-group {
+\t\t\t\tmargin-bottom: 20px;
+\t\t\t}
+\t\t\tlabel {
+\t\t\t\tdisplay: block;
+\t\t\t\tmargin-bottom: 8px;
+\t\t\t\tcolor: #94a3b8;
+\t\t\t\tfont-size: 14px;
+\t\t\t}
+\t\t\tinput {
+\t\t\t\twidth: 100%;
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tborder: 1px solid rgba(255, 255, 255, 0.1);
+\t\t\t\tbackground: #0a0a0c;
+\t\t\t\tcolor: white;
+\t\t\t\tbox-sizing: border-box;
+\t\t\t}
+\t\t\tinput:focus {
+\t\t\t\toutline: none;
+\t\t\t\tborder-color: #6366f1;
+\t\t\t}
+\t\t\tbutton {
+\t\t\t\twidth: 100%;
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tborder: none;
+\t\t\t\tbackground: #6366f1;
+\t\t\t\tcolor: white;
+\t\t\t\tfont-weight: 600;
+\t\t\t\tcursor: pointer;
+\t\t\t\ttransition: background 0.2s;
+\t\t\t\tmargin-top: 10px;
+\t\t\t}
+\t\t\tbutton:hover {
+\t\t\t\tbackground: #4f46e5;
+\t\t\t}
+\t\t\t.error {
+\t\t\t\tcolor: #ef4444;
+\t\t\t\tbackground: rgba(239, 68, 68, 0.1);
+\t\t\t\tpadding: 12px;
+\t\t\t\tborder-radius: 8px;
+\t\t\t\tmargin-bottom: 20px;
+\t\t\t\tfont-size: 14px;
+\t\t\t\ttext-align: center;
+\t\t\t}
+\t\t\t.back-link {
+\t\t\t\tdisplay: block;
+\t\t\t\ttext-align: center;
+\t\t\t\tmargin-top: 20px;
+\t\t\t\tcolor: #64748b;
+\t\t\t\ttext-decoration: none;
+\t\t\t\tfont-size: 14px;
+\t\t\t}
+\t\t\t.back-link:hover {
+\t\t\t\tcolor: #94a3b8;
+\t\t\t}
+\t\t</style>
+\t</head>
+\t<body>
+\t\t<div class=\"login-card\">
+\t\t\t<h1>MTA-APP Admin</h1>
 
-        <form method=\"post\">
-            <div class=\"form-group\">
-                <label for=\"username\">Username</label>
-                <input type=\"text\" id=\"username\" name=\"username\" required autofocus>
-            </div>
-            <div class=\"form-group\">
-                <label for=\"password\">Password</label>
-                <input type=\"password\" id=\"password\" name=\"password\" required>
-            </div>
-            <button type=\"submit\">Login</button>
-        </form>
+\t\t\t{% for message in app.flashes('error') %}
+\t\t\t\t<div class=\"error\">{{ message }}</div>
+\t\t\t{% endfor %}
 
-        <a href=\"{{ path('index') }}\" class=\"back-link\">← Back to Site</a>
-    </div>
-</body>
+\t\t\t{% if error %}
+\t\t\t\t<div class=\"error\">{{ error }}</div>
+\t\t\t{% endif %}
+
+\t\t\t<form method=\"post\">
+\t\t\t\t<div class=\"form-group\">
+\t\t\t\t\t<label for=\"username\">Username</label>
+\t\t\t\t\t<input type=\"text\" id=\"username\" name=\"username\" required autofocus>
+\t\t\t\t</div>
+\t\t\t\t<div class=\"form-group\">
+\t\t\t\t\t<label for=\"password\">Password</label>
+\t\t\t\t\t<input type=\"password\" id=\"password\" name=\"password\" required>
+\t\t\t\t</div>
+\t\t\t\t<button type=\"submit\">Login</button>
+\t\t\t</form>
+
+\t\t\t<a href=\"{{ path('index') }}\" class=\"back-link\">← Back to Site</a>
+\t\t</div>
+\t</body>
 </html>
 ", "admin/login.html.twig", "/home/antoine/Workspace/htdocs/mta-cms/templates/admin/login.html.twig");
     }

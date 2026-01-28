@@ -1,4 +1,4 @@
-<?php namespace App;
+<?php declare(strict_types=1); namespace App;
 /**
  * 
 **/
@@ -10,6 +10,7 @@ use \Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use \Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use \Symfony\Bundle\MonologBundle\MonologBundle;
 use \Symfony\Bundle\TwigBundle\TwigBundle;
+use \Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 /**
  * 
 **/
@@ -25,6 +26,7 @@ class Kernel extends BaseKernel
     public function registerBundles(): iterable
     {
         yield new FrameworkBundle();
+        yield new DoctrineBundle();
         yield new MonologBundle();
         yield new TwigBundle();
 
@@ -36,6 +38,8 @@ class Kernel extends BaseKernel
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $container->import(ROOT_DIR . '/config/*.yaml');
+        $container->import(ROOT_DIR . '/config/packages/*.yaml');
+        
         if (isset($this->bundles['WebProfilerBundle']))
         {
             $container->extension('web_profiler', [
@@ -53,12 +57,7 @@ class Kernel extends BaseKernel
             $routes->import('@WebProfilerBundle/Resources/config/routing/profiler.php', 'php')->prefix('/_profiler');
         }
 
-        // 1. Import Admin Controllers with dynamic prefix from .env
-        $adminPath = $_ENV['ADMIN_PATH'] ?? '/admin';
-        $routes->import(__DIR__ . '/Controller/Admin/', 'attribute')
-               ->prefix($adminPath);
-
-        // 2. Import Main/Public Controllers LAST (Catch-all)
+        // 1. Import Main/Public Controllers ONLY (Admin is handled by Legacy Bridge in startup.php)
         $routes->import(__DIR__ . '/Controller/HomeController.php', 'attribute');
     }
 

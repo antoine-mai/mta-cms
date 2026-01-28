@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Extension;
 
+use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
@@ -21,6 +22,7 @@ use Symfony\Component\DependencyInjection\Loader\DirectoryLoader;
 use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
@@ -50,11 +52,13 @@ trait ExtensionTrait
 
     private function createContainerLoader(ContainerBuilder $container, string $env, bool $prepend): DelegatingLoader
     {
+        $buildDir = $container->getParameter('kernel.build_dir');
         $locator = new FileLocator();
         $resolver = new LoaderResolver([
+            new XmlFileLoader($container, $locator, $env, $prepend),
             new YamlFileLoader($container, $locator, $env, $prepend),
             new IniFileLoader($container, $locator, $env),
-            new PhpFileLoader($container, $locator, $env, $prepend),
+            class_exists(ConfigBuilderGenerator::class) ? new PhpFileLoader($container, $locator, $env, new ConfigBuilderGenerator($buildDir), $prepend) : new PhpFileLoader($container, $locator, $env, $prepend),
             new GlobFileLoader($container, $locator, $env),
             new DirectoryLoader($container, $locator, $env),
             new ClosureLoader($container, $env),
