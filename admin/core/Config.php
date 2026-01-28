@@ -131,7 +131,7 @@ class CI_Config {
 
 		foreach ($this->_config_paths as $path)
 		{
-			foreach (array($file, ENVIRONMENT.DIRECTORY_SEPARATOR.$file) as $location)
+			foreach (array($file) as $location)
 			{
 				$file_path = ($path === APPPATH) ? CONFPATH.$location.'.php' : $path.'config/'.$location.'.php';
 

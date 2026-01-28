@@ -63,11 +63,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *  Load the framework constants
  * ------------------------------------------------------
  */
-	if (file_exists(CONFPATH.ENVIRONMENT.'/constants.php'))
-	{
-		require_once(CONFPATH.ENVIRONMENT.'/constants.php');
-	}
-
 	if (file_exists(CONFPATH.'constants.php'))
 	{
 		require_once(CONFPATH.'constants.php');
@@ -78,7 +73,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *  Load the global functions
  * ------------------------------------------------------
  */
-	require_once(BASEPATH.'core/Common.php');
+	require_once(BASEPATH.'/core/Common.php');
 
 
 /*

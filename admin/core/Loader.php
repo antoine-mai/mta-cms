@@ -1223,17 +1223,6 @@ class CI_Loader {
 						$found = TRUE;
 					}
 
-					if (($path === APPPATH) ? file_exists(CONFPATH.ENVIRONMENT.'/'.strtolower($class).'.php') : file_exists($path.'config/'.ENVIRONMENT.'/'.strtolower($class).'.php'))
-					{
-						include(($path === APPPATH) ? CONFPATH.ENVIRONMENT.'/'.strtolower($class).'.php' : $path.'config/'.ENVIRONMENT.'/'.strtolower($class).'.php');
-						$found = TRUE;
-					}
-					elseif (($path === APPPATH) ? file_exists(CONFPATH.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php') : file_exists($path.'config/'.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php'))
-					{
-						include(($path === APPPATH) ? CONFPATH.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php' : $path.'config/'.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php');
-						$found = TRUE;
-					}
-
 					// Break on the first found configuration, thus package
 					// files are not overridden by default paths
 					if ($found === TRUE)
@@ -1301,11 +1290,6 @@ class CI_Loader {
 		if (file_exists(CONFPATH.'autoload.php'))
 		{
 			include(CONFPATH.'autoload.php');
-		}
-
-		if (file_exists(CONFPATH.ENVIRONMENT.'/autoload.php'))
-		{
-			include(CONFPATH.ENVIRONMENT.'/autoload.php');
 		}
 
 		if ( ! isset($autoload))
