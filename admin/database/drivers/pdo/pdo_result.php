@@ -36,7 +36,7 @@
  * @since	Version 2.1.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * PDO Result Class

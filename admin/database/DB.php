@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Initialize the database
@@ -160,11 +160,11 @@ function &DB($params = '', $query_builder_override = NULL)
 		$query_builder = $active_record;
 	}
 
-	require_once(BASEPATH.'database/DB_driver.php');
+	require_once(ADMIN_ROOT.'database/DB_driver.php');
 
 	if ( ! isset($query_builder) OR $query_builder === TRUE)
 	{
-		require_once(BASEPATH.'database/DB_query_builder.php');
+		require_once(ADMIN_ROOT.'database/DB_query_builder.php');
 		if ( ! class_exists('CI_DB', FALSE))
 		{
 			/**
@@ -187,7 +187,7 @@ function &DB($params = '', $query_builder_override = NULL)
 	}
 
 	// Load the DB driver
-	$driver_file = BASEPATH.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
+	$driver_file = ADMIN_ROOT.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
 
 	file_exists($driver_file) OR show_error('Invalid DB driver');
 	require_once($driver_file);
@@ -199,7 +199,7 @@ function &DB($params = '', $query_builder_override = NULL)
 	// Check for a subdriver
 	if ( ! empty($DB->subdriver))
 	{
-		$driver_file = BASEPATH.'database/drivers/'.$DB->dbdriver.'/subdrivers/'.$DB->dbdriver.'_'.$DB->subdriver.'_driver.php';
+		$driver_file = ADMIN_ROOT.'database/drivers/'.$DB->dbdriver.'/subdrivers/'.$DB->dbdriver.'_'.$DB->subdriver.'_driver.php';
 
 		if (file_exists($driver_file))
 		{

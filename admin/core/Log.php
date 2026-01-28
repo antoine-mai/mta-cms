@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Logging Class
@@ -192,7 +192,7 @@ class CI_Log {
 			// Only add protection to php files
 			if ($this->_file_ext === 'php')
 			{
-				$message .= "<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>\n\n";
+				$message .= "<?php defined('ADMIN_ROOT') OR exit('No direct script access allowed'); ?>\n\n";
 			}
 		}
 

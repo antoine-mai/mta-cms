@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Loader Class
@@ -71,7 +71,7 @@ class CI_Loader {
 	 *
 	 * @var	array
 	 */
-	protected $_ci_library_paths =	array(APPPATH, BASEPATH);
+	protected $_ci_library_paths =	array(APPPATH, ADMIN_ROOT);
 
 	/**
 	 * List of paths to load models from
@@ -85,7 +85,7 @@ class CI_Loader {
 	 *
 	 * @var	array
 	 */
-	protected $_ci_helper_paths =	array(APPPATH, BASEPATH);
+	protected $_ci_helper_paths =	array(APPPATH, ADMIN_ROOT);
 
 	/**
 	 * List of cached variables
@@ -309,7 +309,7 @@ class CI_Loader {
 			}
 			elseif ( ! class_exists('CI_Model', FALSE))
 			{
-				require_once(BASEPATH.'core'.DIRECTORY_SEPARATOR.'Model.php');
+				require_once(ADMIN_ROOT.'core'.DIRECTORY_SEPARATOR.'Model.php');
 			}
 
 			$class = config_item('subclass_prefix').'Model';
@@ -385,7 +385,7 @@ class CI_Loader {
 			return FALSE;
 		}
 
-		require_once(BASEPATH.'database/DB.php');
+		require_once(ADMIN_ROOT.'database/DB.php');
 
 		if ($return === TRUE)
 		{
@@ -420,8 +420,8 @@ class CI_Loader {
 			$db =& $CI->db;
 		}
 
-		require_once(BASEPATH.'database/DB_utility.php');
-		require_once(BASEPATH.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_utility.php');
+		require_once(ADMIN_ROOT.'database/DB_utility.php');
+		require_once(ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_utility.php');
 		$class = 'CI_DB_'.$db->dbdriver.'_utility';
 
 		if ($return === TRUE)
@@ -451,12 +451,12 @@ class CI_Loader {
 			$db =& $CI->db;
 		}
 
-		require_once(BASEPATH.'database/DB_forge.php');
-		require_once(BASEPATH.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_forge.php');
+		require_once(ADMIN_ROOT.'database/DB_forge.php');
+		require_once(ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_forge.php');
 
 		if ( ! empty($db->subdriver))
 		{
-			$driver_path = BASEPATH.'database/drivers/'.$db->dbdriver.'/subdrivers/'.$db->dbdriver.'_'.$db->subdriver.'_forge.php';
+			$driver_path = ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/subdrivers/'.$db->dbdriver.'_'.$db->subdriver.'_forge.php';
 			if (file_exists($driver_path))
 			{
 				require_once($driver_path);
@@ -620,7 +620,7 @@ class CI_Loader {
 			// If we have loaded extensions - check if the base one is here
 			if ($ext_loaded === TRUE)
 			{
-				$base_helper = BASEPATH.'helpers/'.$helper.'.php';
+				$base_helper = ADMIN_ROOT.'helpers/'.$helper.'.php';
 				if ( ! file_exists($base_helper))
 				{
 					show_error('Unable to load the requested file: helpers/'.$helper.'.php');
@@ -747,7 +747,7 @@ class CI_Loader {
 		if ( ! class_exists('CI_Driver_Library', FALSE))
 		{
 			// We aren't instantiating an object here, just making the base class available
-			require BASEPATH.'libraries/Driver.php';
+			require ADMIN_ROOT.'libraries/Driver.php';
 		}
 
 		// We can save the loader some time since Drivers will *always* be in a subfolder,
@@ -801,7 +801,7 @@ class CI_Loader {
 	 *
 	 * Return a list of all package paths.
 	 *
-	 * @param	bool	$include_base	Whether to include BASEPATH (default: FALSE)
+	 * @param	bool	$include_base	Whether to include ADMIN_ROOT (default: FALSE)
 	 * @return	array
 	 */
 	public function get_package_paths($include_base = FALSE)
@@ -856,8 +856,8 @@ class CI_Loader {
 		}
 
 		// make sure the application default paths are still in the array
-		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, BASEPATH)));
-		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, BASEPATH)));
+		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, ADMIN_ROOT)));
+		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, ADMIN_ROOT)));
 		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, array(APPPATH)));
 		$this->_ci_view_paths = array_merge($this->_ci_view_paths, array(APPPATH.'views/' => TRUE));
 		$config->_config_paths = array_unique(array_merge($config->_config_paths, array(APPPATH)));
@@ -1039,7 +1039,7 @@ class CI_Loader {
 		$class = ucfirst($class);
 
 		// Is this a stock library? There are a few special conditions if so ...
-		if (file_exists(BASEPATH.'libraries/'.$subdir.$class.'.php'))
+		if (file_exists(ADMIN_ROOT.'libraries/'.$subdir.$class.'.php'))
 		{
 			return $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
 		}
@@ -1067,8 +1067,8 @@ class CI_Loader {
 		// Let's search for the requested library file and load it.
 		foreach ($this->_ci_library_paths as $path)
 		{
-			// BASEPATH has already been checked for
-			if ($path === BASEPATH)
+			// ADMIN_ROOT has already been checked for
+			if ($path === ADMIN_ROOT)
 			{
 				continue;
 			}
@@ -1138,7 +1138,7 @@ class CI_Loader {
 		}
 
 		$paths = $this->_ci_library_paths;
-		array_pop($paths); // BASEPATH
+		array_pop($paths); // ADMIN_ROOT
 		array_pop($paths); // APPPATH (needs to be the first path checked)
 		array_unshift($paths, APPPATH);
 
@@ -1157,7 +1157,7 @@ class CI_Loader {
 			}
 		}
 
-		include_once(BASEPATH.'libraries/'.$file_path.$library_name.'.php');
+		include_once(ADMIN_ROOT.'libraries/'.$file_path.$library_name.'.php');
 
 		// Check for extensions
 		$subclass = config_item('subclass_prefix').$library_name;

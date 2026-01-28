@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Database Driver Class
@@ -761,8 +761,8 @@ abstract class CI_DB_driver {
 
 		if ( ! class_exists($driver, FALSE))
 		{
-			require_once(BASEPATH.'database/DB_result.php');
-			require_once(BASEPATH.'database/drivers/'.$this->dbdriver.'/'.$this->dbdriver.'_result.php');
+			require_once(ADMIN_ROOT.'database/DB_result.php');
+			require_once(ADMIN_ROOT.'database/drivers/'.$this->dbdriver.'/'.$this->dbdriver.'_result.php');
 		}
 
 		return $driver;
@@ -1695,7 +1695,7 @@ abstract class CI_DB_driver {
 	{
 		if ( ! class_exists('CI_DB_Cache', FALSE))
 		{
-			require_once(BASEPATH.'database/DB_cache.php');
+			require_once(ADMIN_ROOT.'database/DB_cache.php');
 		}
 		elseif (is_object($this->CACHE))
 		{
@@ -1770,16 +1770,16 @@ abstract class CI_DB_driver {
 		{
 			if (isset($call['file'], $call['class']))
 			{
-				// We'll need this on Windows, as APPPATH and BASEPATH will always use forward slashes
+				// We'll need this on Windows, as APPPATH and ADMIN_ROOT will always use forward slashes
 				if (DIRECTORY_SEPARATOR !== '/')
 				{
 					$call['file'] = str_replace('\\', '/', $call['file']);
 				}
 
-				if (strpos($call['file'], BASEPATH.'database') === FALSE && strpos($call['class'], 'Loader') === FALSE)
+				if (strpos($call['file'], ADMIN_ROOT.'database') === FALSE && strpos($call['class'], 'Loader') === FALSE)
 				{
 					// Found it - use a relative path for safety
-					$message[] = 'Filename: '.str_replace(array(APPPATH, BASEPATH), '', $call['file']);
+					$message[] = 'Filename: '.str_replace(array(APPPATH, ADMIN_ROOT), '', $call['file']);
 					$message[] = 'Line Number: '.$call['line'];
 					break;
 				}

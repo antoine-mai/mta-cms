@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Common Functions
@@ -153,7 +153,7 @@ if ( ! function_exists('load_class'))
 
 		// Look for the class first in the local application/libraries folder
 		// then in the native system/libraries folder
-		foreach (array(APPPATH, BASEPATH) as $path)
+		foreach (array(APPPATH, ADMIN_ROOT) as $path)
 		{
 			if (file_exists($path.$directory.'/'.$class.'.php'))
 			{

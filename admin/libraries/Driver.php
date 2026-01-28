@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * CodeIgniter Driver Library Class
@@ -128,8 +128,8 @@ class CI_Driver_Library {
 				$file = $path.'libraries/'.$this->lib_name.'/drivers/'.$prefix.$child_name.'.php';
 				if (file_exists($file))
 				{
-					// Yes - require base class from BASEPATH
-					$basepath = BASEPATH.'libraries/'.$this->lib_name.'/drivers/'.$child_name.'.php';
+					// Yes - require base class from ADMIN_ROOT
+					$basepath = ADMIN_ROOT.'libraries/'.$this->lib_name.'/drivers/'.$child_name.'.php';
 					if ( ! file_exists($basepath))
 					{
 						$msg = 'Unable to load the requested class: CI_'.$child_name;

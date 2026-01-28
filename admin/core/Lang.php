@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Language Class
@@ -119,7 +119,7 @@ class CI_Lang {
 		}
 
 		// Load the base file, so any others found can override it
-		$basepath = BASEPATH.'language/'.$idiom.'/'.$langfile;
+		$basepath = ADMIN_ROOT.'language/'.$idiom.'/'.$langfile;
 		if (($found = file_exists($basepath)) === TRUE)
 		{
 			include($basepath);

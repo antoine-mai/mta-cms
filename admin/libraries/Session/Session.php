@@ -36,7 +36,7 @@
  * @since	Version 2.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * CodeIgniter Session Class
@@ -206,13 +206,13 @@ class CI_Session {
 	protected function _ci_load_classes($driver)
 	{
 		// PHP 5.4 compatibility
-		interface_exists('SessionHandlerInterface', FALSE) OR require_once(BASEPATH.'libraries/Session/SessionHandlerInterface.php');
+		interface_exists('SessionHandlerInterface', FALSE) OR require_once(ADMIN_ROOT.'libraries/Session/SessionHandlerInterface.php');
 		// PHP 7 compatibility
-		interface_exists('SessionUpdateTimestampHandlerInterface', FALSE) OR require_once(BASEPATH.'libraries/Session/SessionUpdateTimestampHandlerInterface.php');
+		interface_exists('SessionUpdateTimestampHandlerInterface', FALSE) OR require_once(ADMIN_ROOT.'libraries/Session/SessionUpdateTimestampHandlerInterface.php');
 
-		require_once(BASEPATH.'libraries/Session/CI_Session_driver_interface.php');
+		require_once(ADMIN_ROOT.'libraries/Session/CI_Session_driver_interface.php');
 		$wrapper = is_php('8.0') ? 'PHP8SessionWrapper' : 'OldSessionWrapper';
-		require_once(BASEPATH.'libraries/Session/'.$wrapper.'.php');
+		require_once(ADMIN_ROOT.'libraries/Session/'.$wrapper.'.php');
 
 		$prefix = config_item('subclass_prefix');
 
@@ -221,7 +221,7 @@ class CI_Session {
 			require_once(
 				file_exists(APPPATH.'libraries/Session/Session_driver.php')
 					? APPPATH.'libraries/Session/Session_driver.php'
-					: BASEPATH.'libraries/Session/Session_driver.php'
+					: ADMIN_ROOT.'libraries/Session/Session_driver.php'
 			);
 
 			if (file_exists($file_path = APPPATH.'libraries/Session/'.$prefix.'Session_driver.php'))
@@ -244,7 +244,7 @@ class CI_Session {
 
 		if ( ! class_exists('CI_'.$class, FALSE))
 		{
-			if (file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$class.'.php') OR file_exists($file_path = BASEPATH.'libraries/Session/drivers/'.$class.'.php'))
+			if (file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$class.'.php') OR file_exists($file_path = ADMIN_ROOT.'libraries/Session/drivers/'.$class.'.php'))
 			{
 				require_once($file_path);
 			}

@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 $lang['ut_test_name'] = 'Test Name';
 $lang['ut_test_datatype'] = 'Test Datatype';

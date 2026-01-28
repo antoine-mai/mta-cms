@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * System Initialization File
@@ -73,7 +73,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *  Load the global functions
  * ------------------------------------------------------
  */
-	require_once(BASEPATH.'/core/Common.php');
+	require_once(ADMIN_ROOT.'/core/Common.php');
 
 
 /*
@@ -280,10 +280,10 @@ if ( ! is_php('5.4'))
  * ------------------------------------------------------
  */
 
-	require_once(BASEPATH.'core/compat/mbstring.php');
-	require_once(BASEPATH.'core/compat/hash.php');
-	require_once(BASEPATH.'core/compat/password.php');
-	require_once(BASEPATH.'core/compat/standard.php');
+	require_once(ADMIN_ROOT.'core/compat/mbstring.php');
+	require_once(ADMIN_ROOT.'core/compat/hash.php');
+	require_once(ADMIN_ROOT.'core/compat/password.php');
+	require_once(ADMIN_ROOT.'core/compat/standard.php');
 
 /*
  * ------------------------------------------------------
@@ -351,7 +351,7 @@ if ( ! is_php('5.4'))
  *
  */
 	// Load the base controller class
-	require_once BASEPATH.'core/Controller.php';
+	require_once ADMIN_ROOT.'core/Controller.php';
 
 	/**
 	 * Reference to the CI_Controller method.

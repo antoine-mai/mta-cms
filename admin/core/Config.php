@@ -36,7 +36,7 @@
  * @since	Version 1.0.0
  * @filesource
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 
 /**
  * Config Class
@@ -360,7 +360,7 @@ class CI_Config {
 	 */
 	public function system_url()
 	{
-		$x = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', BASEPATH));
+		$x = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', ADMIN_ROOT));
 		return $this->slash_item('base_url').end($x).'/';
 	}
 
