@@ -1,6 +1,5 @@
 <?php
 defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-
 echo "\nDatabase error: ",
 	$heading,
 	"\n\n",
