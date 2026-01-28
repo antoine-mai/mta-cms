@@ -1,8 +1,7 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
+<?php namespace Admin\Core;
 class Exceptions {
 	public $ob_level;
-	public $levels = array(
+	public $levels = [
 		E_ERROR			=>	'Error',
 		E_WARNING		=>	'Warning',
 		E_PARSE			=>	'Parsing Error',
@@ -14,7 +13,7 @@ class Exceptions {
 		E_USER_ERROR		=>	'User Error',
 		E_USER_WARNING		=>	'User Warning',
 		E_USER_NOTICE		=>	'User Notice'
-	);
+	];
 	public function __construct()
 	{
 		$this->ob_level = ob_get_level();
@@ -48,7 +47,7 @@ class Exceptions {
 		$templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
-			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
+			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
 		}
 		if (is_cli())
 		{
@@ -76,7 +75,7 @@ class Exceptions {
 		$templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
-			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
+			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
 		}
 		$message = $exception->getMessage();
 		if (empty($message))
@@ -106,7 +105,7 @@ class Exceptions {
 		$templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
-			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
+			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
 		}
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
 		if ( ! is_cli())

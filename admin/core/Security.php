@@ -1,7 +1,10 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Security {
-	public $filename_bad_chars =	array(
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Security
+{
+	public $filename_bad_chars =	[
 		'../', '<!--', '-->', '<', '>',
 		"'", '"', '&', '$', '#',
 		'{', '}', '[', ']', '=',
@@ -18,14 +21,14 @@ class Security {
 		'%3f',		// ?
 		'%3b',		// ;
 		'%3d'		// =
-	);
+	];
 	public $charset = 'UTF-8';
 	protected $_xss_hash;
 	protected $_csrf_hash;
 	protected $_csrf_expire =	7200;
 	protected $_csrf_token_name =	'ci_csrf_token';
 	protected $_csrf_cookie_name =	'ci_csrf_token';
-	protected $_never_allowed_str =	array(
+	protected $_never_allowed_str =	[
 		'document.cookie' => '[removed]',
 		'(document).cookie' => '[removed]',
 		'document.write'  => '[removed]',
@@ -38,8 +41,8 @@ class Security {
 		'<![CDATA['       => '&lt;![CDATA[',
 		'<comment>'	  => '&lt;comment&gt;',
 		'<%'              => '&lt;&#37;'
-	);
-	protected $_never_allowed_regex = array(
+	];
+	protected $_never_allowed_regex = [
 		'javascript\s*:',
 		'(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
 		'expression\s*(\(|&\#40;)', // CSS and IE
@@ -49,12 +52,12 @@ class Security {
 		'vbs\s*:', // IE
 		'Redirect\s+30\d',
 		"([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?"
-	);
+	];
 	public function __construct()
 	{
 		if (config_item('csrf_protection'))
 		{
-			foreach (array('csrf_expire', 'csrf_token_name', 'csrf_cookie_name') as $key)
+			foreach (['csrf_expire', 'csrf_token_name', 'csrf_cookie_name'] as $key)
 			{
 				if (NULL !== ($val = config_item($key)))
 				{
@@ -118,14 +121,14 @@ class Security {
 			setcookie(
 				$this->_csrf_cookie_name,
 				$this->_csrf_hash,
-				array(
+				[
 					'expires'  => $expire,
 					'path'     => config_item('cookie_path'),
 					'domain'   => config_item('cookie_domain'),
 					'secure'   => $secure_cookie,
 					'httponly' => config_item('cookie_httponly'),
 					'samesite' => 'Strict'
-				)
+				]
 			);
 		}
 		else
@@ -173,13 +176,13 @@ class Security {
 			{
 				$oldstr = $str;
 				$str = rawurldecode($str);
-				$str = preg_replace_callback('#%(?:\s*[0-9a-f]){2,}#i', array($this, '_urldecodespaces'), $str);
+				$str = preg_replace_callback('#%(?:\s*[0-9a-f]){2,}#i', [$this, '_urldecodespaces'], $str);
 			}
 			while ($oldstr !== $str);
 			unset($oldstr);
 		}
-		$str = preg_replace_callback("/[^a-z0-9>]+[a-z0-9]+=([\'\"]).*?\\1/si", array($this, '_convert_attribute'), $str);
-		$str = preg_replace_callback('/<\w+.*/si', array($this, '_decode_entity'), $str);
+		$str = preg_replace_callback("/[^a-z0-9>]+[a-z0-9]+=([\'\"]).*?\\1/si", [$this, '_convert_attribute'], $str);
+		$str = preg_replace_callback('/<\w+.*/si', [$this, '_decode_entity'], $str);
 		$str = remove_invisible_characters($str);
 		$str = str_replace("\t", ' ', $str);
 		$converted_string = $str;
@@ -190,28 +193,28 @@ class Security {
 		}
 		else
 		{
-			$str = str_replace(array('<?', '?'.'>'), array('&lt;?', '?&gt;'), $str);
+			$str = str_replace(['<?', '?'.'>'], ['&lt;?', '?&gt;'], $str);
 		}
-		$words = array(
+		$words = [
 			'javascript', 'expression', 'vbscript', 'jscript', 'wscript',
 			'vbs', 'script', 'base64', 'applet', 'alert', 'document',
 			'write', 'cookie', 'window', 'confirm', 'prompt', 'eval'
-		);
+		];
 		foreach ($words as $word)
 		{
 			$word = implode('\s*', str_split($word)).'\s*';
-			$str = preg_replace_callback('#('.substr($word, 0, -3).')(\W)#is', array($this, '_compact_exploded_words'), $str);
+			$str = preg_replace_callback('#('.substr($word, 0, -3).')(\W)#is', [$this, '_compact_exploded_words'], $str);
 		}
 		do
 		{
 			$original = $str;
 			if (preg_match('/<a/i', $str))
 			{
-				$str = preg_replace_callback('#<a(?:rea)?[^a-z0-9>]+([^>]*?)(?:>|$)#si', array($this, '_js_link_removal'), $str);
+				$str = preg_replace_callback('#<a(?:rea)?[^a-z0-9>]+([^>]*?)(?:>|$)#si', [$this, '_js_link_removal'], $str);
 			}
 			if (preg_match('/<img/i', $str))
 			{
-				$str = preg_replace_callback('#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#si', array($this, '_js_img_removal'), $str);
+				$str = preg_replace_callback('#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#si', [$this, '_js_img_removal'], $str);
 			}
 			if (preg_match('/script|xss/i', $str))
 			{
@@ -233,7 +236,7 @@ class Security {
 		do
 		{
 			$old_str = $str;
-			$str = preg_replace_callback($pattern, array($this, '_sanitize_naughty_html'), $str);
+			$str = preg_replace_callback($pattern, [$this, '_sanitize_naughty_html'], $str);
 		}
 		while ($old_str !== $str);
 		unset($old_str);
@@ -331,7 +334,7 @@ class Security {
 			$str_compare = $str;
 			if (preg_match_all('/&[a-z]{2,}(?![a-z;])/i', $str, $matches))
 			{
-				$replace = array();
+				$replace = [];
 				$matches = array_unique(array_map('strtolower', $matches[0]));
 				foreach ($matches as &$match)
 				{
@@ -375,10 +378,10 @@ class Security {
 	public function strip_image_tags($str)
 	{
 		return preg_replace(
-			array(
+			[
 				'#<img[\s/]+.*?src\s*=\s*(["\'])([^\\1]+?)\\1.*?\>#i',
 				'#<img[\s/]+.*?src\s*=\s*?(([^\s"\'=<>`]+)).*?\>#i'
-			),
+			],
 			'\\2',
 			$str
 		);
@@ -397,15 +400,15 @@ class Security {
 	}
 	protected function _sanitize_naughty_html($matches)
 	{
-		static $naughty_tags    = array(
+		static $naughty_tags    = [
 			'alert', 'area', 'prompt', 'confirm', 'applet', 'audio', 'basefont', 'base', 'behavior', 'bgsound',
 			'blink', 'body', 'embed', 'expression', 'form', 'frameset', 'frame', 'head', 'html', 'ilayer',
 			'iframe', 'input', 'button', 'select', 'isindex', 'layer', 'link', 'meta', 'keygen', 'object',
 			'plaintext', 'style', 'script', 'textarea', 'title', 'math', 'video', 'svg', 'xml', 'xss'
-		);
-		static $evil_attributes = array(
+		];
+		static $evil_attributes = [
 			'on\w+', 'style', 'xmlns', 'formaction', 'form', 'xlink:href', 'FSCommand', 'seekSegmentTime'
-		);
+		];
 		if (empty($matches['closeTag']))
 		{
 			return '&lt;'.$matches[1];
@@ -416,7 +419,7 @@ class Security {
 		}
 		elseif (isset($matches['attributes']))
 		{
-			$attributes = array();
+			$attributes = [];
 			$attributes_pattern = '#'
 				.'(?<name>[^\s\042\047>/=]+)' // attribute characters
 				.'(?:\s*=(?<value>[^\s\042\047=><`]+|\s*\042[^\042]*\042|\s*\047[^\047]*\047|\s*(?U:[^\s\042\047=><`]*)))' // attribute-value separator
@@ -476,7 +479,7 @@ class Security {
 	}
 	protected function _convert_attribute($match)
 	{
-		return str_replace(array('>', '<', '\\'), array('&gt;', '&lt;', '\\\\'), $match[0]);
+		return str_replace(['>', '<', '\\'], ['&gt;', '&lt;', '\\\\'], $match[0]);
 	}
 	protected function _filter_attributes($str)
 	{

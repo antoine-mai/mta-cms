@@ -1,20 +1,23 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Log {
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Log
+{
 	protected $_log_path;
 	protected $_file_permissions = 0644;
 	protected $_threshold = 1;
-	protected $_threshold_array = array();
+	protected $_threshold_array = [];
 	protected $_date_fmt = 'Y-m-d H:i:s';
 	protected $_file_ext;
 	protected $_enabled = TRUE;
-	protected $_levels = array('ERROR' => 1, 'DEBUG' => 2, 'INFO' => 3, 'ALL' => 4);
+	protected $_levels = ['ERROR' => 1, 'DEBUG' => 2, 'INFO' => 3, 'ALL' => 4];
 	protected static $func_overload;
 	public function __construct()
 	{
 		$config =& get_config();
 		isset(self::$func_overload) OR self::$func_overload = ( ! is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-		$this->_log_path = ($config['log_path'] !== '') ? $config['log_path'] : APPPATH.'logs/';
+		$this->_log_path = ($config['log_path'] !== '') ? $config['log_path'] : ADMIN_ROOT.'logs/';
 		$this->_file_ext = (isset($config['log_file_extension']) && $config['log_file_extension'] !== '')
 			? ltrim($config['log_file_extension'], '.') : 'php';
 		file_exists($this->_log_path) OR mkdir($this->_log_path, 0755, TRUE);

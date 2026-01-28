@@ -1,7 +1,10 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Benchmark {
-	public $marker = array();
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Benchmark
+{
+	public $marker = [];
 	public function mark($name)
 	{
 		$this->marker[$name] = microtime(TRUE);

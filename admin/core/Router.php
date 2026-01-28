@@ -1,14 +1,18 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Router {
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Router
+{
 	public $config;
-	public $routes =	array();
+	public $routes =	[];
 	public $class =		'';
 	public $method =	'index';
 	public $directory;
 	public $default_controller;
 	public $translate_uri_dashes = FALSE;
 	public $enable_query_strings = FALSE;
+    public $uri;
 	public function __construct($routing = NULL)
 	{
 		$this->config =& load_class('Config', 'core');
@@ -25,9 +29,9 @@ class Router {
 	}
 	protected function _set_routing()
 	{
-		if (file_exists(APPPATH.'config/routes.php'))
+		if (file_exists(ADMIN_ROOT.'config/routes.php'))
 		{
-			include(APPPATH.'config/routes.php');
+			include(ADMIN_ROOT.'config/routes.php');
 		}
 		if (isset($route) && is_array($route))
 		{
@@ -59,10 +63,10 @@ class Router {
 					$this->uri->filter_uri($_GET[$_f]);
 					$this->set_method($_GET[$_f]);
 				}
-				$this->uri->rsegments = array(
+				$this->uri->rsegments = [
 					1 => $this->class,
 					2 => $this->method
-				);
+				];
 			}
 			else
 			{
@@ -79,7 +83,7 @@ class Router {
 			$this->_set_default_controller();
 		}
 	}
-	protected function _set_request($segments = array())
+	protected function _set_request($segments = [])
 	{
 		$segments = $this->_validate_request($segments);
 		if (empty($segments))
@@ -118,16 +122,16 @@ class Router {
 		{
 			$method = 'index';
 		}
-		if ( ! file_exists(APPPATH.'controllers/'.$this->directory.ucfirst($class).'.php'))
+		if ( ! file_exists(ADMIN_ROOT.'routes/'.$this->directory.ucfirst($class).'.php'))
 		{
 			return;
 		}
 		$this->set_class($class);
 		$this->set_method($method);
-		$this->uri->rsegments = array(
+		$this->uri->rsegments = [
 			1 => $class,
 			2 => $method
-		);
+		];
 		log_message('debug', 'No URI present. Default controller set.');
 	}
 	protected function _validate_request($segments)
@@ -138,9 +142,9 @@ class Router {
 		{
 			$test = $this->directory
 				.ucfirst($this->translate_uri_dashes === TRUE ? str_replace('-', '_', $segments[0]) : $segments[0]);
-			if ( ! file_exists(APPPATH.'controllers/'.$test.'.php')
+			if ( ! file_exists(ADMIN_ROOT.'routes/'.$test.'.php')
 				&& $directory_override === FALSE
-				&& is_dir(APPPATH.'controllers/'.$this->directory.$segments[0])
+				&& is_dir(ADMIN_ROOT.'routes/'.$this->directory.$segments[0])
 			)
 			{
 				$this->set_directory(array_shift($segments), TRUE);
@@ -168,7 +172,7 @@ class Router {
 					continue;
 				}
 			}
-			$key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
+			$key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
 			if (preg_match('#^'.$key.'$#', $uri, $matches))
 			{
 				if ( ! is_string($val) && is_callable($val))
@@ -188,7 +192,7 @@ class Router {
 	}
 	public function set_class($class)
 	{
-		$this->class = str_replace(array('/', '.'), '', $class);
+		$this->class = str_replace(['/', '.'], '', $class);
 	}
 	public function fetch_class()
 	{

@@ -1,4 +1,5 @@
 <?php
+namespace Admin\Core;
 defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 class Input {
 	protected $ip_address = FALSE;
@@ -6,7 +7,7 @@ class Input {
 	protected $_standardize_newlines;
 	protected $_enable_xss = FALSE;
 	protected $_enable_csrf = FALSE;
-	protected $headers = array();
+	protected $headers = [];
 	protected $_raw_input_stream;
 	protected $_input_stream;
 	protected $security;
@@ -35,7 +36,7 @@ class Input {
 		isset($index) OR $index = array_keys($array);
 		if (is_array($index))
 		{
-			$output = array();
+			$output = [];
 			foreach ($index as $key)
 			{
 				$output[$key] = $this->_fetch_from_array($array, $key, $xss_clean);
@@ -107,7 +108,7 @@ class Input {
 		if ( ! is_array($this->_input_stream))
 		{
 			parse_str($this->raw_input_stream, $this->_input_stream);
-			is_array($this->_input_stream) OR $this->_input_stream = array();
+			is_array($this->_input_stream) OR $this->_input_stream = [];
 		}
 		return $this->_fetch_from_array($this->_input_stream, $index, $xss_clean);
 	}
@@ -115,7 +116,7 @@ class Input {
 	{
 		if (is_array($name))
 		{
-			foreach (array('value', 'expire', 'domain', 'path', 'prefix', 'secure', 'httponly', 'name', 'samesite') as $item)
+			foreach (['value', 'expire', 'domain', 'path', 'prefix', 'secure', 'httponly', 'name', 'samesite'] as $item)
 			{
 				if (isset($name[$item]))
 				{
@@ -153,7 +154,7 @@ class Input {
 		if (isset($samesite))
 		{
 			$samesite = ucfirst(strtolower($samesite));
-			in_array($samesite, array('Lax', 'Strict', 'None'), TRUE) OR $samesite = 'Lax';
+			in_array($samesite, ['Lax', 'Strict', 'None'], TRUE) OR $samesite = 'Lax';
 		}
 		else
 		{
@@ -177,14 +178,14 @@ class Input {
 			header($cookie_header);
 			return;
 		}
-		$setcookie_options = array(
+		$setcookie_options = [
 			'expires' => $expire,
 			'path' => $path,
 			'domain' => $domain,
 			'secure' => $secure,
 			'httponly' => $httponly,
 			'samesite' => $samesite,
-		);
+		];
 		setcookie($prefix.$name, $value, $setcookie_options);
 	}
 	public function ip_address()
@@ -201,7 +202,7 @@ class Input {
 		$this->ip_address = $this->server('REMOTE_ADDR');
 		if ($proxy_ips)
 		{
-			foreach (array('HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP') as $header)
+			foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP'] as $header)
 			{
 				if (($spoof = $this->server($header)) !== NULL)
 				{
@@ -308,7 +309,7 @@ class Input {
 	{
 		if ($this->_allow_get_array === FALSE)
 		{
-			$_GET = array();
+			$_GET = [];
 		}
 		elseif (is_array($_GET))
 		{
@@ -350,7 +351,7 @@ class Input {
 	{
 		if (is_array($str))
 		{
-			$new_array = array();
+			$new_array = [];
 			foreach (array_keys($str) as $key)
 			{
 				$new_array[$this->_clean_input_keys($key)] = $this->_clean_input_data($str[$key]);

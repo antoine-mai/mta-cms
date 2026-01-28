@@ -1,11 +1,15 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class URI {
-	public $keyval = array();
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class URI
+{
+	public $keyval = [];
 	public $uri_string = '';
-	public $segments = array();
-	public $rsegments = array();
+	public $segments = [];
+	public $rsegments = [];
 	protected $_permitted_uri_chars;
+    public $config;
 	public function __construct()
 	{
 		$this->config =& load_class('Config', 'core');
@@ -127,7 +131,7 @@ class URI {
 	}
 	protected function _remove_relative_directory($uri)
 	{
-		$uris = array();
+		$uris = [];
 		$tok = strtok($uri, '/');
 		while ($tok !== FALSE)
 		{
@@ -154,15 +158,15 @@ class URI {
 	{
 		return isset($this->rsegments[$n]) ? $this->rsegments[$n] : $no_result;
 	}
-	public function uri_to_assoc($n = 3, $default = array())
+	public function uri_to_assoc($n = 3, $default = [])
 	{
 		return $this->_uri_to_assoc($n, $default, 'segment');
 	}
-	public function ruri_to_assoc($n = 3, $default = array())
+	public function ruri_to_assoc($n = 3, $default = [])
 	{
 		return $this->_uri_to_assoc($n, $default, 'rsegment');
 	}
-	protected function _uri_to_assoc($n = 3, $default = array(), $which = 'segment')
+	protected function _uri_to_assoc($n = 3, $default = [], $which = 'segment')
 	{
 		if ( ! is_numeric($n))
 		{
@@ -177,13 +181,13 @@ class URI {
 		if ($this->$total_segments() < $n)
 		{
 			return (count($default) === 0)
-				? array()
+				? []
 				: array_fill_keys($default, NULL);
 		}
 		$segments = array_slice($this->$segment_array(), ($n - 1));
 		$i = 0;
 		$lastval = '';
-		$retval = array();
+		$retval = [];
 		foreach ($segments as $seg)
 		{
 			if ($i % 2)
@@ -207,13 +211,13 @@ class URI {
 				}
 			}
 		}
-		isset($this->keyval[$which]) OR $this->keyval[$which] = array();
+		isset($this->keyval[$which]) OR $this->keyval[$which] = [];
 		$this->keyval[$which][$n] = $retval;
 		return $retval;
 	}
 	public function assoc_to_uri($array)
 	{
-		$temp = array();
+		$temp = [];
 		foreach ((array) $array as $key => $val)
 		{
 			$temp[] = $key;

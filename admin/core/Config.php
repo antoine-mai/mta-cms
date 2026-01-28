@@ -1,9 +1,12 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Config {
-	public $config = array();
-	public $is_loaded =	array();
-	public $_config_paths =	array(APPPATH);
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Config
+{
+	public $config = [];
+	public $is_loaded =	[];
+	public $_config_paths =	[ADMIN_ROOT];
 	public function __construct()
 	{
 		$this->config =& get_config();
@@ -36,9 +39,9 @@ class Config {
 		$loaded = FALSE;
 		foreach ($this->_config_paths as $path)
 		{
-			foreach (array($file) as $location)
+			foreach ([$file] as $location)
 			{
-				$file_path = ($path === APPPATH) ? CONFPATH.$location.'.php' : $path.'config/'.$location.'.php';
+				$file_path = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.$location.'.php' : $path.'config/'.$location.'.php';
 				if (in_array($file_path, $this->is_loaded, TRUE))
 				{
 					return TRUE;

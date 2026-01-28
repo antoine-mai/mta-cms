@@ -1,8 +1,11 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Lang {
-	public $language =	array();
-	public $is_loaded =	array();
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Lang
+{
+	public $language =	[];
+	public $is_loaded =	[];
 	public function __construct()
 	{
 		log_message('info', 'Language Class Initialized');
@@ -68,7 +71,7 @@ class Lang {
 			log_message('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
 			if ($return === TRUE)
 			{
-				return array();
+				return [];
 			}
 			return;
 		}

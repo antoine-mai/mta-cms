@@ -1,6 +1,9 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Utf8 {
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Utf8
+{
 	public function __construct()
 	{
 		if (

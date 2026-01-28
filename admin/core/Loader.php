@@ -1,24 +1,50 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Loader {
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Loader
+{
 	protected $_ci_ob_level;
-	protected $_ci_view_paths =	array(VIEWPATH	=> TRUE);
-	protected $_ci_library_paths =	array(APPPATH, ADMIN_ROOT);
-	protected $_ci_model_paths =	array(APPPATH);
-	protected $_ci_helper_paths =	array(APPPATH, ADMIN_ROOT);
-	protected $_ci_cached_vars =	array();
-	protected $_ci_classes =	array();
-	protected $_ci_models =	array();
-	protected $_ci_helpers =	array();
-	protected $_ci_varmap =	array(
+	protected $_ci_view_paths =	[ADMIN_ROOT . 'template/'	=> TRUE];
+	protected $_ci_library_paths =	[ADMIN_ROOT, ADMIN_ROOT];
+	protected $_ci_helper_paths =	[ADMIN_ROOT, ADMIN_ROOT];
+	protected $_ci_cached_vars =	[];
+	protected $_ci_classes =	[];
+	protected $_ci_helpers =	[];
+	protected $_ci_varmap =	[
 		'unit_test' => 'unit',
 		'user_agent' => 'agent'
-	);
+	];
 	public function __construct()
 	{
 		$this->_ci_ob_level = ob_get_level();
 		$this->_ci_classes =& is_loaded();
 		log_message('info', 'Loader Class Initialized');
+	}
+
+	public function autoloadPsr4(array $namespaces = [])
+	{
+		foreach ($namespaces as $prefix => $base_dir)
+		{
+			$prefix = trim($prefix, '\\') . '\\';
+			$base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . '/';
+
+			spl_autoload_register(function ($class) use ($prefix, $base_dir) {
+				$len = strlen($prefix);
+				if (strncmp($prefix, $class, $len) !== 0)
+				{
+					return;
+				}
+				
+				$relative_class = substr($class, $len);
+				$file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+				
+				if (file_exists($file))
+				{
+					require $file;
+				}
+			});
+		}
 	}
 	public function initialize()
 	{
@@ -56,181 +82,18 @@ class Loader {
 		$this->_ci_load_library($library, $params, $object_name);
 		return $this;
 	}
-	public function model($model, $name = '', $db_conn = FALSE)
+	public function template($view, $vars = [], $return = FALSE)
 	{
-		if (empty($model))
-		{
-			return $this;
-		}
-		elseif (is_array($model))
-		{
-			foreach ($model as $key => $value)
-			{
-				is_int($key) ? $this->model($value, '', $db_conn) : $this->model($key, $value, $db_conn);
-			}
-			return $this;
-		}
-		$path = '';
-		if (($last_slash = strrpos($model, '/')) !== FALSE)
-		{
-			$path = substr($model, 0, ++$last_slash);
-			$model = substr($model, $last_slash);
-		}
-		if (empty($name))
-		{
-			$name = $model;
-		}
-		if (in_array($name, $this->_ci_models, TRUE))
-		{
-			return $this;
-		}
-		$CI =& get_instance();
-		if (isset($CI->$name))
-		{
-			throw new RuntimeException('The model name you are loading is the name of a resource that is already being used: '.$name);
-		}
-		if ($db_conn !== FALSE && ! class_exists('DB', FALSE))
-		{
-			if ($db_conn === TRUE)
-			{
-				$db_conn = '';
-			}
-			$this->database($db_conn, FALSE, TRUE);
-		}
-		if ( ! class_exists('Model', FALSE))
-		{
-			$app_path = APPPATH.'core'.DIRECTORY_SEPARATOR;
-			if (file_exists($app_path.'Model.php'))
-			{
-				require_once($app_path.'Model.php');
-				if ( ! class_exists('Model', FALSE))
-				{
-					throw new RuntimeException($app_path."Model.php exists, but doesn't declare class Model");
-				}
-				log_message('info', 'Model class loaded');
-			}
-			elseif ( ! class_exists('Model', FALSE))
-			{
-				require_once(ADMIN_ROOT.'core'.DIRECTORY_SEPARATOR.'Model.php');
-			}
-			$class = config_item('subclass_prefix').'Model';
-			if (file_exists($app_path.$class.'.php'))
-			{
-				require_once($app_path.$class.'.php');
-				if ( ! class_exists($class, FALSE))
-				{
-					throw new RuntimeException($app_path.$class.".php exists, but doesn't declare class ".$class);
-				}
-				log_message('info', config_item('subclass_prefix').'Model class loaded');
-			}
-		}
-		$model = ucfirst($model);
-		if ( ! class_exists($model, FALSE))
-		{
-			foreach ($this->_ci_model_paths as $mod_path)
-			{
-				if ( ! file_exists($mod_path.'models/'.$path.$model.'.php'))
-				{
-					continue;
-				}
-				require_once($mod_path.'models/'.$path.$model.'.php');
-				if ( ! class_exists($model, FALSE))
-				{
-					throw new RuntimeException($mod_path."models/".$path.$model.".php exists, but doesn't declare class ".$model);
-				}
-				break;
-			}
-			if ( ! class_exists($model, FALSE))
-			{
-				throw new RuntimeException('Unable to locate the model you have specified: '.$model);
-			}
-		}
-		elseif ( ! is_subclass_of($model, 'Model'))
-		{
-			throw new RuntimeException("Class ".$model." already exists and doesn't extend Model");
-		}
-		$this->_ci_models[] = $name;
-		$model = new $model();
-		$CI->$name = $model;
-		log_message('info', 'Model "'.get_class($model).'" initialized');
-		return $this;
-	}
-	public function database($params = '', $return = FALSE, $query_builder = NULL)
-	{
-		$CI =& get_instance();
-		if ($return === FALSE && $query_builder === NULL && isset($CI->db) && is_object($CI->db) && ! empty($CI->db->conn_id))
-		{
-			return FALSE;
-		}
-		require_once(ADMIN_ROOT.'database/DB.php');
-		if ($return === TRUE)
-		{
-			return DB($params, $query_builder);
-		}
-		$CI->db = '';
-		$CI->db =& DB($params, $query_builder);
-		return $this;
-	}
-	public function dbutil($db = NULL, $return = FALSE)
-	{
-		$CI =& get_instance();
-		if ( ! is_object($db) OR ! ($db instanceof CI_DB))
-		{
-			class_exists('DB', FALSE) OR $this->database();
-			$db =& $CI->db;
-		}
-		require_once(ADMIN_ROOT.'database/DB_utility.php');
-		require_once(ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_utility.php');
-		$class = 'DB_'.$db->dbdriver.'_utility';
-		if ($return === TRUE)
-		{
-			return new $class($db);
-		}
-		$CI->dbutil = new $class($db);
-		return $this;
-	}
-	public function dbforge($db = NULL, $return = FALSE)
-	{
-		$CI =& get_instance();
-		if ( ! is_object($db) OR ! ($db instanceof CI_DB))
-		{
-			class_exists('DB', FALSE) OR $this->database();
-			$db =& $CI->db;
-		}
-		require_once(ADMIN_ROOT.'database/DB_forge.php');
-		require_once(ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/'.$db->dbdriver.'_forge.php');
-		if ( ! empty($db->subdriver))
-		{
-			$driver_path = ADMIN_ROOT.'database/drivers/'.$db->dbdriver.'/subdrivers/'.$db->dbdriver.'_'.$db->subdriver.'_forge.php';
-			if (file_exists($driver_path))
-			{
-				require_once($driver_path);
-				$class = 'DB_'.$db->dbdriver.'_'.$db->subdriver.'_forge';
-			}
-		}
-		else
-		{
-			$class = 'DB_'.$db->dbdriver.'_forge';
-		}
-		if ($return === TRUE)
-		{
-			return new $class($db);
-		}
-		$CI->dbforge = new $class($db);
-		return $this;
-	}
-	public function view($view, $vars = array(), $return = FALSE)
-	{
-		return $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_prepare_view_vars($vars), '_ci_return' => $return));
+		return $this->_ci_load(['_ci_view' => $view, '_ci_vars' => $this->_ci_prepare_view_vars($vars), '_ci_return' => $return]);
 	}
 	public function file($path, $return = FALSE)
 	{
-		return $this->_ci_load(array('_ci_path' => $path, '_ci_return' => $return));
+		return $this->_ci_load(['_ci_path' => $path, '_ci_return' => $return]);
 	}
 	public function vars($vars, $val = '')
 	{
 		$vars = is_string($vars)
-			? array($vars => $val)
+			? [$vars => $val]
 			: $this->_ci_prepare_view_vars($vars);
 		foreach ($vars as $key => $val)
 		{
@@ -240,7 +103,7 @@ class Loader {
 	}
 	public function clear_vars()
 	{
-		$this->_ci_cached_vars = array();
+		$this->_ci_cached_vars = [];
 		return $this;
 	}
 	public function get_var($key)
@@ -251,9 +114,9 @@ class Loader {
 	{
 		return $this->_ci_cached_vars;
 	}
-	public function helper($helpers = array())
+	public function helper($helpers = [])
 	{
-		is_array($helpers) OR $helpers = array($helpers);
+		is_array($helpers) OR $helpers = [$helpers];
 		foreach ($helpers as &$helper)
 		{
 			$filename = basename($helper);
@@ -268,18 +131,18 @@ class Loader {
 			$ext_loaded = FALSE;
 			foreach ($this->_ci_helper_paths as $path)
 			{
-				if (file_exists($path.'helpers/'.$ext_helper.'.php'))
+				if (file_exists($path.'services/'.$ext_helper.'.php'))
 				{
-					include_once($path.'helpers/'.$ext_helper.'.php');
+					include_once($path.'services/'.$ext_helper.'.php');
 					$ext_loaded = TRUE;
 				}
 			}
 			if ($ext_loaded === TRUE)
 			{
-				$base_helper = ADMIN_ROOT.'helpers/'.$helper.'.php';
+				$base_helper = ADMIN_ROOT.'services/'.$helper.'.php';
 				if ( ! file_exists($base_helper))
 				{
-					show_error('Unable to load the requested file: helpers/'.$helper.'.php');
+					show_error('Unable to load the requested file: services/'.$helper.'.php');
 				}
 				include_once($base_helper);
 				$this->_ci_helpers[$helper] = TRUE;
@@ -288,9 +151,9 @@ class Loader {
 			}
 			foreach ($this->_ci_helper_paths as $path)
 			{
-				if (file_exists($path.'helpers/'.$helper.'.php'))
+				if (file_exists($path.'services/'.$helper.'.php'))
 				{
-					include_once($path.'helpers/'.$helper.'.php');
+					include_once($path.'services/'.$helper.'.php');
 					$this->_ci_helpers[$helper] = TRUE;
 					log_message('info', 'Helper loaded: '.$helper);
 					break;
@@ -298,12 +161,12 @@ class Loader {
 			}
 			if ( ! isset($this->_ci_helpers[$helper]))
 			{
-				show_error('Unable to load the requested file: helpers/'.$helper.'.php');
+				show_error('Unable to load the requested file: services/'.$helper.'.php');
 			}
 		}
 		return $this;
 	}
-	public function helpers($helpers = array())
+	public function helpers($helpers = [])
 	{
 		return $this->helper($helpers);
 	}
@@ -353,7 +216,7 @@ class Loader {
 		array_unshift($this->_ci_library_paths, $path);
 		array_unshift($this->_ci_model_paths, $path);
 		array_unshift($this->_ci_helper_paths, $path);
-		$this->_ci_view_paths = array($path.'views/' => $view_cascade) + $this->_ci_view_paths;
+		$this->_ci_view_paths = [$path.'views/' => $view_cascade] + $this->_ci_view_paths;
 		$config =& $this->_ci_get_component('config');
 		$config->_config_paths[] = $path;
 		return $this;
@@ -376,7 +239,7 @@ class Loader {
 		else
 		{
 			$path = rtrim($path, '/').'/';
-			foreach (array('_ci_library_paths', '_ci_model_paths', '_ci_helper_paths') as $var)
+			foreach (['_ci_library_paths', '_ci_model_paths', '_ci_helper_paths'] as $var)
 			{
 				if (($key = array_search($path, $this->{$var})) !== FALSE)
 				{
@@ -392,16 +255,16 @@ class Loader {
 				unset($config->_config_paths[$key]);
 			}
 		}
-		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, ADMIN_ROOT)));
-		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, ADMIN_ROOT)));
-		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, array(APPPATH)));
-		$this->_ci_view_paths = array_merge($this->_ci_view_paths, array(APPPATH.'views/' => TRUE));
-		$config->_config_paths = array_unique(array_merge($config->_config_paths, array(APPPATH)));
+		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, [ADMIN_ROOT, ADMIN_ROOT]));
+		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, [ADMIN_ROOT, ADMIN_ROOT]));
+		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, [ADMIN_ROOT]));
+		$this->_ci_view_paths = array_merge($this->_ci_view_paths, [ADMIN_ROOT.'views/' => TRUE]);
+		$config->_config_paths = array_unique(array_merge($config->_config_paths, [ADMIN_ROOT]));
 		return $this;
 	}
 	protected function _ci_load($_ci_data)
 	{
-		foreach (array('_ci_view', '_ci_vars', '_ci_path', '_ci_return') as $_ci_val)
+		foreach (['_ci_view', '_ci_vars', '_ci_path', '_ci_return'] as $_ci_val)
 		{
 			$$_ci_val = isset($_ci_data[$_ci_val]) ? $_ci_data[$_ci_val] : FALSE;
 		}
@@ -483,7 +346,7 @@ class Loader {
 			$subdir = '';
 		}
 		$class = ucfirst($class);
-		if (file_exists(ADMIN_ROOT.'libraries/'.$subdir.$class.'.php'))
+		if (file_exists(ADMIN_ROOT.'services/'.$subdir.$class.'.php'))
 		{
 			return $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
 		}
@@ -509,7 +372,7 @@ class Loader {
 			{
 				continue;
 			}
-			$filepath = $path.'libraries/'.$subdir.$class.'.php';
+			$filepath = $path.'services/'.$subdir.$class.'.php';
 			if ( ! file_exists($filepath))
 			{
 				continue;
@@ -549,11 +412,11 @@ class Loader {
 		}
 		$paths = $this->_ci_library_paths;
 		array_pop($paths); // ADMIN_ROOT
-		array_pop($paths); // APPPATH (needs to be the first path checked)
-		array_unshift($paths, APPPATH);
+		array_pop($paths); // ADMIN_ROOT (needs to be the first path checked)
+		array_unshift($paths, ADMIN_ROOT);
 		foreach ($paths as $path)
 		{
-			if (file_exists($path = $path.'libraries/'.$file_path.$library_name.'.php'))
+			if (file_exists($path = $path.'services/'.$file_path.$library_name.'.php'))
 			{
 				include_once($path);
 				if (class_exists($prefix.$library_name, FALSE))
@@ -563,11 +426,11 @@ class Loader {
 				log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
 			}
 		}
-		include_once(ADMIN_ROOT.'libraries/'.$file_path.$library_name.'.php');
+		include_once(ADMIN_ROOT.'services/'.$file_path.$library_name.'.php');
 		$subclass = config_item('subclass_prefix').$library_name;
 		foreach ($paths as $path)
 		{
-			if (file_exists($path = $path.'libraries/'.$file_path.$subclass.'.php'))
+			if (file_exists($path = $path.'services/'.$file_path.$subclass.'.php'))
 			{
 				include_once($path);
 				if (class_exists($subclass, FALSE))
@@ -590,14 +453,14 @@ class Loader {
 				$found = FALSE;
 				foreach ($config_component->_config_paths as $path)
 				{
-					if (($path === APPPATH) ? file_exists(CONFPATH.strtolower($class).'.php') : file_exists($path.'config/'.strtolower($class).'.php'))
+					if (($path === ADMIN_ROOT) ? file_exists(ROOT_DIR . '/config/admin/'.strtolower($class).'.php') : file_exists($path.'config/'.strtolower($class).'.php'))
 					{
-						include(($path === APPPATH) ? CONFPATH.strtolower($class).'.php' : $path.'config/'.strtolower($class).'.php');
+						include(($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.strtolower($class).'.php' : $path.'config/'.strtolower($class).'.php');
 						$found = TRUE;
 					}
-					elseif (($path === APPPATH) ? file_exists(CONFPATH.ucfirst(strtolower($class)).'.php') : file_exists($path.'config/'.ucfirst(strtolower($class)).'.php'))
+					elseif (($path === ADMIN_ROOT) ? file_exists(ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.php') : file_exists($path.'config/'.ucfirst(strtolower($class)).'.php'))
 					{
-						include(($path === APPPATH) ? CONFPATH.ucfirst(strtolower($class)).'.php' : $path.'config/'.ucfirst(strtolower($class)).'.php');
+						include(($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.ucfirst(strtolower($class)).'.php' : $path.'config/'.ucfirst(strtolower($class)).'.php');
 						$found = TRUE;
 					}
 					if ($found === TRUE)
@@ -638,9 +501,9 @@ class Loader {
 	}
 	protected function _ci_autoloader()
 	{
-		if (file_exists(CONFPATH.'autoload.php'))
+		if (file_exists(ROOT_DIR . '/config/admin/'.'autoload.php'))
 		{
-			include(CONFPATH.'autoload.php');
+			include(ROOT_DIR . '/config/admin/'.'autoload.php');
 		}
 		if ( ! isset($autoload))
 		{
@@ -660,7 +523,7 @@ class Loader {
 				$this->config($val);
 			}
 		}
-		foreach (array('helper', 'language') as $type)
+		foreach (['helper', 'language'] as $type)
 		{
 			if (isset($autoload[$type]) && count($autoload[$type]) > 0)
 			{
@@ -673,16 +536,9 @@ class Loader {
 		}
 		if (isset($autoload['libraries']) && count($autoload['libraries']) > 0)
 		{
-			if (in_array('database', $autoload['libraries']))
-			{
-				$this->database();
-				$autoload['libraries'] = array_diff($autoload['libraries'], array('database'));
-			}
+			// Database loading removed
+			$autoload['libraries'] = array_diff($autoload['libraries'], ['database']);
 			$this->library($autoload['libraries']);
-		}
-		if (isset($autoload['model']))
-		{
-			$this->model($autoload['model']);
 		}
 	}
 	protected function _ci_prepare_view_vars($vars)
@@ -691,7 +547,7 @@ class Loader {
 		{
 			$vars = is_object($vars)
 				? get_object_vars($vars)
-				: array();
+				: [];
 		}
 		foreach (array_keys($vars) as $key)
 		{

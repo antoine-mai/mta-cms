@@ -1,15 +1,18 @@
-<?php
-defined('ADMIN_ROOT') OR exit('No direct script access allowed');
-class Output {
+<?php namespace Admin\Core;
+/**
+ * 
+**/
+class Output
+{
 	public $final_output = '';
 	public $cache_expiration = 0;
-	public $headers = array();
-	public $mimes =	array();
+	public $headers = [];
+	public $mimes =	[];
 	protected $mime_type = 'text/html';
 	public $enable_profiler = FALSE;
 	protected $_zlib_oc = FALSE;
 	protected $_compress_output = FALSE;
-	protected $_profiler_sections =	array();
+	protected $_profiler_sections =	[];
 	public $parse_exec_vars = TRUE;
 	protected static $func_overload;
 	public function __construct()
@@ -44,7 +47,7 @@ class Output {
 		{
 			return $this;
 		}
-		$this->headers[] = array($header, $replace);
+		$this->headers[] = [$header, $replace];
 		return $this;
 	}
 	public function set_content_type($mime_type, $charset = NULL)
@@ -68,7 +71,7 @@ class Output {
 		}
 		$header = 'Content-Type: '.$mime_type
 			.(empty($charset) ? '' : '; charset='.$charset);
-		$this->headers[] = array($header, TRUE);
+		$this->headers[] = [$header, TRUE];
 		return $this;
 	}
 	public function get_content_type()
@@ -153,7 +156,7 @@ class Output {
 		if ($this->parse_exec_vars === TRUE)
 		{
 			$memory	= round(memory_get_usage() / 1024 / 1024, 2).'MB';
-			$output = str_replace(array('{elapsed_time}', '{memory_usage}'), array($elapsed, $memory), $output);
+			$output = str_replace(['{elapsed_time}', '{memory_usage}'], [$elapsed, $memory], $output);
 		}
 		if (isset($CI) // This means that we're not serving a cache file, if we were, it would already be compressed
 			&& $this->_compress_output === TRUE
@@ -215,7 +218,7 @@ class Output {
 	{
 		$CI =& get_instance();
 		$path = $CI->config->item('cache_path');
-		$cache_path = ($path === '') ? APPPATH.'cache/' : $path;
+		$cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
 		if ( ! is_dir($cache_path) OR ! is_really_writable($cache_path))
 		{
 			log_message('error', 'Unable to write cache file: '.$cache_path);
@@ -256,10 +259,10 @@ class Output {
 			}
 		}
 		$expire = time() + ($this->cache_expiration * 60);
-		$cache_info = serialize(array(
+		$cache_info = serialize([
 			'expire'	=> $expire,
 			'headers'	=> $this->headers
-		));
+		]);
 		$output = $cache_info.'ENDCI--->'.$output;
 		for ($written = 0, $length = self::strlen($output); $written < $length; $written += $result)
 		{
@@ -282,7 +285,7 @@ class Output {
 	}
 	public function _display_cache(&$CFG, &$URI)
 	{
-		$cache_path = ($CFG->item('cache_path') === '') ? APPPATH.'cache/' : $CFG->item('cache_path');
+		$cache_path = ($CFG->item('cache_path') === '') ? ADMIN_ROOT.'cache/' : $CFG->item('cache_path');
 		$uri = $CFG->item('base_url').$CFG->item('index_page').$URI->uri_string;
 		if (($cache_query_string = $CFG->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
 		{
@@ -332,7 +335,7 @@ class Output {
 		$cache_path = $CI->config->item('cache_path');
 		if ($cache_path === '')
 		{
-			$cache_path = APPPATH.'cache/';
+			$cache_path = ADMIN_ROOT.'cache/';
 		}
 		if ( ! is_dir($cache_path))
 		{
