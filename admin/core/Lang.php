@@ -6,12 +6,12 @@
 class Lang
 {
 	public $language =	[];
-	public $is_loaded =	[];
+	public $isLoaded =	[];
 	public function __construct()
 	{
-		\Admin\Core\Error::log_message('info', 'Language Class Initialized');
+		\Admin\Core\Error::logMessage('info', 'Language Class Initialized');
 	}
-	public function load($langfile, $idiom = '', $return = FALSE, $add_suffix = TRUE, $alt_path = '')
+	public function load($langfile, $idiom = '', $return = false, $add_suffix = true, $alt_path = '')
 	{
 		if (is_array($langfile))
 		{
@@ -22,7 +22,7 @@ class Lang
 			return;
 		}
 		$langfile = str_replace('.php', '', $langfile);
-		if ($add_suffix === TRUE)
+		if ($add_suffix === true)
 		{
 			$langfile = preg_replace('/_lang$/', '', $langfile).'_lang';
 		}
@@ -32,12 +32,12 @@ class Lang
 			$config =& get_config();
 			$idiom = empty($config['language']) ? 'english' : $config['language'];
 		}
-		if ($return === FALSE && isset($this->is_loaded[$langfile]) && $this->is_loaded[$langfile] === $idiom)
+		if ($return === false && isset($this->isLoaded[$langfile]) && $this->isLoaded[$langfile] === $idiom)
 		{
 			return;
 		}
 		$basepath = ADMIN_ROOT.'language/'.$idiom.'/'.$langfile;
-		if (($found = file_exists($basepath)) === TRUE)
+		if (($found = file_exists($basepath)) === true)
 		{
 			include($basepath);
 		}
@@ -47,50 +47,50 @@ class Lang
 			if (file_exists($alt_path))
 			{
 				include($alt_path);
-				$found = TRUE;
+				$found = true;
 			}
 		}
 		else
 		{
-			foreach (get_instance()->load->get_package_paths(TRUE) as $package_path)
+			foreach (getInstance()->load->get_package_paths(true) as $package_path)
 			{
 				$package_path .= 'language/'.$idiom.'/'.$langfile;
 				if ($basepath !== $package_path && file_exists($package_path))
 				{
 					include($package_path);
-					$found = TRUE;
+					$found = true;
 					break;
 				}
 			}
 		}
-		if ($found !== TRUE)
+		if ($found !== true)
 		{
-			\Admin\Core\Error::show_error('Unable to load the requested language file: language/'.$idiom.'/'.$langfile);
+			\Admin\Core\Error::showError('Unable to load the requested language file: language/'.$idiom.'/'.$langfile);
 		}
 		if ( ! isset($lang) OR ! is_array($lang))
 		{
-			\Admin\Core\Error::log_message('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
-			if ($return === TRUE)
+			\Admin\Core\Error::logMessage('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
+			if ($return === true)
 			{
 				return [];
 			}
 			return;
 		}
-		if ($return === TRUE)
+		if ($return === true)
 		{
 			return $lang;
 		}
-		$this->is_loaded[$langfile] = $idiom;
+		$this->isLoaded[$langfile] = $idiom;
 		$this->language = array_merge($this->language, $lang);
-		\Admin\Core\Error::log_message('info', 'Language file loaded: language/'.$idiom.'/'.$langfile);
-		return TRUE;
+		\Admin\Core\Error::logMessage('info', 'Language file loaded: language/'.$idiom.'/'.$langfile);
+		return true;
 	}
-	public function line($line, $log_errors = TRUE)
+	public function line($line, $log_errors = true)
 	{
-		$value = isset($this->language[$line]) ? $this->language[$line] : FALSE;
-		if ($value === FALSE && $log_errors === TRUE)
+		$value = isset($this->language[$line]) ? $this->language[$line] : false;
+		if ($value === false && $log_errors === true)
 		{
-			\Admin\Core\Error::log_message('error', 'Could not find the language line "'.$line.'"');
+			\Admin\Core\Error::logMessage('error', 'Could not find the language line "'.$line.'"');
 		}
 		return $value;
 	}

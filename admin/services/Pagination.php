@@ -4,14 +4,14 @@
 **/
 class Pagination
 {
-	protected $base_url		= '';
+	protected $baseUrl		= '';
 	protected $prefix = '';
 	protected $suffix = '';
 	protected $total_rows = 0;
 	protected $num_links = 2;
 	public $per_page = 10;
 	public $cur_page = 0;
-	protected $use_page_numbers = FALSE;
+	protected $use_page_numbers = false;
 	protected $first_link = '&lsaquo; First';
 	protected $next_link = '&gt;';
 	protected $prev_link = '&lt;';
@@ -32,30 +32,30 @@ class Pagination
 	protected $prev_tag_close = '';
 	protected $num_tag_open = '';
 	protected $num_tag_close = '';
-	protected $page_query_string = FALSE;
+	protected $page_query_string = false;
 	protected $query_string_segment = 'per_page';
-	protected $display_pages = TRUE;
+	protected $display_pages = true;
 	protected $_attributes = '';
 	protected $_link_types = [];
-	protected $reuse_query_string = FALSE;
-	protected $use_global_url_suffix = FALSE;
+	protected $reuse_query_string = false;
+	protected $use_global_url_suffix = false;
 	protected $data_page_attr = 'data-ci-pagination-page';
 	protected $CI;
 
 	public function __construct($params = [])
 	{
-		$this->CI =& get_instance();
+		$this->CI =& getInstance();
 		$this->CI->load->language('pagination');
 		foreach (['first_link', 'next_link', 'prev_link', 'last_link'] as $key)
 		{
-			if (($val = $this->CI->lang->line('pagination_'.$key)) !== FALSE)
+			if (($val = $this->CI->lang->line('pagination_'.$key)) !== false)
 			{
 				$this->$key = $val;
 			}
 		}
 		isset($params['attributes']) OR $params['attributes'] = [];
 		$this->initialize($params);
-		log_message('info', 'Pagination Class Initialized');
+		logMessage('info', 'Pagination Class Initialized');
 	}
 
 	public function initialize(array $params = [])
@@ -77,11 +77,11 @@ class Pagination
 				$this->$key = $val;
 			}
 		}
-		if ($this->CI->config->item('enable_query_strings') === TRUE)
+		if ($this->CI->config->item('enable_query_strings') === true)
 		{
-			$this->page_query_string = TRUE;
+			$this->page_query_string = true;
 		}
-		if ($this->use_global_url_suffix === TRUE)
+		if ($this->use_global_url_suffix === true)
 		{
 			$this->suffix = $this->CI->config->item('url_suffix');
 		}
@@ -102,9 +102,9 @@ class Pagination
 		$this->num_links = (int) $this->num_links;
 		if ($this->num_links < 0)
 		{
-			show_error('Your number of links must be a non-negative number.');
+			showError('Your number of links must be a non-negative number.');
 		}
-		if ($this->reuse_query_string === TRUE)
+		if ($this->reuse_query_string === true)
 		{
 			$get = $this->CI->input->get();
 			unset($get['c'], $get['m'], $get[(string)$this->query_string_segment]);
@@ -113,20 +113,20 @@ class Pagination
 		{
 			$get = [];
 		}
-		$base_url = trim((string)$this->base_url);
+		$baseUrl = trim((string)$this->baseUrl);
 		$first_url = (string)$this->first_url;
-		$query_string_sep = (strpos($base_url, '?') === FALSE) ? '?' : '&amp;';
-		if ($this->page_query_string === TRUE)
+		$query_string_sep = (strpos($baseUrl, '?') === false) ? '?' : '&amp;';
+		if ($this->page_query_string === true)
 		{
 			if ($first_url === '')
 			{
-				$first_url = $base_url;
+				$first_url = $baseUrl;
 				if ( ! empty($get))
 				{
 					$first_url .= $query_string_sep.http_build_query($get);
 				}
 			}
-			$base_url .= $query_string_sep.http_build_query(array_merge($get, [(string)$this->query_string_segment => '']));
+			$baseUrl .= $query_string_sep.http_build_query(array_merge($get, [(string)$this->query_string_segment => '']));
 		}
 		else
 		{
@@ -134,18 +134,18 @@ class Pagination
 			{
 				$this->suffix .= $query_string_sep.http_build_query($get);
 			}
-			if ($this->reuse_query_string === TRUE && ($base_query_pos = strpos($base_url, '?')) !== FALSE)
+			if ($this->reuse_query_string === true && ($base_query_pos = strpos($baseUrl, '?')) !== false)
 			{
-				$base_url = substr($base_url, 0, $base_query_pos);
+				$baseUrl = substr($baseUrl, 0, $base_query_pos);
 			}
 			if ($first_url === '')
 			{
-				$first_url = $base_url.(($this->suffix !== '' && strpos((string)$this->suffix, $query_string_sep) !== 0) ? $query_string_sep.$this->suffix : $this->suffix);
+				$first_url = $baseUrl.(($this->suffix !== '' && strpos((string)$this->suffix, $query_string_sep) !== 0) ? $query_string_sep.$this->suffix : $this->suffix);
 			}
-			$base_url = rtrim($base_url, '/').'/';
+			$baseUrl = rtrim($baseUrl, '/').'/';
 		}
 		$base_page = ($this->use_page_numbers) ? 1 : 0;
-		if ($this->page_query_string === TRUE)
+		if ($this->page_query_string === true)
 		{
 			$this->cur_page = $this->CI->input->get((string)$this->query_string_segment);
 		}
@@ -192,13 +192,13 @@ class Pagination
 		$start	= (($this->cur_page - $this->num_links) > 0) ? $this->cur_page - ($this->num_links - 1) : 1;
 		$end	= (($this->cur_page + $this->num_links) < $num_pages) ? $this->cur_page + $this->num_links : $num_pages;
 		$output = '';
-		if ($this->first_link !== FALSE && $this->cur_page > ($this->num_links + 1 + ! $this->num_links))
+		if ($this->first_link !== false && $this->cur_page > ($this->num_links + 1 + ! $this->num_links))
 		{
 			$attributes = sprintf('%s %s="%d"', $this->_attributes, $this->data_page_attr, 1);
 			$output .= $this->first_tag_open.'<a href="'.$first_url.'"'.$attributes.$this->_attr_rel('start').'>'
 				.$this->first_link.'</a>'.$this->first_tag_close;
 		}
-		if ($this->prev_link !== FALSE && $this->cur_page !== 1)
+		if ($this->prev_link !== false && $this->cur_page !== 1)
 		{
 			$i = ($this->use_page_numbers) ? (int)$uri_page_number - 1 : (int)$uri_page_number - (int)$this->per_page;
 			$attributes = sprintf('%s %s="%d"', $this->_attributes, $this->data_page_attr, ($this->cur_page - 1));
@@ -210,11 +210,11 @@ class Pagination
 			else
 			{
 				$append = (string)$this->prefix.$i.(string)$this->suffix;
-				$output .= $this->prev_tag_open.'<a href="'.$base_url.$append.'"'.$attributes.$this->_attr_rel('prev').'>'
+				$output .= $this->prev_tag_open.'<a href="'.$baseUrl.$append.'"'.$attributes.$this->_attr_rel('prev').'>'
 					.$this->prev_link.'</a>'.$this->prev_tag_close;
 			}
 		}
-		if ($this->display_pages !== FALSE)
+		if ($this->display_pages !== false)
 		{
 			for ($loop = $start - 1; $loop <= $end; $loop++)
 			{
@@ -234,24 +234,24 @@ class Pagination
 					else
 					{
 						$append = (string)$this->prefix.$i.(string)$this->suffix;
-						$output .= $this->num_tag_open.'<a href="'.$base_url.$append.'"'.$attributes.'>'
+						$output .= $this->num_tag_open.'<a href="'.$baseUrl.$append.'"'.$attributes.'>'
 							.$loop.'</a>'.$this->num_tag_close;
 					}
 				}
 			}
 		}
-		if ($this->next_link !== FALSE && $this->cur_page < $num_pages)
+		if ($this->next_link !== false && $this->cur_page < $num_pages)
 		{
 			$i = ($this->use_page_numbers) ? $this->cur_page + 1 : $this->cur_page * $this->per_page;
 			$attributes = sprintf('%s %s="%d"', $this->_attributes, $this->data_page_attr, $this->cur_page + 1);
-			$output .= $this->next_tag_open.'<a href="'.$base_url.(string)$this->prefix.$i.(string)$this->suffix.'"'.$attributes
+			$output .= $this->next_tag_open.'<a href="'.$baseUrl.(string)$this->prefix.$i.(string)$this->suffix.'"'.$attributes
 				.$this->_attr_rel('next').'>'.$this->next_link.'</a>'.$this->next_tag_close;
 		}
-		if ($this->last_link !== FALSE && ($this->cur_page + $this->num_links + ! $this->num_links) < $num_pages)
+		if ($this->last_link !== false && ($this->cur_page + $this->num_links + ! $this->num_links) < $num_pages)
 		{
 			$i = ($this->use_page_numbers) ? $num_pages : ($num_pages * $this->per_page) - $this->per_page;
 			$attributes = sprintf('%s %s="%d"', $this->_attributes, $this->data_page_attr, $num_pages);
-			$output .= $this->last_tag_open.'<a href="'.$base_url.(string)$this->prefix.$i.(string)$this->suffix.'"'.$attributes.'>'
+			$output .= $this->last_tag_open.'<a href="'.$baseUrl.(string)$this->prefix.$i.(string)$this->suffix.'"'.$attributes.'>'
 				.$this->last_link.'</a>'.$this->last_tag_close;
 		}
 		$output = preg_replace('#([^:"])//+#', '\\1/', (string)$output);
@@ -260,7 +260,7 @@ class Pagination
 
 	protected function _parse_attributes($attributes)
 	{
-		isset($attributes['rel']) OR $attributes['rel'] = TRUE;
+		isset($attributes['rel']) OR $attributes['rel'] = true;
 		$this->_link_types = ($attributes['rel'])
 			? ['start' => 'start', 'prev' => 'prev', 'next' => 'next']
 			: [];

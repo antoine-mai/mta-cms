@@ -7,10 +7,10 @@ if (file_exists(ROOT_DIR . '/config/admin/' . 'constants.php')) {
 }
 require_once(ADMIN_ROOT . 'core/Common.php');
 
-if (!function_exists('get_instance')) {
-    function &get_instance()
+if (!function_exists('getInstance')) {
+    function &getInstance()
     {
-        return \Admin\Core\Route::get_instance();
+        return \Admin\Core\Route::getInstance();
     }
 }
 
@@ -18,6 +18,14 @@ use Admin\Core\Common;
 
 class Admin
 {
+
+    protected static function errorHandlers()
+    {
+        set_error_handler([\Admin\Core\Error::class, 'errorHandler']);
+        set_exception_handler([\Admin\Core\Error::class, 'exceptionHandler']);
+        register_shutdown_function([\Admin\Core\Error::class, 'shutdownHandler']);
+    }
+
     public static function run()
     {
         // 0. Init
@@ -46,29 +54,23 @@ class Admin
             $response->prepare();
             $response->send();
         } else {
-            $OUT->_display();
+            $OUT->display();
         }
-    }
-
-    protected static function errorHandlers()
-    {
-        set_error_handler([\Admin\Core\Error::class, '_error_handler']);
-        set_exception_handler([\Admin\Core\Error::class, '_exception_handler']);
-        register_shutdown_function([\Admin\Core\Error::class, '_shutdown_handler']);
     }
 
     protected static function loadConfig()
     {
         global $assign_to_config;
         if (!empty($assign_to_config['subclass_prefix'])) {
-            Common::get_config(['subclass_prefix' => $assign_to_config['subclass_prefix']]);
+            // This would normally set a global or static prefix, but since we use Registry, 
+            // we'll rely on the Config class which is loaded next anyway.
         }
         
         $CFG =& Registry::getInstance('Config', 'core');
         
         if (isset($assign_to_config) && is_array($assign_to_config)) {
              foreach ($assign_to_config as $key => $value) {
-                $CFG->set_item($key, $value);
+                $CFG->setItem($key, $value);
             }
         }
         
@@ -88,7 +90,7 @@ class Admin
         $OUT =& Registry::getInstance('Output', 'core');
         
         // Cache check
-        // if ($OUT->_display_cache($CFG, $URI) === TRUE) {
+        // if ($OUT->display_cache($CFG, $URI) === true) {
         //     exit;
         // }
 
@@ -101,7 +103,7 @@ class Admin
 
     protected static function checkRequest($RTR, $request)
     {
-        $e404 = FALSE;
+        $e404 = false;
         $class = ucfirst($RTR->class);
         
         // Convert directory structure to namespace
@@ -117,17 +119,17 @@ class Admin
         $method = ($requestMethod === 'POST') ? 'post' : 'index';
 
         if (empty($class) OR !class_exists($fqcn)) {
-            $e404 = TRUE;
+            $e404 = true;
         } else {
             // Check if method exists in the Route class (it should, as it extends Admin\Core\Route)
             // But we check anyway in case it's missing in a specific route or abstract
             if (!method_exists($fqcn, $method)) {
-                 $e404 = TRUE; 
+                 $e404 = true; 
             }
         }
 
         if ($e404) {
-            Error::show_404($fqcn . '::' . $method);
+            Error::show404($fqcn . '::' . $method);
         }
         
         // $params = array_slice($URI->rsegments, 2);
@@ -167,21 +169,21 @@ class Admin
         ini_set('default_charset', $charset);
 
         if (extension_loaded('mbstring')) {
-            define('MB_ENABLED', TRUE);
+            define('MB_ENABLED', true);
             @ini_set('mbstring.internal_encoding', $charset);
             mb_substitute_character('none');
         } else {
-            define('MB_ENABLED', FALSE);
+            define('MB_ENABLED', false);
         }
 
         if (extension_loaded('iconv')) {
-            define('ICONV_ENABLED', TRUE);
+            define('ICONV_ENABLED', true);
             @ini_set('iconv.internal_encoding', $charset);
         } else {
-            define('ICONV_ENABLED', FALSE);
+            define('ICONV_ENABLED', false);
         }
 
-        if (Common::is_php('5.6')) {
+        if (Common::isPhp('5.6')) {
             ini_set('php.internal_encoding', $charset);
         }
     }

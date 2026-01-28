@@ -4,10 +4,10 @@
 **/
 class Agent
 {
-	public $agent = NULL;
-	public $is_browser = FALSE;
-	public $is_robot = FALSE;
-	public $is_mobile = FALSE;
+	public $agent = null;
+	public $is_browser = false;
+	public $is_robot = false;
+	public $is_mobile = false;
 	public $languages = [];
 	public $charsets = [];
 	public $platforms = [];
@@ -29,7 +29,7 @@ class Agent
 			$this->agent = trim((string)$_SERVER['HTTP_USER_AGENT']);
 			$this->_compile_data();
 		}
-		log_message('info', 'Agent Class Initialized');
+		logMessage('info', 'Agent Class Initialized');
 	}
 
 	protected function _load_agent_file()
@@ -39,38 +39,38 @@ class Agent
 			include(ADMIN_ROOT.'config/user_agents.php');
 		}
 
-		if ($found !== TRUE)
+		if ($found !== true)
 		{
-			return FALSE;
+			return false;
 		}
 
-		$return = FALSE;
+		$return = false;
 		if (isset($platforms))
 		{
 			$this->platforms = $platforms;
 			unset($platforms);
-			$return = TRUE;
+			$return = true;
 		}
 
 		if (isset($browsers))
 		{
 			$this->browsers = $browsers;
 			unset($browsers);
-			$return = TRUE;
+			$return = true;
 		}
 
 		if (isset($mobiles))
 		{
 			$this->mobiles = $mobiles;
 			unset($mobiles);
-			$return = TRUE;
+			$return = true;
 		}
 
 		if (isset($robots))
 		{
 			$this->robots = $robots;
 			unset($robots);
-			$return = TRUE;
+			$return = true;
 		}
 
 		return $return;
@@ -81,7 +81,7 @@ class Agent
 		$this->_set_platform();
 		foreach (['_set_robot', '_set_browser', '_set_mobile'] as $function)
 		{
-			if ($this->$function() === TRUE)
+			if ($this->$function() === true)
 			{
 				break;
 			}
@@ -97,12 +97,12 @@ class Agent
 				if (preg_match('|'.preg_quote($key).'|i', (string)$this->agent))
 				{
 					$this->platform = $val;
-					return TRUE;
+					return true;
 				}
 			}
 		}
 		$this->platform = 'Unknown Platform';
-		return FALSE;
+		return false;
 	}
 
 	protected function _set_browser()
@@ -113,15 +113,15 @@ class Agent
 			{
 				if (preg_match('|'.$key.'.*?([0-9\.]+)|i', (string)$this->agent, $match))
 				{
-					$this->is_browser = TRUE;
+					$this->is_browser = true;
 					$this->version = $match[1];
 					$this->browser = $val;
 					$this->_set_mobile();
-					return TRUE;
+					return true;
 				}
 			}
 		}
-		return FALSE;
+		return false;
 	}
 
 	protected function _set_robot()
@@ -132,14 +132,14 @@ class Agent
 			{
 				if (preg_match('|'.preg_quote($key).'|i', (string)$this->agent))
 				{
-					$this->is_robot = TRUE;
+					$this->is_robot = true;
 					$this->robot = $val;
 					$this->_set_mobile();
-					return TRUE;
+					return true;
 				}
 			}
 		}
-		return FALSE;
+		return false;
 	}
 
 	protected function _set_mobile()
@@ -148,15 +148,15 @@ class Agent
 		{
 			foreach ($this->mobiles as $key => $val)
 			{
-				if (FALSE !== (stripos((string)$this->agent, $key)))
+				if (false !== (stripos((string)$this->agent, $key)))
 				{
-					$this->is_mobile = TRUE;
+					$this->is_mobile = true;
 					$this->mobile = $val;
-					return TRUE;
+					return true;
 				}
 			}
 		}
-		return FALSE;
+		return false;
 	}
 
 	protected function _set_languages()
@@ -183,41 +183,41 @@ class Agent
 		}
 	}
 
-	public function is_browser($key = NULL)
+	public function is_browser($key = null)
 	{
 		if ( ! $this->is_browser)
 		{
-			return FALSE;
+			return false;
 		}
-		if ($key === NULL)
+		if ($key === null)
 		{
-			return TRUE;
+			return true;
 		}
 		return (isset($this->browsers[$key]) && $this->browser === $this->browsers[$key]);
 	}
 
-	public function is_robot($key = NULL)
+	public function is_robot($key = null)
 	{
 		if ( ! $this->is_robot)
 		{
-			return FALSE;
+			return false;
 		}
-		if ($key === NULL)
+		if ($key === null)
 		{
-			return TRUE;
+			return true;
 		}
 		return (isset($this->robots[$key]) && $this->robot === $this->robots[$key]);
 	}
 
-	public function is_mobile($key = NULL)
+	public function is_mobile($key = null)
 	{
 		if ( ! $this->is_mobile)
 		{
-			return FALSE;
+			return false;
 		}
-		if ($key === NULL)
+		if ($key === null)
 		{
-			return TRUE;
+			return true;
 		}
 		return (isset($this->mobiles[$key]) && $this->mobile === $this->mobiles[$key]);
 	}
@@ -228,12 +228,12 @@ class Agent
 		{
 			if (empty($_SERVER['HTTP_REFERER']))
 			{
-				$this->referer = FALSE;
+				$this->referer = false;
 			}
 			else
 			{
 				$referer_host = @parse_url((string)$_SERVER['HTTP_REFERER'], PHP_URL_HOST);
-				$own_host = parse_url((string) config_item('base_url'), PHP_URL_HOST);
+				$own_host = parse_url((string) configItem('baseUrl'), PHP_URL_HOST);
 				$this->referer = ($referer_host && $referer_host !== $own_host);
 			}
 		}
@@ -295,19 +295,19 @@ class Agent
 
 	public function accept_lang($lang = 'en')
 	{
-		return in_array(strtolower((string)$lang), $this->languages(), TRUE);
+		return in_array(strtolower((string)$lang), $this->languages(), true);
 	}
 
 	public function accept_charset($charset = 'utf-8')
 	{
-		return in_array(strtolower((string)$charset), $this->charsets(), TRUE);
+		return in_array(strtolower((string)$charset), $this->charsets(), true);
 	}
 
 	public function parse($string)
 	{
-		$this->is_browser = FALSE;
-		$this->is_robot = FALSE;
-		$this->is_mobile = FALSE;
+		$this->is_browser = false;
+		$this->is_robot = false;
+		$this->is_mobile = false;
 		$this->browser = '';
 		$this->version = '';
 		$this->mobile = '';

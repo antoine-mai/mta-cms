@@ -37,12 +37,12 @@ class Driver
 			return $this->_parent->$child;
 		}
 
-		return NULL;
+		return null;
 	}
 
 	public function load_driver($child)
 	{
-		$prefix = config_item('subclass_prefix');
+		$prefix = configItem('subclass_prefix');
 		if ( ! isset($this->lib_name))
 		{
 			$this->lib_name = str_replace([$prefix, 'Admin\\Services\\'], '', (string)get_class($this));
@@ -52,12 +52,12 @@ class Driver
 		if ( ! in_array($child, $this->valid_drivers))
 		{
 			$msg = 'Invalid driver requested: '.$child_name;
-			log_message('error', $msg);
-			show_error($msg);
+			logMessage('error', $msg);
+			showError($msg);
 		}
 
-		$CI = get_instance();
-		$paths = $CI->load->get_package_paths(TRUE);
+		$CI = getInstance();
+		$paths = $CI->load->get_package_paths(true);
 		
         // Try PSR-4 first
         $namespace = get_class($this);
@@ -71,7 +71,7 @@ class Driver
             } else {
                 // Fallback to legacy loading
                 $class_name = $prefix.$child_name;
-                $found = class_exists($class_name, FALSE);
+                $found = class_exists($class_name, false);
                 if ( ! $found)
                 {
                     foreach ($paths as $path)
@@ -83,12 +83,12 @@ class Driver
                             if ( ! file_exists((string)$basepath))
                             {
                                 $msg = 'Unable to load the requested class: CI_'.$child_name;
-                                log_message('error', $msg);
-                                show_error($msg);
+                                logMessage('error', $msg);
+                                showError($msg);
                             }
                             include_once($basepath);
                             include_once($file);
-                            $found = TRUE;
+                            $found = true;
                             break;
                         }
                     }
@@ -97,7 +97,7 @@ class Driver
                 if ( ! $found)
                 {
                     $class_name = ''.$child_name;
-                    if ( ! class_exists($class_name, FALSE))
+                    if ( ! class_exists($class_name, false))
                     {
                         foreach ($paths as $path)
                         {
@@ -111,17 +111,17 @@ class Driver
                     }
                 }
 
-                if ( ! class_exists($class_name, FALSE))
+                if ( ! class_exists($class_name, false))
                 {
-                    if (class_exists($child_name, FALSE))
+                    if (class_exists($child_name, false))
                     {
                         $class_name = $child_name;
                     }
                     else
                     {
                         $msg = 'Unable to load the requested driver: '.$class_name;
-                        log_message('error', $msg);
-                        show_error($msg);
+                        logMessage('error', $msg);
+                        showError($msg);
                     }
                 }
             }

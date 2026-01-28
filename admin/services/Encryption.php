@@ -31,14 +31,14 @@ class Encryption
 	{
 		if ( ! extension_loaded('openssl'))
 		{
-			show_error('Encryption: Unable to find an available encryption driver.');
+			showError('Encryption: Unable to find an available encryption driver.');
 		}
 		$this->initialize($params);
-		if ( ! isset($this->_key) && ($key = config_item('encryption_key')))
+		if ( ! isset($this->_key) && ($key = configItem('encryption_key')))
 		{
 			$this->_key = $key;
 		}
-		log_message('info', 'Encryption Class Initialized');
+		logMessage('info', 'Encryption Class Initialized');
 	}
 
 	public function initialize(array $params)
@@ -63,10 +63,10 @@ class Encryption
 		if (isset($this->_cipher, $this->_mode))
 		{
 			$handle = empty($this->_mode) ? $this->_cipher : $this->_cipher.'-'.$this->_mode;
-			if ( ! in_array($handle, openssl_get_cipher_methods(), TRUE))
+			if ( ! in_array($handle, openssl_get_cipher_methods(), true))
 			{
-				$this->_handle = NULL;
-				log_message('error', 'Encryption: Unable to initialize OpenSSL with method '.strtoupper((string)$handle).'.');
+				$this->_handle = null;
+				logMessage('error', 'Encryption: Unable to initialize OpenSSL with method '.strtoupper((string)$handle).'.');
 			}
 			else
 			{
@@ -81,62 +81,62 @@ class Encryption
 		return random_bytes((int) $length);
 	}
 
-	public function encrypt($data, array $params = NULL)
+	public function encrypt($data, array $params = null)
 	{
-		if (($params = $this->_get_params($params)) === FALSE)
+		if (($params = $this->_get_params($params)) === false)
 		{
-			return FALSE;
+			return false;
 		}
-		isset($params['key']) OR $params['key'] = $this->hkdf((string)$this->_key, 'sha512', NULL, strlen((string)$this->_key), 'encryption');
+		isset($params['key']) OR $params['key'] = $this->hkdf((string)$this->_key, 'sha512', null, strlen((string)$this->_key), 'encryption');
 		
 		if (empty($params['handle']))
 		{
-			return FALSE;
+			return false;
 		}
 		$iv = ($iv_size = openssl_cipher_iv_length($params['handle'])) ? $this->create_key($iv_size) : '';
 		$data = openssl_encrypt((string)$data, $params['handle'], (string)$params['key'], 1, $iv);
-		if ($data === FALSE)
+		if ($data === false)
 		{
-			return FALSE;
+			return false;
 		}
 		$data = $iv.$data;
 
 		$params['base64'] && $data = base64_encode($data);
 		if (isset($params['hmac_digest']))
 		{
-			isset($params['hmac_key']) OR $params['hmac_key'] = $this->hkdf((string)$this->_key, 'sha512', NULL, NULL, 'authentication');
+			isset($params['hmac_key']) OR $params['hmac_key'] = $this->hkdf((string)$this->_key, 'sha512', null, null, 'authentication');
 			return hash_hmac($params['hmac_digest'], $data, (string)$params['hmac_key'], ! $params['base64']).$data;
 		}
 		return $data;
 	}
 
-	public function decrypt($data, array $params = NULL)
+	public function decrypt($data, array $params = null)
 	{
-		if (($params = $this->_get_params($params)) === FALSE)
+		if (($params = $this->_get_params($params)) === false)
 		{
-			return FALSE;
+			return false;
 		}
 		if (isset($params['hmac_digest']))
 		{
 			$digest_size = ($params['base64']) ? $this->_digests[$params['hmac_digest']] * 2 : $this->_digests[$params['hmac_digest']];
 			if (strlen((string)$data) <= $digest_size)
 			{
-				return FALSE;
+				return false;
 			}
 			$hmac_input = substr((string)$data, 0, $digest_size);
 			$data = substr((string)$data, $digest_size);
-			isset($params['hmac_key']) OR $params['hmac_key'] = $this->hkdf((string)$this->_key, 'sha512', NULL, NULL, 'authentication');
+			isset($params['hmac_key']) OR $params['hmac_key'] = $this->hkdf((string)$this->_key, 'sha512', null, null, 'authentication');
 			$hmac_check = hash_hmac($params['hmac_digest'], (string)$data, (string)$params['hmac_key'], ! $params['base64']);
 			if (!hash_equals($hmac_input, $hmac_check))
 			{
-				return FALSE;
+				return false;
 			}
 		}
 		if ($params['base64'])
 		{
 			$data = base64_decode((string)$data);
 		}
-		isset($params['key']) OR $params['key'] = $this->hkdf((string)$this->_key, 'sha512', NULL, strlen((string)$this->_key), 'encryption');
+		isset($params['key']) OR $params['key'] = $this->hkdf((string)$this->_key, 'sha512', null, strlen((string)$this->_key), 'encryption');
 		
 		if ($iv_size = openssl_cipher_iv_length($params['handle']))
 		{
@@ -159,19 +159,19 @@ class Encryption
 					'handle' => $this->_handle,
 					'cipher' => $this->_cipher,
 					'mode' => $this->_mode,
-					'key' => NULL,
-					'base64' => TRUE,
+					'key' => null,
+					'base64' => true,
 					'hmac_digest' => 'sha512',
-					'hmac_key' => NULL
+					'hmac_key' => null
 				]
-				: FALSE;
+				: false;
 		}
 		$params = [
-			'handle' => NULL,
+			'handle' => null,
 			'cipher' => $params['cipher'],
 			'mode' => $params['mode'],
 			'key' => $params['key'],
-			'base64' => isset($params['raw_data']) ? ! $params['raw_data'] : FALSE,
+			'base64' => isset($params['raw_data']) ? ! $params['raw_data'] : false,
 			'hmac_digest' => $params['hmac_digest'] ?? 'sha512',
 			'hmac_key' => $params['hmac_key']
 		];
@@ -198,11 +198,11 @@ class Encryption
 		}
 	}
 
-	public function hkdf($key, $digest = 'sha512', $salt = NULL, $length = NULL, $info = '')
+	public function hkdf($key, $digest = 'sha512', $salt = null, $length = null, $info = '')
 	{
 		if ( ! isset($this->_digests[$digest]))
 		{
-			return FALSE;
+			return false;
 		}
 		if (empty($length) OR ! is_int($length))
 		{
@@ -216,12 +216,12 @@ class Encryption
 	{
 		if ($key === 'mode')
 		{
-			return array_search($this->_mode, $this->_modes['openssl'], TRUE);
+			return array_search($this->_mode, $this->_modes['openssl'], true);
 		}
-		elseif (in_array($key, ['cipher', 'digests'], TRUE))
+		elseif (in_array($key, ['cipher', 'digests'], true))
 		{
 			return $this->{'_'.$key};
 		}
-		return NULL;
+		return null;
 	}
 }

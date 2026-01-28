@@ -10,26 +10,26 @@ class Parser
 
 	public function __construct()
 	{
-		$this->CI =& get_instance();
-		log_message('info', 'Parser Class Initialized');
+		$this->CI =& getInstance();
+		logMessage('info', 'Parser Class Initialized');
 	}
 
-	public function parse($template, $data, $return = FALSE)
+	public function parse($template, $data, $return = false)
 	{
-		$template = $this->CI->load->view((string)$template, $data, TRUE);
+		$template = $this->CI->load->view((string)$template, $data, true);
 		return $this->_parse((string)$template, $data, $return);
 	}
 
-	public function parse_string($template, $data, $return = FALSE)
+	public function parse_string($template, $data, $return = false)
 	{
 		return $this->_parse((string)$template, $data, $return);
 	}
 
-	protected function _parse($template, $data, $return = FALSE)
+	protected function _parse($template, $data, $return = false)
 	{
 		if ($template === '')
 		{
-			return FALSE;
+			return false;
 		}
 		$replace = [];
 		foreach ($data as $key => $val)
@@ -43,9 +43,9 @@ class Parser
 		}
 		unset($data);
 		$template = strtr((string)$template, $replace);
-		if ($return === FALSE)
+		if ($return === false)
 		{
-			$this->CI->output->append_output($template);
+			$this->CI->output->appendOutput($template);
 		}
 		return (string)$template;
 	}

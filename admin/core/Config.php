@@ -1,179 +1,278 @@
 <?php namespace Admin\Core;
+
 /**
- * 
-**/
+ * Config Class
+ *
+ * This class contains functions that enable config files to be managed.
+ */
 #[\AllowDynamicProperties]
 class Config
 {
-	public $config = [];
-	public $is_loaded =	[];
-	public $_config_paths =	[ADMIN_ROOT];
-	public function __construct()
-	{
-		// Load main config.yaml
-        $file_path = CONFPATH.'config.yaml';
-        if (file_exists($file_path)) {
-            $yaml = new \Admin\Services\Yaml();
-            $this->config = $yaml->parse($file_path);
-        } else {
-             // Fallback or empty if not found, though widely expected
-             // \Admin\Core\Common::show_error('The configuration file does not exist.');
+    /**
+     * List of all loaded config values
+     *
+     * @var array
+     */
+    public $config = [];
+
+    /**
+     * List of all loaded config files
+     *
+     * @var array
+     */
+    public $isLoaded = [];
+
+    /**
+     * Constructor
+     *
+     * Sets the $config data from the primary config.yaml file
+     */
+    public function __construct()
+    {
+        $this->load('config', false, true);
+    }
+
+    /**
+     * Load Config File
+     *
+     * @param	string	$file           Configuration file name
+     * @param	bool	$useSections   Whether config values should be loaded into their own section
+     * @param	bool	$failGracefully Whether to halt execution if file is not found
+     * @return	bool	true if the file was loaded correctly or false on failure
+     */
+    public function load($file = 'config', $useSections = false, $failGracefully = false)
+    {
+        $file = str_replace('.php', '', $file);
+        $file_path = ROOT_DIR . '/config/admin/' . $file . '.yaml';
+
+        if (in_array($file_path, $this->isLoaded, true)) {
+            return true;
         }
 
+        if (!file_exists($file_path)) {
+            if ($failGracefully === true) {
+                return false;
+            }
+            Error::showError('The configuration file ' . $file . '.yaml does not exist in ' . ROOT_DIR . '/config/admin/');
+        }
 
-	}
-	public function load($file = '', $use_sections = FALSE, $fail_gracefully = FALSE)
-	{
-		$file = ($file === '') ? 'config' : str_replace('.php', '', $file);
-		$loaded = FALSE;
-		foreach ($this->_config_paths as $path)
-		{
-			foreach ([$file] as $location)
-			{
-				$file_path = ($path === ADMIN_ROOT) ? ROOT_DIR . '/config/admin/'.$location.'.yaml' : $path.'config/'.$location.'.yaml';
-				if (in_array($file_path, $this->is_loaded, TRUE))
-				{
-					return TRUE;
-				}
-				if ( ! file_exists($file_path))
-				{
-					continue;
-				}
-				
-                $yaml = new \Admin\Services\Yaml();
-                $config = $yaml->parse($file_path);
+        $yaml = new \Admin\Services\Yaml();
+        $config = $yaml->parse($file_path);
 
-				if ( ! isset($config) OR ! is_array($config))
-				{
-					if ($fail_gracefully === TRUE)
-					{
-						return FALSE;
-					}
-					\Admin\Core\Error::show_error('Your '.$file_path.' file does not appear to contain a valid configuration array.');
-				}
-				if ($use_sections === TRUE)
-				{
-					$this->config[$file] = isset($this->config[$file])
-						? array_merge($this->config[$file], $config)
-						: $config;
-				}
-				else
-				{
-					$this->config = array_merge($this->config, $config);
-				}
-				$this->is_loaded[] = $file_path;
-				$config = NULL;
-				$loaded = TRUE;
-				\Admin\Core\Error::log_message('debug', 'Config file loaded: '.$file_path);
-			}
-		}
-		if ($loaded === TRUE)
-		{
-			return TRUE;
-		}
-		elseif ($fail_gracefully === TRUE)
-		{
-			return FALSE;
-		}
-		\Admin\Core\Error::show_error('The configuration file '.$file.'.yaml does not exist.');
-	}
-	public function item($item, $index = '')
-	{
-		if ($index == '')
-		{
-			return isset($this->config[$item]) ? $this->config[$item] : NULL;
-		}
-		return isset($this->config[$index], $this->config[$index][$item]) ? $this->config[$index][$item] : NULL;
-	}
-	public function slash_item($item)
-	{
-		if ( ! isset($this->config[$item]))
-		{
-			return NULL;
-		}
-		elseif (trim($this->config[$item]) === '')
-		{
-			return '';
-		}
-		return rtrim($this->config[$item], '/').'/';
-	}
-	public function site_url($uri = '', $protocol = NULL)
-	{
-		$base_url = $this->slash_item('base_url');
-		if (isset($protocol))
-		{
-			if ($protocol === '')
-			{
-				$base_url = substr($base_url, strpos($base_url, '//'));
-			}
-			else
-			{
-				$base_url = $protocol.substr($base_url, strpos($base_url, '://'));
-			}
-		}
-		if (empty($uri))
-		{
-			return $base_url.$this->item('index_page');
-		}
-		$uri = $this->_uri_string($uri);
-		if ($this->item('enable_query_strings') === FALSE)
-		{
-			$suffix = isset($this->config['url_suffix']) ? $this->config['url_suffix'] : '';
-			if ($suffix !== '')
-			{
-				if (($offset = strpos($uri, '?')) !== FALSE)
-				{
-					$uri = substr($uri, 0, $offset).$suffix.substr($uri, $offset);
-				}
-				else
-				{
-					$uri .= $suffix;
-				}
-			}
-			return $base_url.$this->slash_item('index_page').$uri;
-		}
-		elseif (strpos($uri, '?') === FALSE)
-		{
-			$uri = '?'.$uri;
-		}
-		return $base_url.$this->item('index_page').$uri;
-	}
-	public function base_url($uri = '', $protocol = NULL)
-	{
-		$base_url = $this->slash_item('base_url');
-		if (isset($protocol))
-		{
-			if ($protocol === '')
-			{
-				$base_url = substr($base_url, strpos($base_url, '//'));
-			}
-			else
-			{
-				$base_url = $protocol.substr($base_url, strpos($base_url, '://'));
-			}
-		}
-		return $base_url.$this->_uri_string($uri);
-	}
-	protected function _uri_string($uri)
-	{
-		if ($this->item('enable_query_strings') === FALSE)
-		{
-			is_array($uri) && $uri = implode('/', $uri);
-			return ltrim($uri, '/');
-		}
-		elseif (is_array($uri))
-		{
-			return http_build_query($uri);
-		}
-		return $uri;
-	}
-	public function system_url()
-	{
-		$x = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', ADMIN_ROOT));
-		return $this->slash_item('base_url').end($x).'/';
-	}
-	public function set_item($item, $value)
-	{
-		$this->config[$item] = $value;
-	}
+        if (!is_array($config)) {
+            if ($failGracefully === true) {
+                return false;
+            }
+            Error::showError('Your ' . $file_path . ' file does not appear to contain a valid configuration array.');
+        }
+
+        if ($useSections === true) {
+            $this->config[$file] = isset($this->config[$file])
+                ? array_merge($this->config[$file], $config)
+                : $config;
+        } else {
+            $this->config = array_merge($this->config, $config);
+        }
+
+        $this->isLoaded[] = $file_path;
+        
+        if ($file !== 'config') {
+            Error::logMessage('debug', 'Config file loaded: ' . $file_path);
+        }
+
+        return true;
+    }
+
+    /**
+     * Fetch a config file item (Getter Alias)
+     *
+     * @param	string	$item	Config item name
+     * @param	string	$index	Index name
+     * @return	mixed	The configuration item or null if the item doesn't exist
+     */
+    public function get($item, $index = '')
+    {
+        return $this->item($item, $index);
+    }
+
+    /**
+     * Set a config file item and save to YAML file
+     *
+     * @param	string	$item	Config item name
+     * @param	mixed	$value	Config item value
+     * @param	string	$file	Configuration file name to save into
+     * @return	bool	true on success, false on failure
+     */
+    public function set($item, $value, $file = 'config')
+    {
+        $file = str_replace('.php', '', $file);
+        $file_path = ROOT_DIR . '/config/admin/' . $file . '.yaml';
+
+        // Update in-memory flat config
+        $this->config[$item] = $value;
+
+        // If file is already loaded in a section, update that too
+        if (isset($this->config[$file]) && is_array($this->config[$file])) {
+            $this->config[$file][$item] = $value;
+        }
+
+        // To save accurately, we load the file data independently
+        $yaml = new \Admin\Services\Yaml();
+        $fileData = $yaml->parse($file_path);
+        
+        $fileData[$item] = $value;
+
+        $result = $yaml->dump($file_path, $fileData);
+        
+        if ($result !== false) {
+            Error::logMessage('debug', 'Config file updated and saved: ' . $file_path);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Fetch a config file item
+     *
+     * @param	string	$item	Config item name
+     * @param	string	$index	Index name
+     * @return	mixed	The configuration item or null if the item doesn't exist
+     */
+    public function item($item, $index = '')
+    {
+        if ($index == '') {
+            return isset($this->config[$item]) ? $this->config[$item] : null;
+        }
+
+        return isset($this->config[$index], $this->config[$index][$item]) ? $this->config[$index][$item] : null;
+    }
+
+    /**
+     * Fetch a config file item with slash appended (if not empty)
+     *
+     * @param	string	$item	Config item name
+     * @return	string|null	The configuration item or null if the item doesn't exist
+     */
+    public function slashItem($item)
+    {
+        if (!isset($this->config[$item])) {
+            return null;
+        } elseif (trim((string)$this->config[$item]) === '') {
+            return '';
+        }
+
+        return rtrim((string)$this->config[$item], '/') . '/';
+    }
+
+    /**
+     * Site URL
+     *
+     * Returns baseUrl . index_page . uri
+     *
+     * @param	string|string[]	$uri	URI string or an array of segments
+     * @param	string	$protocol
+     * @return	string
+     */
+    public function siteUrl($uri = '', $protocol = null)
+    {
+        $baseUrl = $this->slashItem('baseUrl');
+
+        if (isset($protocol)) {
+            if ($protocol === '') {
+                $baseUrl = substr($baseUrl, strpos($baseUrl, '//'));
+            } else {
+                $baseUrl = $protocol . substr($baseUrl, strpos($baseUrl, '://'));
+            }
+        }
+
+        if (empty($uri)) {
+            return $baseUrl . $this->item('index_page');
+        }
+
+        $uri = $this->_uriString($uri);
+
+        if ($this->item('enable_query_strings') === false) {
+            $suffix = isset($this->config['url_suffix']) ? $this->config['url_suffix'] : '';
+
+            if ($suffix !== '') {
+                if (($offset = strpos($uri, '?')) !== false) {
+                    $uri = substr($uri, 0, $offset) . $suffix . substr($uri, $offset);
+                } else {
+                    $uri .= $suffix;
+                }
+            }
+
+            return $baseUrl . $this->slashItem('index_page') . $uri;
+        } elseif (strpos($uri, '?') === false) {
+            $uri = '?' . $uri;
+        }
+
+        return $baseUrl . $this->item('index_page') . $uri;
+    }
+
+    /**
+     * Base URL
+     *
+     * Returns baseUrl [. uri]
+     *
+     * @param	string|string[]	$uri	URI string or an array of segments
+     * @param	string	$protocol
+     * @return	string
+     */
+    public function baseUrl($uri = '', $protocol = null)
+    {
+        $baseUrl = $this->slashItem('baseUrl');
+
+        if (isset($protocol)) {
+            if ($protocol === '') {
+                $baseUrl = substr($baseUrl, strpos($baseUrl, '//'));
+            } else {
+                $baseUrl = $protocol . substr($baseUrl, strpos($baseUrl, '://'));
+            }
+        }
+
+        return $baseUrl . $this->_uriString($uri);
+    }
+
+    /**
+     * Build URI string
+     *
+     * @param	string|string[]	$uri	URI string or an array of segments
+     * @return	string
+     */
+    protected function _uriString($uri)
+    {
+        if ($this->item('enable_query_strings') === false) {
+            is_array($uri) && $uri = implode('/', $uri);
+            return ltrim($uri, '/');
+        } elseif (is_array($uri)) {
+            return http_build_query($uri);
+        }
+
+        return $uri;
+    }
+
+    /**
+     * System URL
+     *
+     * @return	string
+     */
+    public function systemUrl()
+    {
+        $x = explode('/', preg_replace('|/*(.+?)/*$|', '\\1', ADMIN_ROOT));
+        return $this->slashItem('baseUrl') . end($x) . '/';
+    }
+
+    /**
+     * Set a config file item (In-memory only)
+     *
+     * @param	string	$item	Config item name
+     * @param	mixed	$value	Config item value
+     * @return	void
+     */
+    public function setItem($item, $value)
+    {
+        $this->config[$item] = $value;
+    }
 }

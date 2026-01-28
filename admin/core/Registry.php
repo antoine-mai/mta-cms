@@ -18,44 +18,60 @@ class Registry
      * @param mixed $param Optional parameters for constructor
      * @return object
      */
-    public static function &getInstance($class, $directory = 'libraries', $param = NULL)
+    public static function &getInstance($class, $directory = 'libraries', $param = null)
     {
         // Normalize class name for cache key
-        $clean_class = str_replace(['Admin\\Core\\', 'Admin\\Services\\'], '', $class);
-        $key = strtolower($clean_class);
+        $cleanClass = str_replace(['Admin\\Core\\', 'Admin\\Services\\'], '', $class);
+        $key = strtolower($cleanClass);
 
         if (isset(self::$_instances[$key])) {
             return self::$_instances[$key];
         }
 
         // Resolve fully qualified class name
-        $fqcn = FALSE;
+        $fqcn = false;
 
         // 1. Try direct namespaced class existance (if passed as FQCN)
         if (class_exists($class)) {
             $fqcn = $class;
         } 
         // 2. Try Core namespace
-        elseif (class_exists('Admin\\Core\\' . $clean_class)) {
-            $fqcn = 'Admin\\Core\\' . $clean_class;
+        elseif (class_exists('Admin\\Core\\' . $cleanClass)) {
+            $fqcn = 'Admin\\Core\\' . $cleanClass;
         }
         // 3. Try Services namespace
-        elseif (class_exists('Admin\\Services\\' . $clean_class)) {
-            $fqcn = 'Admin\\Services\\' . $clean_class;
+        elseif (class_exists('Admin\\Services\\' . $cleanClass)) {
+            $fqcn = 'Admin\\Services\\' . $cleanClass;
         }
 
-        if ($fqcn === FALSE) {
-            // Legacy fallback using load_class logic from Common (simplified)
-             \Admin\Core\Error::show_error("Unable to locate the specified class: {$class}");
+        if ($fqcn === false) {
+             Error::showError("Unable to locate the specified class: {$class}");
         }
 
-        self::$_instances[$key] = isset($param)
-            ? new $fqcn($param)
-            : new $fqcn();
+        // To handle circular dependencies, we instantiate without constructor first,
+        // register the instance, and then call the constructor.
+        try {
+            $reflection = new \ReflectionClass($fqcn);
+            $instance = $reflection->newInstanceWithoutConstructor();
+            
+            // Register early to break cycles
+            self::$_instances[$key] = $instance;
 
-        // Keep track of loaded classes order if needed, or simply return
+            // Call constructor manually
+            if ($reflection->hasMethod('__construct')) {
+                $constructor = $reflection->getConstructor();
+                if ($constructor->isPublic()) {
+                    if (isset($param)) {
+                        $instance->__construct($param);
+                    } else {
+                        $instance->__construct();
+                    }
+                }
+            }
+        } catch (\ReflectionException $e) {
+            Error::showError("Reflection error while instantiating {$class}: " . $e->getMessage());
+        }
 
-        
         return self::$_instances[$key];
     }
 

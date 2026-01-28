@@ -14,15 +14,15 @@ class Download
      * @param	bool	$set_mime	Whether to try to send the actual MIME type
      * @return	void
      */
-    public function force($filename = '', $data = '', $set_mime = FALSE)
+    public function force($filename = '', $data = '', $set_mime = false)
     {
         if ($filename === '' OR $data === '')
         {
             return;
         }
-        elseif ($data === NULL)
+        elseif ($data === null)
         {
-            if ( ! @is_file($filename) OR ($filesize = @filesize($filename)) === FALSE)
+            if ( ! @is_file($filename) OR ($filesize = @filesize($filename)) === false)
             {
                 return;
             }
@@ -42,7 +42,7 @@ class Download
         $x = explode('.', $filename);
         $extension = end($x);
 
-        if ($set_mime === TRUE)
+        if ($set_mime === true)
         {
             if (count($x) === 1 OR $extension === '')
             {
@@ -52,7 +52,7 @@ class Download
                 return;
             }
 
-            $mimes =& get_mimes();
+            $mimes =& getMimes();
 
             // Only change the default MIME if we can find one
             if (isset($mimes[$extension]))
@@ -70,13 +70,13 @@ class Download
             $filename = implode('.', $x);
         }
 
-        if ($data === NULL && ($fp = @fopen($filepath, 'rb')) === FALSE)
+        if ($data === null && ($fp = @fopen($filepath, 'rb')) === false)
         {
             return;
         }
 
         // Clean output buffer
-        if (ob_get_level() !== 0 && @ob_end_clean() === FALSE)
+        if (ob_get_level() !== 0 && @ob_end_clean() === false)
         {
             @ob_clean();
         }
@@ -90,13 +90,13 @@ class Download
         header('Cache-Control: private, no-transform, no-store, must-revalidate');
 
         // If we have data, just echo it and exit
-        if ($data !== NULL)
+        if ($data !== null)
         {
             exit($data);
         }
 
         // If we are reading a file, echo it in chunks
-        while ( ! feof($fp) && ($data = fread($fp, 1048576)) !== FALSE)
+        while ( ! feof($fp) && ($data = fread($fp, 1048576)) !== false)
         {
             echo $data;
         }

@@ -6,21 +6,21 @@ class Utf8
 {
 	public function __construct()
 	{
-		if (defined('PREG_BAD_UTF8_ERROR') && (ICONV_ENABLED === TRUE OR MB_ENABLED === TRUE) && strtoupper(\Admin\Core\Common::config_item('charset')) === 'UTF-8')
+		if (defined('PREG_BAD_UTF8_ERROR') && (ICONV_ENABLED === true OR MB_ENABLED === true) && strtoupper(\Admin\Core\Common::configItem('charset')) === 'UTF-8')
 		{
-			define('UTF8_ENABLED', TRUE);
-			\Admin\Core\Error::log_message('debug', 'UTF-8 Support Enabled');
+			define('UTF8_ENABLED', true);
+			\Admin\Core\Error::logMessage('debug', 'UTF-8 Support Enabled');
 		}
 		else
 		{
-			define('UTF8_ENABLED', FALSE);
-			\Admin\Core\Error::log_message('debug', 'UTF-8 Support Disabled');
+			define('UTF8_ENABLED', false);
+			\Admin\Core\Error::logMessage('debug', 'UTF-8 Support Disabled');
 		}
-		\Admin\Core\Error::log_message('info', 'Utf8 Class Initialized');
+		\Admin\Core\Error::logMessage('info', 'Utf8 Class Initialized');
 	}
 	public function cleanString($str)
 	{
-		if ($this->isAscii($str) === FALSE)
+		if ($this->isAscii($str) === false)
 		{
 			if (MB_ENABLED)
 			{
@@ -35,7 +35,7 @@ class Utf8
 	}
 	public function safeAsciiForXml($str)
 	{
-		return \Admin\Core\Common::remove_invisible_characters($str, FALSE);
+		return \Admin\Core\Common::removeInvisibleCharacters($str, false);
 	}
 	public function convertToUtf8($str, $encoding)
 	{
@@ -47,7 +47,7 @@ class Utf8
 		{
 			return @iconv($encoding, 'UTF-8', $str);
 		}
-		return FALSE;
+		return false;
 	}
 	public function isAscii($str)
 	{

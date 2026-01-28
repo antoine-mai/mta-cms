@@ -30,9 +30,9 @@ class Route
         
 		$this->load =& \Admin\Core\Registry::getInstance('Loader', 'core');
 		$this->load->initialize();
-		Error::log_message('info', 'Route Class Initialized');
+		Error::logMessage('info', 'Route Class Initialized');
 	}
-	public static function &get_instance()
+	public static function &getInstance()
 	{
 		return self::$instance;
 	}

@@ -10,32 +10,32 @@ class Router
 	public $class =		'';
 	public $method =	'index';
 	public $directory;
-	public $translate_uri_dashes = FALSE;
-	public $enable_query_strings = FALSE;
+	public $translate_uri_dashes = false;
+	public $enable_query_strings = false;
     /**
      * @var \Admin\Core\Request\Request
      */
     protected $request;
     protected $params = [];
 
-	public function __construct($routing = NULL)
+	public function __construct($routing = null)
 	{
 		$this->config =& \Admin\Core\Registry::getInstance('Config', 'core');
         // $this->uri =& \Admin\Core\Registry::getInstance('URI', 'core'); // Deprecated
-		$this->enable_query_strings = ( ! \Admin\Core\Common::is_cli() && $this->config->item('enable_query_strings') === TRUE);
+		$this->enable_query_strings = ( ! Console::isCli() && $this->config->item('enable_query_strings') === true);
 		
         if (is_array($routing) && isset($routing['directory'])) {
-             $this->set_directory($routing['directory']);
+             $this->setDirectory($routing['directory']);
         }
         
-        $this->_set_routing();
+        $this->setRouting();
         
 		if (is_array($routing))
 		{
-			empty($routing['controller']) OR $this->set_class($routing['controller']);
-			empty($routing['function'])   OR $this->set_method($routing['function']);
+			empty($routing['controller']) OR $this->setClass($routing['controller']);
+			empty($routing['function'])   OR $this->setMethod($routing['function']);
 		}
-		Error::log_message('info', 'Router Class Initialized');
+		Error::logMessage('info', 'Router Class Initialized');
 	}
     
     public function setRequest(\Admin\Core\Request\Request $request)
@@ -47,7 +47,7 @@ class Router
     {
         return $this->params;
     }
-	protected function _set_routing()
+	protected function setRouting()
 	{
 		if (file_exists(CONFPATH.'routes.yaml'))
 		{
@@ -73,19 +73,19 @@ class Router
 				if ($_d !== '')
 				{
 					$this->uri->filter_uri($_d);
-					$this->set_directory($_d);
+					$this->setDirectory($_d);
 				}
 			}
 			$_c = trim($this->config->item('controller_trigger'));
 			if ( ! empty($_GET[$_c]))
 			{
 				$this->uri->filter_uri($_GET[$_c]);
-				$this->set_class($_GET[$_c]);
+				$this->setClass($_GET[$_c]);
 				$_f = trim($this->config->item('function_trigger'));
 				if ( ! empty($_GET[$_f]))
 				{
 					$this->uri->filter_uri($_GET[$_f]);
-					$this->set_method($_GET[$_f]);
+					$this->setMethod($_GET[$_f]);
 				}
 				$this->uri->rsegments = [
 					1 => $this->class,
@@ -98,16 +98,16 @@ class Router
 			}
 			return;
 		}
-		$this->_parse_routes();
+		$this->parseRoutes();
 	}
-	protected function _set_request($segments = [])
+	protected function setRequest($segments = [])
 	{
-		$segments = $this->_validate_request($segments);
+		$segments = $this->validateRequest($segments);
 		if (empty($segments))
 		{
 			return;
 		}
-		if ($this->translate_uri_dashes === TRUE)
+		if ($this->translate_uri_dashes === true)
 		{
 			$segments[0] = str_replace('-', '_', $segments[0]);
 			if (isset($segments[1]))
@@ -115,43 +115,43 @@ class Router
 				$segments[1] = str_replace('-', '_', $segments[1]);
 			}
 		}
-		$this->set_class($segments[0]);
+		$this->setClass($segments[0]);
 		if (isset($segments[1]))
 		{
-			$this->set_method($segments[1]);
+			$this->setMethod($segments[1]);
 		}
 		else
 		{
 			$segments[1] = 'index';
 		}
-		array_unshift($segments, NULL);
+		array_unshift($segments, null);
 		unset($segments[0]);
 		
         // Store params
         $this->params = array_slice($segments, 2);
 	}
 
-	protected function _validate_request($segments)
+	protected function validateRequest($segments)
 	{
 		$c = count($segments);
 		$directory_override = isset($this->directory);
 		while ($c-- > 0)
 		{
 			$test = $this->directory
-				.ucfirst($this->translate_uri_dashes === TRUE ? str_replace('-', '_', $segments[0]) : $segments[0]);
+				.ucfirst($this->translate_uri_dashes === true ? str_replace('-', '_', $segments[0]) : $segments[0]);
 			if ( ! file_exists(ADMIN_ROOT.'routes/'.$test.'.php')
-				&& $directory_override === FALSE
+				&& $directory_override === false
 				&& is_dir(ADMIN_ROOT.'routes/'.$this->directory.$segments[0])
 			)
 			{
-				$this->set_directory(array_shift($segments), TRUE);
+				$this->setDirectory(array_shift($segments), true);
 				continue;
 			}
 			return $segments;
 		}
 		return $segments;
 	}
-	protected function _parse_routes()
+	protected function parseRoutes()
 	{
         // Use Request path info if available, otherwise fallback (for now)
         if ($this->request) {
@@ -202,7 +202,7 @@ class Router
             // Root route check
             if ($uri === '/' && ($route_key === '/' OR $route_key === ''))
             {
-                $this->_set_route_params($controller);
+                $this->setRouteParams($controller);
                 return;
             }
 
@@ -211,7 +211,7 @@ class Router
 			$route_key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $route_key);
 			if (preg_match('#^'.$route_key.'$#', $uri, $matches))
 			{
-				$this->_set_route_params($controller, $matches, $uri, $route_key);
+				$this->setRouteParams($controller, $matches, $uri, $route_key);
 				return;
 			}
 		}
@@ -220,15 +220,15 @@ class Router
         if ($uri === '/')
         {
         // Fallback or default
-            Error::show_error('No route found for /');
+            Error::showError('No route found for /');
         }
 
-		// $this->_set_request(array_values($this->uri->segments));
+		// $this->setRequest(array_values($this->uri->segments));
         $segments = explode('/', trim($uri, '/'));
-        $this->_set_request($segments);
+        $this->setRequest($segments);
 	}
 
-    protected function _set_route_params($controller, $matches = [], $uri = '', $route_key = '')
+    protected function setRouteParams($controller, $matches = [], $uri = '', $route_key = '')
     {
         if ( ! is_string($controller) && is_callable($controller))
         {
@@ -239,27 +239,27 @@ class Router
         {
             $controller = str_replace('::', '/', $controller);
 
-            if (strpos($controller, '$') !== FALSE && strpos($route_key, '(') !== FALSE)
+            if (strpos($controller, '$') !== false && strpos($route_key, '(') !== false)
             {
                 $controller = preg_replace('#^'.$route_key.'$#', $controller, $uri);
             }
         }
         
-        $this->_set_request(explode('/', $controller));
+        $this->setRequest(explode('/', $controller));
     }
-	public function set_class($class)
+	public function setClass($class)
 	{
 		$this->class = str_replace(['/', '.'], '', $class);
 	}
 
-	public function set_method($method)
+	public function setMethod($method)
 	{
 		$this->method = $method;
 	}
 
-	public function set_directory($dir, $append = FALSE)
+	public function setDirectory($dir, $append = false)
 	{
-		if ($append !== TRUE OR empty($this->directory))
+		if ($append !== true OR empty($this->directory))
 		{
 			$this->directory = str_replace('.', '', trim($dir, '/')).'/';
 		}

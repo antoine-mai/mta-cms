@@ -1,37 +1,38 @@
 <?php namespace Admin\Services;
+
 /**
+ * Url Class
  * 
-**/
+ * Provides helper methods for URL management.
+ */
 class Url
 {
     /**
      * Site URL
      *
-     * Returns a base_url with the site_index appended. This function is helpy
-     * because it lets you create URLs in your content without having to worry
-     * about whether or not to include the "index.php" file or your base link.
+     * Returns a baseUrl with the site_index appended.
      *
      * @param	string|string[]	$uri	URI string or an array of segments
      * @param	string	$protocol
      * @return	string
      */
-    public function site_url($uri = '', $protocol = NULL)
+    public function siteUrl($uri = '', $protocol = null)
     {
-        return get_instance()->config->site_url($uri, $protocol);
+        return getInstance()->config->siteUrl($uri, $protocol);
     }
 
     /**
      * Base URL
      *
-     * Returns base_url [. 'index_page']
+     * Returns baseUrl [. 'index_page']
      *
      * @param	string|string[]	$uri	URI string or an array of segments
      * @param	string	$protocol
      * @return	string
      */
-    public function base_url($uri = '', $protocol = NULL)
+    public function baseUrl($uri = '', $protocol = null)
     {
-        return get_instance()->config->base_url($uri, $protocol);
+        return getInstance()->config->baseUrl($uri, $protocol);
     }
 
     /**
@@ -42,10 +43,10 @@ class Url
      *
      * @return	string
      */
-    public function current_url()
+    public function currentUrl()
     {
-        $CI =& get_instance();
-        return $CI->config->site_url($CI->uri->uri_string());
+        $CI = &getInstance();
+        return $CI->config->siteUrl($CI->uri->uriString());
     }
 
     /**
@@ -55,9 +56,9 @@ class Url
      *
      * @return	string
      */
-    public function uri_string()
+    public function uriString()
     {
-        return get_instance()->uri->uri_string();
+        return getInstance()->uri->uriString();
     }
 
     /**
@@ -68,36 +69,26 @@ class Url
      * @param	int	$code	HTTP Response status code
      * @return	void
      */
-    public function redirect($uri = '', $method = 'auto', $code = NULL)
+    public function redirect($uri = '', $method = 'auto', $code = null)
     {
-        if ( ! preg_match('#^(\w+:)?//#i', $uri))
-        {
-            $uri = $this->site_url($uri);
+        if (!preg_match('#^(\w+:)?//#i', $uri)) {
+            $uri = $this->siteUrl($uri);
         }
 
-        if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== FALSE)
-        {
+        if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false) {
             $method = 'refresh';
-        }
-        elseif ($method !== 'refresh' && (empty($code) OR ! is_numeric($code)))
-        {
-            if (isset($_SERVER['SERVER_PROTOCOL'], $_SERVER['REQUEST_METHOD']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.1')
-            {
+        } elseif ($method !== 'refresh' && (empty($code) || !is_numeric($code))) {
+            if (isset($_SERVER['SERVER_PROTOCOL'], $_SERVER['REQUEST_METHOD']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.1') {
                 $code = ($_SERVER['REQUEST_METHOD'] !== 'GET') ? 303 : 307;
-            }
-            else
-            {
+            } else {
                 $code = 302;
             }
         }
 
-        if ($method === 'refresh')
-        {
-            header('Refresh:0;url='.$uri);
-        }
-        else
-        {
-            header('Location: '.$uri, TRUE, $code);
+        if ($method === 'refresh') {
+            header('Refresh:0;url=' . $uri);
+        } else {
+            header('Location: ' . $uri, true, (int)$code);
         }
         exit;
     }

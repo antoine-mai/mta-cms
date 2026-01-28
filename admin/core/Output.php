@@ -10,39 +10,39 @@ class Output
 	public $headers = [];
 	public $mimes =	[];
 	protected $mime_type = 'text/html';
-	public $enable_profiler = FALSE;
-	protected $_zlib_oc = FALSE;
-	protected $_compress_output = FALSE;
+	public $enable_profiler = false;
+	protected $_zlib_oc = false;
+	protected $_compress_output = false;
 	protected $_profiler_sections =	[];
-	public $parse_exec_vars = TRUE;
+	public $parse_exec_vars = true;
 	protected static $func_overload;
 	public function __construct()
 	{
 		$this->_zlib_oc = (bool) ini_get('zlib.output_compression');
 		$this->_compress_output = (
-			$this->_zlib_oc === FALSE
-			&& \Admin\Core\Common::config_item('compress_output') === TRUE
+			$this->_zlib_oc === false
+			&& \Admin\Core\Common::configItem('compress_output') === true
 			&& extension_loaded('zlib')
 		);
-		isset(self::$func_overload) OR self::$func_overload = ( ! \Admin\Core\Common::is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-		$this->mimes =& \Admin\Core\Common::get_mimes();
-		Error::log_message('info', 'Output Class Initialized');
+		isset(self::$func_overload) OR self::$func_overload = ( ! \Admin\Core\Common::isPhp('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
+		$this->mimes =& \Admin\Core\Common::getMimes();
+		Error::logMessage('info', 'Output Class Initialized');
 	}
-	public function get_output()
+	public function getOutput()
 	{
 		return $this->final_output;
 	}
-	public function set_output($output)
+	public function setOutput($output)
 	{
 		$this->final_output = $output;
 		return $this;
 	}
-	public function append_output($output)
+	public function appendOutput($output)
 	{
 		$this->final_output .= $output;
 		return $this;
 	}
-	public function set_header($header, $replace = TRUE)
+	public function setHeader($header, $replace = true)
 	{
 		if ($this->_zlib_oc && strncasecmp($header, 'content-length', 14) === 0)
 		{
@@ -51,9 +51,9 @@ class Output
 		$this->headers[] = [$header, $replace];
 		return $this;
 	}
-	public function set_content_type($mime_type, $charset = NULL)
+	public function setContentType($mime_type, $charset = null)
 	{
-		if (strpos($mime_type, '/') === FALSE)
+		if (strpos($mime_type, '/') === false)
 		{
 			$extension = ltrim($mime_type, '.');
 			if (isset($this->mimes[$extension]))
@@ -68,11 +68,11 @@ class Output
 		$this->mime_type = $mime_type;
 		if (empty($charset))
 		{
-			$charset = \Admin\Core\Common::config_item('charset');
+			$charset = \Admin\Core\Common::configItem('charset');
 		}
 		$header = 'Content-Type: '.$mime_type
 			.(empty($charset) ? '' : '; charset='.$charset);
-		$this->headers[] = [$header, TRUE];
+		$this->headers[] = [$header, true];
 		return $this;
 	}
 	public function get_content_type()
@@ -98,7 +98,7 @@ class Output
 		);
 		if (empty($headers) OR empty($header))
 		{
-			return NULL;
+			return null;
 		}
 		for ($c = count($headers) - 1; $c > -1; $c--)
 		{
@@ -107,16 +107,16 @@ class Output
 				return trim(self::substr($headers[$c], $l+1));
 			}
 		}
-		return NULL;
+		return null;
 	}
-	public function set_status_header($code = 200, $text = '')
+	public function setStatusHeader($code = 200, $text = '')
 	{
-		set_status_header($code, $text);
+		setStatusHeader($code, $text);
 		return $this;
 	}
-	public function enable_profiler($val = TRUE)
+	public function enable_profiler($val = true)
 	{
-		$this->enable_profiler = is_bool($val) ? $val : TRUE;
+		$this->enable_profiler = is_bool($val) ? $val : true;
 		return $this;
 	}
 	public function set_profiler_sections($sections)
@@ -128,7 +128,7 @@ class Output
 		}
 		foreach ($sections as $section => $enable)
 		{
-			$this->_profiler_sections[$section] = ($enable !== FALSE);
+			$this->_profiler_sections[$section] = ($enable !== false);
 		}
 		return $this;
 	}
@@ -137,12 +137,12 @@ class Output
 		$this->cache_expiration = is_numeric($time) ? $time : 0;
 		return $this;
 	}
-	public function _display($output = '')
+	public function display($output = '')
 	{
 		$CFG =& Registry::getInstance('Config', 'core');
-		if (class_exists('Controller', FALSE))
+		if (class_exists('Controller', false))
 		{
-			$CI =& get_instance();
+			$CI =& getInstance();
 		}
 		if ($output === '')
 		{
@@ -150,17 +150,17 @@ class Output
 		}
 		if ($this->cache_expiration > 0 && isset($CI) && ! method_exists($CI, '_output'))
 		{
-			$this->_write_cache($output);
+			$this->writeCache($output);
 		}
 		$elapsed = 0;
-		if ($this->parse_exec_vars === TRUE)
+		if ($this->parse_exec_vars === true)
 		{
 			$memory	= round(memory_get_usage() / 1024 / 1024, 2).'MB';
 			$output = str_replace(['{elapsed_time}', '{memory_usage}'], [$elapsed, $memory], $output);
 		}
 		if (isset($CI) // This means that we're not serving a cache file, if we were, it would already be compressed
-			&& $this->_compress_output === TRUE
-			&& isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE)
+			&& $this->_compress_output === true
+			&& isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
 		{
 			ob_start('ob_gzhandler');
 		}
@@ -173,9 +173,9 @@ class Output
 		}
 		if ( ! isset($CI))
 		{
-			if ($this->_compress_output === TRUE)
+			if ($this->_compress_output === true)
 			{
-				if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE)
+				if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
 				{
 					header('Content-Encoding: gzip');
 					header('Content-Length: '.self::strlen($output));
@@ -186,11 +186,11 @@ class Output
 				}
 			}
 			echo $output;
-			Error::log_message('info', 'Final output sent to browser');
-			Error::log_message('debug', 'Total execution time: '.$elapsed);
+			Error::logMessage('info', 'Final output sent to browser');
+			Error::logMessage('debug', 'Total execution time: '.$elapsed);
 			return;
 		}
-		if ($this->enable_profiler === TRUE)
+		if ($this->enable_profiler === true)
 		{
 			$CI->load->library('profiler');
 			if ( ! empty($this->_profiler_sections))
@@ -211,20 +211,20 @@ class Output
 		{
 			echo $output; // Send it to the browser!
 		}
-		Error::log_message('info', 'Final output sent to browser');
-		Error::log_message('debug', 'Total execution time: '.$elapsed);
+		Error::logMessage('info', 'Final output sent to browser');
+		Error::logMessage('debug', 'Total execution time: '.$elapsed);
 	}
-	public function _write_cache($output)
+	public function writeCache($output)
 	{
-		$CI =& get_instance();
+		$CI =& getInstance();
 		$path = $CI->config->item('cache_path');
 		$cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
-		if ( ! is_dir($cache_path) OR ! \Admin\Core\Common::is_really_writable($cache_path))
+		if ( ! is_dir($cache_path) OR ! \Admin\Core\Common::isReallyWritable($cache_path))
 		{
-			Error::log_message('error', 'Unable to write cache file: '.$cache_path);
+			Error::logMessage('error', 'Unable to write cache file: '.$cache_path);
 			return;
 		}
-		$uri = $CI->config->item('base_url')
+		$uri = $CI->config->item('baseUrl')
 			.$CI->config->item('index_page')
 			.$CI->uri->uri_string();
 		if (($cache_query_string = $CI->config->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
@@ -241,21 +241,21 @@ class Output
 		$cache_path .= md5($uri);
 		if ( ! $fp = @fopen($cache_path, 'w+b'))
 		{
-			Error::log_message('error', 'Unable to write cache file: '.$cache_path);
+			Error::logMessage('error', 'Unable to write cache file: '.$cache_path);
 			return;
 		}
 		if ( ! flock($fp, LOCK_EX))
 		{
-			Error::log_message('error', 'Unable to secure a file lock for file at: '.$cache_path);
+			Error::logMessage('error', 'Unable to secure a file lock for file at: '.$cache_path);
 			fclose($fp);
 			return;
 		}
-		if ($this->_compress_output === TRUE)
+		if ($this->_compress_output === true)
 		{
 			$output = gzencode($output);
-			if ($this->get_header('content-type') === NULL)
+			if ($this->get_header('content-type') === null)
 			{
-				$this->set_content_type($this->mime_type);
+				$this->setContentType($this->mime_type);
 			}
 		}
 		$expire = time() + ($this->cache_expiration * 60);
@@ -266,7 +266,7 @@ class Output
 		$output = $cache_info.'ENDCI--->'.$output;
 		for ($written = 0, $length = self::strlen($output); $written < $length; $written += $result)
 		{
-			if (($result = fwrite($fp, self::substr($output, $written))) === FALSE)
+			if (($result = fwrite($fp, self::substr($output, $written))) === false)
 			{
 				break;
 			}
@@ -276,17 +276,17 @@ class Output
 		if ( ! is_int($result))
 		{
 			@unlink($cache_path);
-			Error::log_message('error', 'Unable to write the complete cache content at: '.$cache_path);
+			Error::logMessage('error', 'Unable to write the complete cache content at: '.$cache_path);
 			return;
 		}
 		chmod($cache_path, 0640);
-		Error::log_message('debug', 'Cache file written: '.$cache_path);
+		Error::logMessage('debug', 'Cache file written: '.$cache_path);
 		$this->set_cache_header($_SERVER['REQUEST_TIME'], $expire);
 	}
-	public function _display_cache(&$CFG, &$URI)
+	public function display_cache(&$CFG, &$URI)
 	{
 		$cache_path = ($CFG->item('cache_path') === '') ? ADMIN_ROOT.'cache/' : $CFG->item('cache_path');
-		$uri = $CFG->item('base_url').$CFG->item('index_page').$URI->uri_string;
+		$uri = $CFG->item('baseUrl').$CFG->item('index_page').$URI->uri_string;
 		if (($cache_query_string = $CFG->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
 		{
 			if (is_array($cache_query_string))
@@ -301,7 +301,7 @@ class Output
 		$filepath = $cache_path.md5($uri);
 		if ( ! file_exists($filepath) OR ! $fp = @fopen($filepath, 'rb'))
 		{
-			return FALSE;
+			return false;
 		}
 		flock($fp, LOCK_SH);
 		$cache = (filesize($filepath) > 0) ? fread($fp, filesize($filepath)) : '';
@@ -309,29 +309,29 @@ class Output
 		fclose($fp);
 		if ( ! preg_match('/^(.*)ENDCI--->/', $cache, $match))
 		{
-			return FALSE;
+			return false;
 		}
 		$cache_info = unserialize($match[1]);
 		$expire = $cache_info['expire'];
 		$last_modified = filemtime($filepath);
-		if ($_SERVER['REQUEST_TIME'] >= $expire && \Admin\Core\Common::is_really_writable($cache_path))
+		if ($_SERVER['REQUEST_TIME'] >= $expire && \Admin\Core\Common::isReallyWritable($cache_path))
 		{
 			@unlink($filepath);
-			Error::log_message('debug', 'Cache file has expired. File deleted.');
-			return FALSE;
+			Error::logMessage('debug', 'Cache file has expired. File deleted.');
+			return false;
 		}
 		$this->set_cache_header($last_modified, $expire);
 		foreach ($cache_info['headers'] as $header)
 		{
-			$this->set_header($header[0], $header[1]);
+			$this->setHeader($header[0], $header[1]);
 		}
-		$this->_display(self::substr($cache, self::strlen($match[0])));
-		Error::log_message('debug', 'Cache file is current. Sending it to browser.');
-		return TRUE;
+		$this->display(self::substr($cache, self::strlen($match[0])));
+		Error::logMessage('debug', 'Cache file is current. Sending it to browser.');
+		return true;
 	}
 	public function delete_cache($uri = '')
 	{
-		$CI =& get_instance();
+		$CI =& getInstance();
 		$cache_path = $CI->config->item('cache_path');
 		if ($cache_path === '')
 		{
@@ -339,8 +339,8 @@ class Output
 		}
 		if ( ! is_dir($cache_path))
 		{
-			Error::log_message('error', 'Unable to find cache path: '.$cache_path);
-			return FALSE;
+			Error::logMessage('error', 'Unable to find cache path: '.$cache_path);
+			return false;
 		}
 		if (empty($uri))
 		{
@@ -357,20 +357,20 @@ class Output
 				}
 			}
 		}
-		$cache_path .= md5($CI->config->item('base_url').$CI->config->item('index_page').ltrim($uri, '/'));
+		$cache_path .= md5($CI->config->item('baseUrl').$CI->config->item('index_page').ltrim($uri, '/'));
 		if ( ! @unlink($cache_path))
 		{
-			Error::log_message('error', 'Unable to delete cache file for '.$uri);
-			return FALSE;
+			Error::logMessage('error', 'Unable to delete cache file for '.$uri);
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
 	public function set_cache_header($last_modified, $expiration)
 	{
 		$max_age = $expiration - $_SERVER['REQUEST_TIME'];
 		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $last_modified <= strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']))
 		{
-			$this->set_status_header(304);
+			$this->setStatusHeader(304);
 			exit;
 		}
 		header('Pragma: public');
@@ -384,7 +384,7 @@ class Output
 			? mb_strlen($str, '8bit')
 			: strlen($str);
 	}
-	protected static function substr($str, $start, $length = NULL)
+	protected static function substr($str, $start, $length = null)
 	{
 		if (self::$func_overload)
 		{

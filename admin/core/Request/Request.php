@@ -366,7 +366,7 @@ class Request
      */
     public function getClientIp()
     {
-        if ($this->clientIp !== NULL)
+        if ($this->clientIp !== null)
         {
             return $this->clientIp;
         }
@@ -385,13 +385,13 @@ class Request
         {
             foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP'] as $header)
             {
-                if (($spoof = $this->server->get($header)) !== NULL)
+                if (($spoof = $this->server->get($header)) !== null)
                 {
                     sscanf($spoof, '%[^,]', $spoof);
 
                     if ( ! $this->isValidIp($spoof))
                     {
-                        $spoof = NULL;
+                        $spoof = null;
                     }
                     else
                     {
@@ -404,7 +404,7 @@ class Request
             {
                 for ($i = 0, $c = count($proxy_ips); $i < $c; $i++)
                 {
-                    if (strpos($proxy_ips[$i], '/') === FALSE)
+                    if (strpos($proxy_ips[$i], '/') === false)
                     {
                         if ($proxy_ips[$i] === $this->clientIp)
                         {
@@ -416,7 +416,7 @@ class Request
 
                     isset($separator) OR $separator = $this->isValidIp($this->clientIp, 'ipv6') ? ':' : '.';
 
-                    if (strpos($proxy_ips[$i], $separator) === FALSE)
+                    if (strpos($proxy_ips[$i], $separator) === false)
                     {
                         continue;
                     }

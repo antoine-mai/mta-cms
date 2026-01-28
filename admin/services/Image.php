@@ -6,15 +6,15 @@ class Image
 {
 	public $image_library		= 'gd2';
 	public $library_path		= '';
-	public $dynamic_output		= FALSE;
+	public $dynamic_output		= false;
 	public $source_image		= '';
 	public $new_image		= '';
 	public $width			= '';
 	public $height			= '';
 	public $quality			= 90;
-	public $create_thumb		= FALSE;
+	public $create_thumb		= false;
 	public $thumb_marker		= '_thumb';
-	public $maintain_ratio		= TRUE;
+	public $maintain_ratio		= true;
 	public $master_dim		= 'auto';
 	public $rotation_angle		= '';
 	public $x_axis			= '';
@@ -48,8 +48,8 @@ class Image
 	public $create_fnc		= 'imagecreatetruecolor';
 	public $copy_fnc		= 'imagecopyresampled';
 	public $error_msg		= [];
-	protected $wm_use_drop_shadow	= FALSE;
-	public $wm_use_truetype	= FALSE;
+	protected $wm_use_drop_shadow	= false;
+	public $wm_use_truetype	= false;
 
 	public function __construct($props = [])
 	{
@@ -58,7 +58,7 @@ class Image
 			$this->initialize($props);
 		}
 		ini_set('gd.jpeg_ignore_warning', 1);
-		log_message('info', 'Image Lib Class Initialized');
+		logMessage('info', 'Image Lib Class Initialized');
 	}
 
 	public function clear()
@@ -69,11 +69,11 @@ class Image
 			$this->$val = '';
 		}
 		$this->image_library 		= 'gd2';
-		$this->dynamic_output 		= FALSE;
+		$this->dynamic_output 		= false;
 		$this->quality 				= 90;
-		$this->create_thumb 		= FALSE;
+		$this->create_thumb 		= false;
 		$this->thumb_marker 		= '_thumb';
-		$this->maintain_ratio 		= TRUE;
+		$this->maintain_ratio 		= true;
 		$this->master_dim 			= 'auto';
 		$this->wm_type 				= 'text';
 		$this->wm_x_transp 			= 4;
@@ -90,8 +90,8 @@ class Image
 		$this->create_fnc 			= 'imagecreatetruecolor';
 		$this->copy_fnc 			= 'imagecopyresampled';
 		$this->error_msg 			= [];
-		$this->wm_use_drop_shadow 	= FALSE;
-		$this->wm_use_truetype 		= FALSE;
+		$this->wm_use_drop_shadow 	= false;
+		$this->wm_use_truetype 		= false;
 	}
 
 	public function initialize($props = [])
@@ -102,7 +102,7 @@ class Image
 			{
 				if (property_exists($this, $key))
 				{
-					if (in_array($key, ['wm_font_color', 'wm_shadow_color'], TRUE))
+					if (in_array($key, ['wm_font_color', 'wm_shadow_color'], true))
 					{
 						if (preg_match('/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', (string)$val, $matches))
 						{
@@ -115,7 +115,7 @@ class Image
 							continue;
 						}
 					}
-					elseif (in_array($key, ['width', 'height'], TRUE) && ! ctype_digit((string) $val))
+					elseif (in_array($key, ['width', 'height'], true) && ! ctype_digit((string) $val))
 					{
 						continue;
 					}
@@ -126,15 +126,15 @@ class Image
 		if ($this->source_image === '')
 		{
 			$this->set_error('imglib_source_image_required');
-			return FALSE;
+			return false;
 		}
 		if ( ! function_exists('getimagesize'))
 		{
 			$this->set_error('imglib_gd_required_for_props');
-			return FALSE;
+			return false;
 		}
 		$this->image_library = strtolower((string)$this->image_library);
-		if (($full_source_path = realpath($this->source_image)) !== FALSE)
+		if (($full_source_path = realpath($this->source_image)) !== false)
 		{
 			$full_source_path = str_replace('\\', '/', $full_source_path);
 		}
@@ -147,14 +147,14 @@ class Image
 		$this->source_folder = str_replace($this->source_image, '', $full_source_path);
 		if ( ! $this->get_image_properties($this->source_folder.$this->source_image))
 		{
-			return FALSE;
+			return false;
 		}
 		if ($this->new_image === '')
 		{
 			$this->dest_image  = $this->source_image;
 			$this->dest_folder = $this->source_folder;
 		}
-		elseif (strpos($this->new_image, '/') === FALSE && strpos($this->new_image, '\\') === FALSE)
+		elseif (strpos($this->new_image, '/') === false && strpos($this->new_image, '\\') === false)
 		{
 			$this->dest_image  = $this->new_image;
 			$this->dest_folder = $this->source_folder;
@@ -174,7 +174,7 @@ class Image
 			}
 			$this->dest_folder = realpath($this->dest_folder).'/';
 		}
-		if ($this->create_thumb === FALSE OR $this->thumb_marker === '')
+		if ($this->create_thumb === false OR $this->thumb_marker === '')
 		{
 			$this->thumb_marker = '';
 		}
@@ -183,7 +183,7 @@ class Image
 		$file_ext = $xp['ext'];
 		$this->full_src_path = $this->source_folder.$this->source_image;
 		$this->full_dst_path = $this->dest_folder.$filename.$this->thumb_marker.$file_ext;
-		if ($this->maintain_ratio === TRUE && ($this->width != 0 OR $this->height != 0))
+		if ($this->maintain_ratio === true && ($this->width != 0 OR $this->height != 0))
 		{
 			$this->image_reproportion();
 		}
@@ -208,17 +208,17 @@ class Image
 		}
 		if ($this->wm_shadow_color !== '')
 		{
-			$this->wm_use_drop_shadow = TRUE;
+			$this->wm_use_drop_shadow = true;
 		}
-		elseif ($this->wm_use_drop_shadow === TRUE && $this->wm_shadow_color === '')
+		elseif ($this->wm_use_drop_shadow === true && $this->wm_shadow_color === '')
 		{
-			$this->wm_use_drop_shadow = FALSE;
+			$this->wm_use_drop_shadow = false;
 		}
 		if ($this->wm_font_path !== '')
 		{
-			$this->wm_use_truetype = TRUE;
+			$this->wm_use_truetype = true;
 		}
-		return TRUE;
+		return true;
 	}
 
 	public function resize()
@@ -239,7 +239,7 @@ class Image
 		if ($this->rotation_angle === '' OR ! in_array($this->rotation_angle, $degs))
 		{
 			$this->set_error('imglib_rotation_angle_required');
-			return FALSE;
+			return false;
 		}
 		if ($this->rotation_angle == 90 OR $this->rotation_angle == 270)
 		{
@@ -263,20 +263,20 @@ class Image
 
 	public function image_process_gd($action = 'resize')
 	{
-		$v2_override = FALSE;
-		if ($this->dynamic_output === FALSE && $this->orig_width === $this->width && $this->orig_height === $this->height)
+		$v2_override = false;
+		if ($this->dynamic_output === false && $this->orig_width === $this->width && $this->orig_height === $this->height)
 		{
 			if ($this->source_image !== $this->new_image && @copy($this->full_src_path, $this->full_dst_path))
 			{
 				chmod($this->full_dst_path, $this->file_permissions);
 			}
-			return TRUE;
+			return true;
 		}
 		if ($action === 'crop')
 		{
 			$this->orig_width  = $this->width;
 			$this->orig_height = $this->height;
-			if ($this->gd_version() !== FALSE)
+			if ($this->gd_version() !== false)
 			{
 				$gd_version = str_replace('0', '', (string)$this->gd_version());
 				$v2_override = ($gd_version == 2);
@@ -289,7 +289,7 @@ class Image
 		}
 		if ( ! ($src_img = $this->image_create_gd()))
 		{
-			return FALSE;
+			return false;
 		}
 		if ($this->image_library === 'gd2' && function_exists('imagecreatetruecolor'))
 		{
@@ -304,25 +304,25 @@ class Image
 		$dst_img = $create($this->width, $this->height);
 		if ($this->image_type == 3) // png we can actually preserve transparency
 		{
-			imagealphablending($dst_img, FALSE);
-			imagesavealpha($dst_img, TRUE);
+			imagealphablending($dst_img, false);
+			imagesavealpha($dst_img, true);
 		}
 		$copy($dst_img, $src_img, 0, 0, (int)$this->x_axis, (int)$this->y_axis, (int)$this->width, (int)$this->height, (int)$this->orig_width, (int)$this->orig_height);
-		if ($this->dynamic_output === TRUE)
+		if ($this->dynamic_output === true)
 		{
-			$this->image_display_gd($dst_img);
+			$this->imagedisplay_gd($dst_img);
 		}
 		elseif ( ! $this->image_save_gd($dst_img)) // Or save it
 		{
-			return FALSE;
+			return false;
 		}
 		imagedestroy($dst_img);
 		imagedestroy($src_img);
-		if ($this->dynamic_output !== TRUE)
+		if ($this->dynamic_output !== true)
 		{
 			chmod($this->full_dst_path, $this->file_permissions);
 		}
-		return TRUE;
+		return true;
 	}
 
 	public function image_process_imagemagick($action = 'resize')
@@ -330,7 +330,7 @@ class Image
 		if ($this->library_path === '')
 		{
 			$this->set_error('imglib_libpath_invalid');
-			return FALSE;
+			return false;
 		}
 		if ( ! preg_match('/convert$/i', (string)$this->library_path))
 		{
@@ -349,7 +349,7 @@ class Image
 		}
 		else // Resize
 		{
-			if($this->maintain_ratio === TRUE)
+			if($this->maintain_ratio === true)
 			{
 				$cmd .= ' -resize '.$this->width.'x'.$this->height;
 			}
@@ -364,10 +364,10 @@ class Image
 		if ($retval > 0)
 		{
 			$this->set_error('imglib_image_process_failed');
-			return FALSE;
+			return false;
 		}
 		chmod($this->full_dst_path, $this->file_permissions);
-		return TRUE;
+		return true;
 	}
 
 	public function image_process_netpbm($action = 'resize')
@@ -375,7 +375,7 @@ class Image
 		if ($this->library_path === '')
 		{
 			$this->set_error('imglib_libpath_invalid');
-			return FALSE;
+			return false;
 		}
 		switch ($this->image_type)
 		{
@@ -423,41 +423,41 @@ class Image
 		if ($retval > 0)
 		{
 			$this->set_error('imglib_image_process_failed');
-			return FALSE;
+			return false;
 		}
 		copy($this->dest_folder.'netpbm.tmp', $this->full_dst_path);
 		unlink($this->dest_folder.'netpbm.tmp');
 		chmod($this->full_dst_path, $this->file_permissions);
-		return TRUE;
+		return true;
 	}
 
 	public function image_rotate_gd()
 	{
 		if ( ! ($src_img = $this->image_create_gd()))
 		{
-			return FALSE;
+			return false;
 		}
 		$white = imagecolorallocate($src_img, 255, 255, 255);
 		$dst_img = imagerotate($src_img, (float)$this->rotation_angle, $white);
-		if ($this->dynamic_output === TRUE)
+		if ($this->dynamic_output === true)
 		{
-			$this->image_display_gd($dst_img);
+			$this->imagedisplay_gd($dst_img);
 		}
 		elseif ( ! $this->image_save_gd($dst_img)) // ... or save it
 		{
-			return FALSE;
+			return false;
 		}
 		imagedestroy($dst_img);
 		imagedestroy($src_img);
 		chmod($this->full_dst_path, $this->file_permissions);
-		return TRUE;
+		return true;
 	}
 
 	public function image_mirror_gd()
 	{
 		if ( ! $src_img = $this->image_create_gd())
 		{
-			return FALSE;
+			return false;
 		}
 		$width  = $this->orig_width;
 		$height = $this->orig_height;
@@ -495,17 +495,17 @@ class Image
 				}
 			}
 		}
-		if ($this->dynamic_output === TRUE)
+		if ($this->dynamic_output === true)
 		{
-			$this->image_display_gd($src_img);
+			$this->imagedisplay_gd($src_img);
 		}
 		elseif ( ! $this->image_save_gd($src_img)) // ... or save it
 		{
-			return FALSE;
+			return false;
 		}
 		imagedestroy($src_img);
 		chmod($this->full_dst_path, $this->file_permissions);
-		return TRUE;
+		return true;
 	}
 
 	public function watermark()
@@ -518,10 +518,10 @@ class Image
 		if ( ! function_exists('imagecolortransparent'))
 		{
 			$this->set_error('imglib_gd_required');
-			return FALSE;
+			return false;
 		}
 		$this->get_image_properties();
-		$props		= $this->get_image_properties($this->wm_overlay_path, TRUE);
+		$props		= $this->get_image_properties($this->wm_overlay_path, true);
 		$wm_img_type	= $props['image_type'];
 		$wm_width	= $props['width'];
 		$wm_height	= $props['height'];
@@ -553,7 +553,7 @@ class Image
 		}
 		if ($wm_img_type == 3 && function_exists('imagealphablending'))
 		{
-			@imagealphablending($src_img, TRUE);
+			@imagealphablending($src_img, true);
 		}
 		$rgba = imagecolorat($wm_img, (int)$this->wm_x_transp, (int)$this->wm_y_transp);
 		$alpha = ($rgba & 0x7F000000) >> 24;
@@ -568,32 +568,32 @@ class Image
 		}
 		if ($this->image_type == 3)
 		{
-			imagealphablending($src_img, FALSE);
-			imagesavealpha($src_img, TRUE);
+			imagealphablending($src_img, false);
+			imagesavealpha($src_img, true);
 		}
-		if ($this->dynamic_output === TRUE)
+		if ($this->dynamic_output === true)
 		{
-			$this->image_display_gd($src_img);
+			$this->imagedisplay_gd($src_img);
 		}
 		elseif ( ! $this->image_save_gd($src_img)) // ... or save it
 		{
-			return FALSE;
+			return false;
 		}
 		imagedestroy($src_img);
 		imagedestroy($wm_img);
-		return TRUE;
+		return true;
 	}
 
 	public function text_watermark()
 	{
 		if ( ! ($src_img = $this->image_create_gd()))
 		{
-			return FALSE;
+			return false;
 		}
-		if ($this->wm_use_truetype === TRUE && ! file_exists($this->wm_font_path))
+		if ($this->wm_use_truetype === true && ! file_exists($this->wm_font_path))
 		{
 			$this->set_error('imglib_missing_font');
-			return FALSE;
+			return false;
 		}
 		$this->get_image_properties();
 		if ($this->wm_vrt_alignment === 'B')
@@ -604,7 +604,7 @@ class Image
 		{
 			$this->wm_hor_offset = $this->wm_hor_offset * -1;
 		}
-		if ($this->wm_use_truetype === TRUE)
+		if ($this->wm_use_truetype === true)
 		{
 			if (empty($this->wm_font_size))
 			{
@@ -630,7 +630,7 @@ class Image
 		}
 		$x_axis = $this->wm_hor_offset + $this->wm_padding;
 		$y_axis = $this->wm_vrt_offset + $this->wm_padding;
-		if ($this->wm_use_drop_shadow === FALSE)
+		if ($this->wm_use_drop_shadow === false)
 		{
 			$this->wm_shadow_distance = 0;
 		}
@@ -679,19 +679,19 @@ class Image
 		}
 		if ($this->image_type == 3)
 		{
-			imagealphablending($src_img, FALSE);
-			imagesavealpha($src_img, TRUE);
+			imagealphablending($src_img, false);
+			imagesavealpha($src_img, true);
 		}
-		if ($this->dynamic_output === TRUE)
+		if ($this->dynamic_output === true)
 		{
-			$this->image_display_gd($src_img);
+			$this->imagedisplay_gd($src_img);
 		}
 		else
 		{
 			$this->image_save_gd($src_img);
 		}
 		imagedestroy($src_img);
-		return TRUE;
+		return true;
 	}
 
 	public function image_create_gd($path = '', $image_type = '')
@@ -710,26 +710,26 @@ class Image
 				if ( ! function_exists('imagecreatefromgif'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_gif_not_supported']);
-					return FALSE;
+					return false;
 				}
 				return imagecreatefromgif($path);
 			case 2:
 				if ( ! function_exists('imagecreatefromjpeg'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_jpg_not_supported']);
-					return FALSE;
+					return false;
 				}
 				return imagecreatefromjpeg($path);
 			case 3:
 				if ( ! function_exists('imagecreatefrompng'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_png_not_supported']);
-					return FALSE;
+					return false;
 				}
 				return imagecreatefrompng($path);
 			default:
 				$this->set_error(['imglib_unsupported_imagecreate']);
-				return FALSE;
+				return false;
 		}
 	}
 
@@ -741,47 +741,47 @@ class Image
 				if ( ! function_exists('imagegif'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_gif_not_supported']);
-					return FALSE;
+					return false;
 				}
 				if ( ! @imagegif($resource, $this->full_dst_path))
 				{
 					$this->set_error('imglib_save_failed');
-					return FALSE;
+					return false;
 				}
 			break;
 			case 2:
 				if ( ! function_exists('imagejpeg'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_jpg_not_supported']);
-					return FALSE;
+					return false;
 				}
 				if ( ! @imagejpeg($resource, $this->full_dst_path, (int)$this->quality))
 				{
 					$this->set_error('imglib_save_failed');
-					return FALSE;
+					return false;
 				}
 			break;
 			case 3:
 				if ( ! function_exists('imagepng'))
 				{
 					$this->set_error(['imglib_unsupported_imagecreate', 'imglib_png_not_supported']);
-					return FALSE;
+					return false;
 				}
 				if ( ! @imagepng($resource, $this->full_dst_path))
 				{
 					$this->set_error('imglib_save_failed');
-					return FALSE;
+					return false;
 				}
 			break;
 			default:
 				$this->set_error(['imglib_unsupported_imagecreate']);
-				return FALSE;
+				return false;
 			break;
 		}
-		return TRUE;
+		return true;
 	}
 
-	public function image_display_gd($resource)
+	public function imagedisplay_gd($resource)
 	{
 		header('Content-Disposition: filename='.$this->source_image.';');
 		header('Content-Type: '.$this->mime_type);
@@ -791,7 +791,7 @@ class Image
 		{
 			case 1	:	imagegif($resource);
 				break;
-			case 2	:	imagejpeg($resource, NULL, (int)$this->quality);
+			case 2	:	imagejpeg($resource, null, (int)$this->quality);
 				break;
 			case 3	:	imagepng($resource);
 				break;
@@ -837,7 +837,7 @@ class Image
 		}
 	}
 
-	public function get_image_properties($path = '', $return = FALSE)
+	public function get_image_properties($path = '', $return = false)
 	{
 		if ($path === '')
 		{
@@ -846,17 +846,17 @@ class Image
 		if ( ! file_exists($path))
 		{
 			$this->set_error('imglib_invalid_path');
-			return FALSE;
+			return false;
 		}
 		$vals = getimagesize($path);
-		if ($vals === FALSE)
+		if ($vals === false)
 		{
 			$this->set_error('imglib_invalid_image');
-			return FALSE;
+			return false;
 		}
 		$types = [1 => 'gif', 2 => 'jpeg', 3 => 'png'];
 		$mime = isset($types[$vals[2]]) ? 'image/'.$types[$vals[2]] : 'image/jpg';
-		if ($return === TRUE)
+		if ($return === true)
 		{
 			return [
 				'width'      => $vals[0],
@@ -871,7 +871,7 @@ class Image
 		$this->image_type  = $vals[2];
 		$this->size_str    = $vals[3];
 		$this->mime_type   = $mime;
-		return TRUE;
+		return true;
 	}
 
 	public function size_calculator($vals)
@@ -906,7 +906,7 @@ class Image
 	public function explode_name($source_image)
 	{
 		$ext = strrchr((string)$source_image, '.');
-		$name = ($ext === FALSE) ? $source_image : substr((string)$source_image, 0, -strlen($ext));
+		$name = ($ext === false) ? $source_image : substr((string)$source_image, 0, -strlen($ext));
 		return ['ext' => $ext, 'name' => $name];
 	}
 
@@ -922,27 +922,27 @@ class Image
 			$gd_version = @gd_info();
 			return preg_replace('/\D/', '', $gd_version['GD Version']);
 		}
-		return FALSE;
+		return false;
 	}
 
 	public function set_error($msg)
 	{
-		$CI =& get_instance();
+		$CI =& getInstance();
 		$CI->lang->load('imglib');
 		if (is_array($msg))
 		{
 			foreach ($msg as $val)
 			{
-				$msg_text = ($CI->lang->line($val) === FALSE) ? $val : $CI->lang->line($val);
+				$msg_text = ($CI->lang->line($val) === false) ? $val : $CI->lang->line($val);
 				$this->error_msg[] = $msg_text;
-				log_message('error', $msg_text);
+				logMessage('error', $msg_text);
 			}
 		}
 		else
 		{
-			$msg_text = ($CI->lang->line($msg) === FALSE) ? $msg : $CI->lang->line($msg);
+			$msg_text = ($CI->lang->line($msg) === false) ? $msg : $CI->lang->line($msg);
 			$this->error_msg[] = $msg_text;
-			log_message('error', $msg_text);
+			logMessage('error', $msg_text);
 		}
 	}
 
