@@ -1,0 +1,10 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+        public: false
+
+    App\:
+        resource: "../server/src/"
+        exclude:
+            - "../server/src/Kernel.php"

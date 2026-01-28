@@ -1,0 +1,14 @@
+87f562,127.0.0.1,GET,http://localhost:8000/,1769575198,,200,request
+32d08e,127.0.0.1,POST,http://localhost:8000/post/user,1769575473,,200,request
+63c621,127.0.0.1,POST,http://localhost:8000/post/app,1769575473,,200,request
+7f1799,127.0.0.1,POST,http://localhost:8000/post/user,1769576904,,200,request
+969607,127.0.0.1,POST,http://localhost:8000/post/app,1769576904,,200,request
+c5cf15,127.0.0.1,GET,http://localhost:8000/admin,1769576908,,301,request
+06af34,127.0.0.1,GET,http://localhost:8000/admin/,1769576908,,302,request
+adf0ad,127.0.0.1,GET,http://localhost:8000/admin/login,1769576908,,200,request
+b3c998,127.0.0.1,POST,http://localhost:8000/admin/login,1769576929,,302,request
+768a76,127.0.0.1,GET,http://localhost:8000/admin/,1769576929,,200,request
+d3a56e,127.0.0.1,GET,http://localhost:8000/admin/,1769576932,,200,request
+2c9477,127.0.0.1,GET,http://localhost:8000/admin/settings,1769578346,,200,request
+534594,127.0.0.1,POST,http://localhost:8000/post/user,1769578350,,200,request
+b416bf,127.0.0.1,POST,http://localhost:8000/post/app,1769578351,,200,request
