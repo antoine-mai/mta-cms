@@ -1,6 +1,9 @@
 <?php namespace Admin\Services\Session;
-
-class PHP8SessionWrapper implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface {
+/**
+ * 
+**/
+class PHP8SessionWrapper implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+{
 	protected SessionDriverInterface $driver;
 
 	public function __construct(SessionDriverInterface $driver)

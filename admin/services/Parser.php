@@ -1,6 +1,9 @@
 <?php namespace Admin\Services;
-
-class Parser {
+/**
+ * 
+**/
+class Parser
+{
 	public $l_delim = '{';
 	public $r_delim = '}';
 	protected $CI;

@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form\Fields;
-
+/**
+ * 
+**/
 class Radio extends Checkbox
 {
     public function render()

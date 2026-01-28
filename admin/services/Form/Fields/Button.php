@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form\Fields;
-
+/**
+ * 
+**/
 class Button extends BaseField
 {
     protected $type = 'button';

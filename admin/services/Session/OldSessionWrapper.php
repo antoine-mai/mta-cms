@@ -1,6 +1,9 @@
 <?php namespace Admin\Services\Session;
-
-class OldSessionWrapper implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface {
+/**
+ * 
+**/
+class OldSessionWrapper implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+{
 	protected $driver;
 
 	public function __construct(SessionDriverInterface $driver)

@@ -1,8 +1,7 @@
 <?php namespace Admin\Services;
-
 /**
  * Yaml class for simple YAML parsing and dumping.
- */
+**/
 class Yaml
 {
     /**

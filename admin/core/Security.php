@@ -2,6 +2,7 @@
 /**
  * 
 **/
+#[\AllowDynamicProperties]
 class Security
 {
 	public $filename_bad_chars =	[
@@ -55,23 +56,23 @@ class Security
 	];
 	public function __construct()
 	{
-		if (config_item('csrf_protection'))
+		if (\Admin\Core\Common::config_item('csrf_protection'))
 		{
 			foreach (['csrf_expire', 'csrf_token_name', 'csrf_cookie_name'] as $key)
 			{
-				if (NULL !== ($val = config_item($key)))
+				if (NULL !== ($val = \Admin\Core\Common::config_item($key)))
 				{
 					$this->{'_'.$key} = $val;
 				}
 			}
-			if ($cookie_prefix = config_item('cookie_prefix'))
+			if ($cookie_prefix = \Admin\Core\Common::config_item('cookie_prefix'))
 			{
 				$this->_csrf_cookie_name = $cookie_prefix.$this->_csrf_cookie_name;
 			}
 			$this->_csrf_set_hash();
 		}
-		$this->charset = strtoupper((string) config_item('charset'));
-		log_message('info', 'Security Class Initialized');
+		$this->charset = strtoupper((string) \Admin\Core\Common::config_item('charset'));
+		Error::log_message('info', 'Security Class Initialized');
 	}
 	public function csrf_verify()
 	{
@@ -79,12 +80,16 @@ class Security
 		{
 			return $this->csrf_set_cookie();
 		}
-		if ($exclude_uris = config_item('csrf_exclude_uris'))
+		if ($exclude_uris = \Admin\Core\Common::config_item('csrf_exclude_uris'))
 		{
-			$uri = load_class('URI', 'core');
+			// $uri = \Admin\Core\Common::load_class('URI', 'core');
+            $request = \Admin\Core\Request\Request::createFromGlobals();
+            $pathInfo = $request->getPathInfo();
+            $pathInfo = ltrim($pathInfo, '/');
+
 			foreach ($exclude_uris as $excluded)
 			{
-				if (preg_match('#^'.$excluded.'$#i'.(UTF8_ENABLED ? 'u' : ''), $uri->uri_string()))
+				if (preg_match('#^'.$excluded.'$#i'.(UTF8_ENABLED ? 'u' : ''), $pathInfo))
 				{
 					return $this;
 				}
@@ -94,7 +99,7 @@ class Security
 			&& is_string($_POST[$this->_csrf_token_name]) && is_string($_COOKIE[$this->_csrf_cookie_name])
 			&& hash_equals($_POST[$this->_csrf_token_name], $_COOKIE[$this->_csrf_cookie_name]);
 		unset($_POST[$this->_csrf_token_name]);
-		if (config_item('csrf_regenerate'))
+		if (\Admin\Core\Common::config_item('csrf_regenerate'))
 		{
 			unset($_COOKIE[$this->_csrf_cookie_name]);
 			$this->_csrf_hash = NULL;
@@ -105,51 +110,51 @@ class Security
 		{
 			$this->csrf_show_error();
 		}
-		log_message('info', 'CSRF token verified');
+		Error::log_message('info', 'CSRF token verified');
 		return $this;
 	}
 	public function csrf_set_cookie()
 	{
 		$expire = time() + $this->_csrf_expire;
-		$secure_cookie = (bool) config_item('cookie_secure');
-		if ($secure_cookie && ! is_https())
+		$secure_cookie = (bool) \Admin\Core\Common::config_item('cookie_secure');
+		if ($secure_cookie && ! \Admin\Core\Common::is_https())
 		{
 			return FALSE;
 		}
-		if (is_php('7.3'))
+		if (\Admin\Core\Common::is_php('7.3'))
 		{
 			setcookie(
 				$this->_csrf_cookie_name,
 				$this->_csrf_hash,
 				[
 					'expires'  => $expire,
-					'path'     => config_item('cookie_path'),
-					'domain'   => config_item('cookie_domain'),
+					'path'     => \Admin\Core\Common::config_item('cookie_path'),
+					'domain'   => \Admin\Core\Common::config_item('cookie_domain'),
 					'secure'   => $secure_cookie,
-					'httponly' => config_item('cookie_httponly'),
+					'httponly' => \Admin\Core\Common::config_item('cookie_httponly'),
 					'samesite' => 'Strict'
 				]
 			);
 		}
 		else
 		{
-			$domain = trim(config_item('cookie_domain'));
+			$domain = trim(\Admin\Core\Common::config_item('cookie_domain'));
 			header('Set-Cookie: '.$this->_csrf_cookie_name.'='.$this->_csrf_hash
 					.'; Expires='.gmdate('D, d-M-Y H:i:s T', $expire)
 					.'; Max-Age='.$this->_csrf_expire
-					.'; Path='.rawurlencode(config_item('cookie_path'))
+					.'; Path='.rawurlencode(\Admin\Core\Common::config_item('cookie_path'))
 					.($domain === '' ? '' : '; Domain='.$domain)
 					.($secure_cookie ? '; Secure' : '')
-					.(config_item('cookie_httponly') ? '; HttpOnly' : '')
+					.(\Admin\Core\Common::config_item('cookie_httponly') ? '; HttpOnly' : '')
 					.'; SameSite=Strict'
 			);
 		}
-		log_message('info', 'CSRF cookie sent');
+		Error::log_message('info', 'CSRF cookie sent');
 		return $this;
 	}
 	public function csrf_show_error()
 	{
-		show_error('The action you have requested is not allowed.', 403);
+		Error::show_error('The action you have requested is not allowed.', 403);
 	}
 	public function get_csrf_hash()
 	{
@@ -169,7 +174,7 @@ class Security
 			}
 			return $str;
 		}
-		$str = remove_invisible_characters($str);
+		$str = \Admin\Core\Common::remove_invisible_characters($str);
 		if (stripos($str, '%') !== false)
 		{
 			do
@@ -183,7 +188,7 @@ class Security
 		}
 		$str = preg_replace_callback("/[^a-z0-9>]+[a-z0-9]+=([\'\"]).*?\\1/si", [$this, '_convert_attribute'], $str);
 		$str = preg_replace_callback('/<\w+.*/si', [$this, '_decode_entity'], $str);
-		$str = remove_invisible_characters($str);
+		$str = \Admin\Core\Common::remove_invisible_characters($str);
 		$str = str_replace("\t", ' ', $str);
 		$converted_string = $str;
 		$str = $this->_do_never_allowed($str);
@@ -282,7 +287,7 @@ class Security
 			}
 			catch (Exception $e)
 			{
-				log_message('error', $e->getMessage());
+				Error::log_message('error', $e->getMessage());
 				return FALSE;
 			}
 		}
@@ -292,7 +297,7 @@ class Security
 		}
 		if (is_readable('/dev/urandom') && ($fp = fopen('/dev/urandom', 'rb')) !== FALSE)
 		{
-			is_php('5.4') && stream_set_chunk_size($fp, $length);
+			\Admin\Core\Common::is_php('5.4') && stream_set_chunk_size($fp, $length);
 			$output = fread($fp, $length);
 			fclose($fp);
 			if ($output !== FALSE)
@@ -314,7 +319,7 @@ class Security
 		}
 		static $_entities;
 		isset($charset) OR $charset = $this->charset;
-		$flag = is_php('5.4')
+		$flag = \Admin\Core\Common::is_php('5.4')
 			? ENT_COMPAT | ENT_HTML5
 			: ENT_COMPAT;
 		if ( ! isset($_entities))
@@ -366,7 +371,7 @@ class Security
 			$bad[] = './';
 			$bad[] = '/';
 		}
-		$str = remove_invisible_characters($str, FALSE);
+		$str = \Admin\Core\Common::remove_invisible_characters($str, FALSE);
 		do
 		{
 			$old = $str;

@@ -1,7 +1,7 @@
-<?php
-
-namespace Admin;
-
+<?php namespace Admin;
+/**
+ * 
+**/
 class Autoload
 {
     private static $loader;
@@ -11,7 +11,8 @@ class Autoload
 
     public static function getLoader()
     {
-        if (null !== self::$loader) {
+        if (null !== self::$loader)
+        {
             return self::$loader;
         }
 
@@ -98,9 +99,9 @@ class Autoload
 
     public function loadClass($class)
     {
-        if ($file = $this->findFile($class)) {
-            includeFile($file);
-
+        if ($file = $this->findFile($class))
+        {
+            include $file;
             return true;
         }
     }
@@ -141,16 +142,6 @@ class Autoload
 
         return false;
     }
-}
-
-/**
- * Scope isolated include.
- *
- * Prevents access to $this/self from included files.
- */
-function includeFile($file)
-{
-    include $file;
 }
 
 \Admin\Autoload::getLoader();

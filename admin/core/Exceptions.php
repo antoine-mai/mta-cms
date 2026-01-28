@@ -2,6 +2,7 @@
 /**
  * 
  */
+#[\AllowDynamicProperties]
 class Exceptions {
 	public $ob_level;
 	public $levels = [
@@ -24,11 +25,11 @@ class Exceptions {
 	public function log_exception($severity, $message, $filepath, $line)
 	{
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
-		log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
+		\Admin\Core\Error::log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
 	}
 	public function show_404($page = '', $log_error = TRUE)
 	{
-		if (is_cli())
+		if (\Admin\Core\Common::is_cli())
 		{
 			$heading = 'Not Found';
 			$message = 'The controller/method pair you requested was not found.';
@@ -40,26 +41,26 @@ class Exceptions {
 		}
 		if ($log_error)
 		{
-			log_message('error', $heading.': '.$page);
+			\Admin\Core\Error::log_message('error', $heading.': '.$page);
 		}
 		echo $this->show_error($heading, $message, 'error_404', 404);
 		exit(4); // EXIT_UNKNOWN_FILE
 	}
 	public function show_error($heading, $message, $template = 'error_general', $status_code = 500)
 	{
-		$templates_path = config_item('error_views_path');
+		$templates_path = \Admin\Core\Common::config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
 		}
-		if (is_cli())
+		if (\Admin\Core\Common::is_cli())
 		{
 			$message = "\t".(is_array($message) ? implode("\n\t", $message) : $message);
 			$template = 'cli'.DIRECTORY_SEPARATOR.$template;
 		}
 		else
 		{
-			set_status_header($status_code);
+			\Admin\Core\Error::set_status_header($status_code);
 			$message = '<p>'.(is_array($message) ? implode('</p><p>', $message) : $message).'</p>';
 			$template = 'html'.DIRECTORY_SEPARATOR.$template;
 		}
@@ -75,7 +76,7 @@ class Exceptions {
 	}
 	public function show_exception($exception)
 	{
-		$templates_path = config_item('error_views_path');
+		$templates_path = \Admin\Core\Common::config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
@@ -85,7 +86,7 @@ class Exceptions {
 		{
 			$message = '(null)';
 		}
-		if (is_cli())
+		if (\Admin\Core\Common::is_cli())
 		{
 			$templates_path .= 'cli'.DIRECTORY_SEPARATOR;
 		}
@@ -105,13 +106,13 @@ class Exceptions {
 	}
 	public function show_php_error($severity, $message, $filepath, $line)
 	{
-		$templates_path = config_item('error_views_path');
+		$templates_path = \Admin\Core\Common::config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = ADMIN_ROOT.'template/errors'.DIRECTORY_SEPARATOR;
 		}
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
-		if ( ! is_cli())
+		if ( ! \Admin\Core\Common::is_cli())
 		{
 			$filepath = str_replace('\\', '/', $filepath);
 			if (FALSE !== strpos($filepath, '/'))

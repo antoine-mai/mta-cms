@@ -1,6 +1,9 @@
 <?php namespace Admin\Services;
-
-class Pagination {
+/**
+ * 
+**/
+class Pagination
+{
 	protected $base_url		= '';
 	protected $prefix = '';
 	protected $suffix = '';

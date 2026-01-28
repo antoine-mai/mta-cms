@@ -14,12 +14,17 @@ if (!function_exists('get_instance')) {
     }
 }
 
+use Admin\Core\Common;
+
 class Admin
 {
     public static function run()
     {
         // 0. Init
-        self::initErrorHandlers();
+        self::errorHandlers();
+
+        // 1. Create Request
+        $request = \Admin\Core\Request\Request::createFromGlobals();
 
         // 1. Load Config
         $CFG = self::loadConfig();
@@ -27,34 +32,39 @@ class Admin
         // 2. Load Helpers, Libraries
 
         // 3. Load Core
-        list($URI, $RTR, $OUT) = self::loadCore($CFG);
+        list($URI, $RTR, $OUT) = self::loadCore($CFG, $request);
 
         // 4. Check Request
-        $route = self::checkRequest($RTR, $URI);
+        $route = self::checkRequest($RTR, $request);
 
         // 5. Load View (Dispatch)
         // 6. Create Response
-        self::dispatch($route);
+        $response = self::dispatch($route, $request);
 
         // 7. Return Response
-        $OUT->_display();
+        if ($response instanceof \Admin\Core\Response\Response) {
+            $response->prepare();
+            $response->send();
+        } else {
+            $OUT->_display();
+        }
     }
 
-    protected static function initErrorHandlers()
+    protected static function errorHandlers()
     {
-        set_error_handler('_error_handler');
-        set_exception_handler('_exception_handler');
-        register_shutdown_function('_shutdown_handler');
+        set_error_handler([\Admin\Core\Error::class, '_error_handler']);
+        set_exception_handler([\Admin\Core\Error::class, '_exception_handler']);
+        register_shutdown_function([\Admin\Core\Error::class, '_shutdown_handler']);
     }
 
     protected static function loadConfig()
     {
         global $assign_to_config;
         if (!empty($assign_to_config['subclass_prefix'])) {
-            get_config(['subclass_prefix' => $assign_to_config['subclass_prefix']]);
+            Common::get_config(['subclass_prefix' => $assign_to_config['subclass_prefix']]);
         }
         
-        $CFG =& load_class('Config', 'core');
+        $CFG =& Registry::getInstance('Config', 'core');
         
         if (isset($assign_to_config) && is_array($assign_to_config)) {
              foreach ($assign_to_config as $key => $value) {
@@ -68,26 +78,28 @@ class Admin
     }
 
 
-    protected static function loadCore($CFG)
+    protected static function loadCore($CFG, $request)
     {
-        load_class('Utf8', 'core');
-        $URI =& load_class('URI', 'core');
-        $RTR =& load_class('Router', 'core');
-        $OUT =& load_class('Output', 'core');
+        Registry::getInstance('Utf8');
+        // $URI =& Registry::getInstance('URI', 'core'); // Deprecated, replaced by Request
+        $RTR =& Registry::getInstance('Router', 'core');
+        $RTR->setRequest($request);
+
+        $OUT =& Registry::getInstance('Output', 'core');
         
         // Cache check
-        if ($OUT->_display_cache($CFG, $URI) === TRUE) {
-            exit;
-        }
+        // if ($OUT->_display_cache($CFG, $URI) === TRUE) {
+        //     exit;
+        // }
 
-        load_class('Security', 'core');
-        load_class('Input', 'core');
-        load_class('Lang', 'core');
+        Registry::getInstance('Security', 'core');
+        Registry::getInstance('Input', 'core');
+        Registry::getInstance('Lang', 'core');
 
-        return [$URI, $RTR, $OUT];
+        return [null, $RTR, $OUT];
     }
 
-    protected static function checkRequest($RTR, $URI)
+    protected static function checkRequest($RTR, $request)
     {
         $e404 = FALSE;
         $class = ucfirst($RTR->class);
@@ -101,7 +113,7 @@ class Admin
         $fqcn = $namespace . $class; // Fully Qualified Class Name
 
         // Determine method based on HTTP Verb
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $requestMethod = $request->server->get('REQUEST_METHOD', 'GET');
         $method = ($requestMethod === 'POST') ? 'post' : 'index';
 
         if (empty($class) OR !class_exists($fqcn)) {
@@ -115,28 +127,12 @@ class Admin
         }
 
         if ($e404) {
-            show_404($fqcn . '::' . $method);
+            Error::show_404($fqcn . '::' . $method);
         }
-
-        // Params: Since we are ignoring the method segment from URL (implied by HTTP verb),
-        // we need to be careful. CodeIgniter's Router might have consumed 'index' or something as the method.
-        // If the URL is /welcome/index, Router says class=Welcome, method=index.
-        // If URL is /welcome, Router says class=Welcome, method=index (default).
-        // If URL is /welcome/foo, Router says class=Welcome, method=foo.
         
-        // With "Route" pattern:
-        // /welcome -> Welcome class -> index() (GET)
-        // /welcome (POST) -> Welcome class -> post() (POST)
-        
-        // What if URL is /welcome/foo ? 
-        // If "Route" pattern implies 1 class = 1 endpoint, then /welcome/foo is 404 unless 'foo' is a param.
-        // In legacy CI, 'foo' is method. 
-        // If user says "always has index and post", it implies specific methods are creating the response.
-        
-        // We will assume standard Route pattern: URL -> Class. Method is internal decision.
-        // Params are subsequent segments.
-        
-        $params = array_slice($URI->rsegments, 2);
+        // $params = array_slice($URI->rsegments, 2);
+        // We need to get params from router or request now
+        $params = $RTR->getParams();
 
         return [
             'class' => $fqcn,
@@ -145,14 +141,24 @@ class Admin
         ];
     }
 
-    protected static function dispatch($route)
+    protected static function dispatch($route, \Admin\Core\Request\Request $request)
     {
         $class = $route['class'];
         $method = $route['method'];
         $params = $route['params'];
 
         $CI = new $class();
-        call_user_func_array([&$CI, $method], $params);
+
+        // Check if the method expects a Request object
+        $reflection = new \ReflectionMethod($CI, $method);
+        foreach ($reflection->getParameters() as $param) {
+            if ($param->getType() && $param->getType()->getName() === \Admin\Core\Request\Request::class) {
+                array_unshift($params, $request);
+                break;
+            }
+        }
+
+        return call_user_func_array([&$CI, $method], $params);
     }
 
     protected static function initCharset($charset)
@@ -175,7 +181,7 @@ class Admin
             define('ICONV_ENABLED', FALSE);
         }
 
-        if (is_php('5.6')) {
+        if (Common::is_php('5.6')) {
             ini_set('php.internal_encoding', $charset);
         }
     }

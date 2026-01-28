@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form;
-
+/**
+ * 
+**/
 trait ValidationRules
 {
     public function required($str)
@@ -10,6 +12,19 @@ trait ValidationRules
     public function regex_match($str, $regex)
     {
         return (bool) preg_match((string)$regex, (string)$str);
+    }
+
+    public function matches($str, $field)
+    {
+        if (isset($this->parent) && ($otherField = $this->parent->getField($field))) {
+            return ($str === $this->parent->get_value($field));
+        }
+        return (isset($_POST[$field]) && $str === $_POST[$field]);
+    }
+
+    public function differs($str, $field)
+    {
+        return ! $this->matches($str, $field);
     }
 
     public function min_length($str, $val)
@@ -122,6 +137,15 @@ trait ValidationRules
     public function is_natural_no_zero($str)
     {
         return ($str != 0 && ctype_digit((string)$str));
+    }
+
+    public function is_unique($str, $field)
+    {
+        sscanf((string)$field, '%[^.].%[^.]', $table, $column);
+        $CI =& get_instance();
+        return isset($CI->db)
+            ? ($CI->db->limit(1)->get_where((string)$table, [$column => $str])->num_rows() === 0)
+            : FALSE;
     }
 
     public function valid_base64($str)

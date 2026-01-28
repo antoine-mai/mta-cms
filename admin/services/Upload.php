@@ -1,8 +1,13 @@
 <?php namespace Admin\Services;
-
-use ReflectionClass;
-
-class Upload {
+/**
+ * 
+**/
+use \ReflectionClass;
+/**
+ * 
+**/
+class Upload
+{
 	public $max_size = 0;
 	public $max_width = 0;
 	public $max_height = 0;

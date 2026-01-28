@@ -1,9 +1,14 @@
 <?php namespace Admin\Services\Session\Drivers;
-
-use Admin\Services\Session\SessionDriver;
-use Admin\Services\Session\SessionDriverInterface;
-
-class Files extends SessionDriver implements SessionDriverInterface {
+/**
+ * 
+**/
+use \Admin\Services\Session\SessionDriverInterface;
+use \Admin\Services\Session\SessionDriver;
+/**
+ * 
+**/
+class Files extends SessionDriver implements SessionDriverInterface
+{
 	protected $_save_path;
 	protected $_file_handle;
 	protected $_file_path;

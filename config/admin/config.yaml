@@ -20,7 +20,7 @@ cache_path: "../../storage/cache/admin/"
 cache_query_string: false
 encryption_key: ""
 sess_driver: files
-sess_cookie_name: ci_session
+sess_cookie_name: mta_cms_admin_session
 sess_samesite: Lax
 sess_expiration: 7200
 sess_save_path: null

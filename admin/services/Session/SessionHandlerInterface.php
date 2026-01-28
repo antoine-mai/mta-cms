@@ -1,6 +1,9 @@
 <?php namespace Admin\Services\Session;
-
-interface SessionHandlerInterface {
+/**
+ * 
+**/
+interface SessionHandlerInterface
+{
 	public function open($save_path, $name);
 	public function close();
 	public function read($session_id);

@@ -1,13 +1,18 @@
 <?php namespace Admin\Services\Session\Drivers;
-
-use Admin\Services\Session\SessionDriver;
+/**
+ * 
+**/
 use Admin\Services\Session\SessionDriverInterface;
+use Admin\Services\Session\SessionDriver;
 use Redis as NativeRedis;
 use RedisException;
-
-class Redis extends SessionDriver implements SessionDriverInterface {
+/**
+ * 
+**/
+class Redis extends SessionDriver implements SessionDriverInterface
+{
 	protected $_redis;
-	protected $_key_prefix = 'ci_session:';
+	protected $_key_prefix = 'mta_cms_admin_session:';
 	protected $_lock_key;
 	protected $_key_exists = FALSE;
 	protected $_setTimeout_name;

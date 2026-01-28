@@ -2,6 +2,7 @@
 /**
  * 
 **/
+#[\AllowDynamicProperties]
 class Log
 {
 	protected $_log_path;
@@ -15,32 +16,39 @@ class Log
 	protected static $func_overload;
 	public function __construct()
 	{
-		$config =& get_config();
-		isset(self::$func_overload) OR self::$func_overload = ( ! is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-		$this->_log_path = ($config['log_path'] !== '') ? $config['log_path'] : ADMIN_ROOT.'logs/';
-		$this->_file_ext = (isset($config['log_file_extension']) && $config['log_file_extension'] !== '')
-			? ltrim($config['log_file_extension'], '.') : 'php';
+		$config =& \Admin\Core\Registry::getInstance('Config', 'core');
+		
+		isset(self::$func_overload) OR self::$func_overload = ( ! \Admin\Core\Common::is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
+		
+		$this->_log_path = ($config->item('log_path') !== '') ? $config->item('log_path') : ADMIN_ROOT.'logs/';
+		$this->_file_ext = ($config->item('log_file_extension') !== '')
+			? ltrim($config->item('log_file_extension'), '.') : 'php';
+			
 		file_exists($this->_log_path) OR mkdir($this->_log_path, 0755, TRUE);
-		if ( ! is_dir($this->_log_path) OR ! is_really_writable($this->_log_path))
+		
+		if ( ! is_dir($this->_log_path) OR ! \Admin\Core\Common::is_really_writable($this->_log_path))
 		{
 			$this->_enabled = FALSE;
 		}
-		if (is_numeric($config['log_threshold']))
+		
+		if (is_numeric($config->item('log_threshold')))
 		{
-			$this->_threshold = (int) $config['log_threshold'];
+			$this->_threshold = (int) $config->item('log_threshold');
 		}
-		elseif (is_array($config['log_threshold']))
+		elseif (is_array($config->item('log_threshold')))
 		{
 			$this->_threshold = 0;
-			$this->_threshold_array = array_flip($config['log_threshold']);
+			$this->_threshold_array = array_flip($config->item('log_threshold'));
 		}
-		if ( ! empty($config['log_date_format']))
+		
+		if ($config->item('log_date_format') !== '')
 		{
-			$this->_date_fmt = $config['log_date_format'];
+			$this->_date_fmt = $config->item('log_date_format');
 		}
-		if ( ! empty($config['log_file_permissions']) && is_int($config['log_file_permissions']))
+		
+		if ($config->item('log_file_permissions') && is_int($config->item('log_file_permissions')))
 		{
-			$this->_file_permissions = $config['log_file_permissions'];
+			$this->_file_permissions = $config->item('log_file_permissions');
 		}
 	}
 	public function write_log($level, $msg)

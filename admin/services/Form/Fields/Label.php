@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form\Fields;
-
+/**
+ * 
+**/
 class Label extends BaseField
 {
     public function render()

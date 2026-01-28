@@ -2,6 +2,7 @@
 /**
  * 
 **/
+#[\AllowDynamicProperties]
 class Output
 {
 	public $final_output = '';
@@ -20,12 +21,12 @@ class Output
 		$this->_zlib_oc = (bool) ini_get('zlib.output_compression');
 		$this->_compress_output = (
 			$this->_zlib_oc === FALSE
-			&& config_item('compress_output') === TRUE
+			&& \Admin\Core\Common::config_item('compress_output') === TRUE
 			&& extension_loaded('zlib')
 		);
-		isset(self::$func_overload) OR self::$func_overload = ( ! is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-		$this->mimes =& get_mimes();
-		log_message('info', 'Output Class Initialized');
+		isset(self::$func_overload) OR self::$func_overload = ( ! \Admin\Core\Common::is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
+		$this->mimes =& \Admin\Core\Common::get_mimes();
+		Error::log_message('info', 'Output Class Initialized');
 	}
 	public function get_output()
 	{
@@ -67,7 +68,7 @@ class Output
 		$this->mime_type = $mime_type;
 		if (empty($charset))
 		{
-			$charset = config_item('charset');
+			$charset = \Admin\Core\Common::config_item('charset');
 		}
 		$header = 'Content-Type: '.$mime_type
 			.(empty($charset) ? '' : '; charset='.$charset);
@@ -138,7 +139,7 @@ class Output
 	}
 	public function _display($output = '')
 	{
-		$CFG =& load_class('Config', 'core');
+		$CFG =& Registry::getInstance('Config', 'core');
 		if (class_exists('Controller', FALSE))
 		{
 			$CI =& get_instance();
@@ -185,8 +186,8 @@ class Output
 				}
 			}
 			echo $output;
-			log_message('info', 'Final output sent to browser');
-			log_message('debug', 'Total execution time: '.$elapsed);
+			Error::log_message('info', 'Final output sent to browser');
+			Error::log_message('debug', 'Total execution time: '.$elapsed);
 			return;
 		}
 		if ($this->enable_profiler === TRUE)
@@ -210,17 +211,17 @@ class Output
 		{
 			echo $output; // Send it to the browser!
 		}
-		log_message('info', 'Final output sent to browser');
-		log_message('debug', 'Total execution time: '.$elapsed);
+		Error::log_message('info', 'Final output sent to browser');
+		Error::log_message('debug', 'Total execution time: '.$elapsed);
 	}
 	public function _write_cache($output)
 	{
 		$CI =& get_instance();
 		$path = $CI->config->item('cache_path');
 		$cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
-		if ( ! is_dir($cache_path) OR ! is_really_writable($cache_path))
+		if ( ! is_dir($cache_path) OR ! \Admin\Core\Common::is_really_writable($cache_path))
 		{
-			log_message('error', 'Unable to write cache file: '.$cache_path);
+			Error::log_message('error', 'Unable to write cache file: '.$cache_path);
 			return;
 		}
 		$uri = $CI->config->item('base_url')
@@ -240,12 +241,12 @@ class Output
 		$cache_path .= md5($uri);
 		if ( ! $fp = @fopen($cache_path, 'w+b'))
 		{
-			log_message('error', 'Unable to write cache file: '.$cache_path);
+			Error::log_message('error', 'Unable to write cache file: '.$cache_path);
 			return;
 		}
 		if ( ! flock($fp, LOCK_EX))
 		{
-			log_message('error', 'Unable to secure a file lock for file at: '.$cache_path);
+			Error::log_message('error', 'Unable to secure a file lock for file at: '.$cache_path);
 			fclose($fp);
 			return;
 		}
@@ -275,11 +276,11 @@ class Output
 		if ( ! is_int($result))
 		{
 			@unlink($cache_path);
-			log_message('error', 'Unable to write the complete cache content at: '.$cache_path);
+			Error::log_message('error', 'Unable to write the complete cache content at: '.$cache_path);
 			return;
 		}
 		chmod($cache_path, 0640);
-		log_message('debug', 'Cache file written: '.$cache_path);
+		Error::log_message('debug', 'Cache file written: '.$cache_path);
 		$this->set_cache_header($_SERVER['REQUEST_TIME'], $expire);
 	}
 	public function _display_cache(&$CFG, &$URI)
@@ -313,10 +314,10 @@ class Output
 		$cache_info = unserialize($match[1]);
 		$expire = $cache_info['expire'];
 		$last_modified = filemtime($filepath);
-		if ($_SERVER['REQUEST_TIME'] >= $expire && is_really_writable($cache_path))
+		if ($_SERVER['REQUEST_TIME'] >= $expire && \Admin\Core\Common::is_really_writable($cache_path))
 		{
 			@unlink($filepath);
-			log_message('debug', 'Cache file has expired. File deleted.');
+			Error::log_message('debug', 'Cache file has expired. File deleted.');
 			return FALSE;
 		}
 		$this->set_cache_header($last_modified, $expire);
@@ -325,7 +326,7 @@ class Output
 			$this->set_header($header[0], $header[1]);
 		}
 		$this->_display(self::substr($cache, self::strlen($match[0])));
-		log_message('debug', 'Cache file is current. Sending it to browser.');
+		Error::log_message('debug', 'Cache file is current. Sending it to browser.');
 		return TRUE;
 	}
 	public function delete_cache($uri = '')
@@ -338,7 +339,7 @@ class Output
 		}
 		if ( ! is_dir($cache_path))
 		{
-			log_message('error', 'Unable to find cache path: '.$cache_path);
+			Error::log_message('error', 'Unable to find cache path: '.$cache_path);
 			return FALSE;
 		}
 		if (empty($uri))
@@ -359,7 +360,7 @@ class Output
 		$cache_path .= md5($CI->config->item('base_url').$CI->config->item('index_page').ltrim($uri, '/'));
 		if ( ! @unlink($cache_path))
 		{
-			log_message('error', 'Unable to delete cache file for '.$uri);
+			Error::log_message('error', 'Unable to delete cache file for '.$uri);
 			return FALSE;
 		}
 		return TRUE;

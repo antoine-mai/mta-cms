@@ -2,13 +2,14 @@
 /**
  * 
 **/
+#[\AllowDynamicProperties]
 class Lang
 {
 	public $language =	[];
 	public $is_loaded =	[];
 	public function __construct()
 	{
-		log_message('info', 'Language Class Initialized');
+		\Admin\Core\Error::log_message('info', 'Language Class Initialized');
 	}
 	public function load($langfile, $idiom = '', $return = FALSE, $add_suffix = TRUE, $alt_path = '')
 	{
@@ -64,11 +65,11 @@ class Lang
 		}
 		if ($found !== TRUE)
 		{
-			show_error('Unable to load the requested language file: language/'.$idiom.'/'.$langfile);
+			\Admin\Core\Error::show_error('Unable to load the requested language file: language/'.$idiom.'/'.$langfile);
 		}
 		if ( ! isset($lang) OR ! is_array($lang))
 		{
-			log_message('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
+			\Admin\Core\Error::log_message('error', 'Language file contains no data: language/'.$idiom.'/'.$langfile);
 			if ($return === TRUE)
 			{
 				return [];
@@ -81,7 +82,7 @@ class Lang
 		}
 		$this->is_loaded[$langfile] = $idiom;
 		$this->language = array_merge($this->language, $lang);
-		log_message('info', 'Language file loaded: language/'.$idiom.'/'.$langfile);
+		\Admin\Core\Error::log_message('info', 'Language file loaded: language/'.$idiom.'/'.$langfile);
 		return TRUE;
 	}
 	public function line($line, $log_errors = TRUE)
@@ -89,7 +90,7 @@ class Lang
 		$value = isset($this->language[$line]) ? $this->language[$line] : FALSE;
 		if ($value === FALSE && $log_errors === TRUE)
 		{
-			log_message('error', 'Could not find the language line "'.$line.'"');
+			\Admin\Core\Error::log_message('error', 'Could not find the language line "'.$line.'"');
 		}
 		return $value;
 	}

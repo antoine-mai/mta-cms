@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form\Fields;
-
+/**
+ * 
+**/
 class Hidden extends BaseField
 {
     protected $recursing;

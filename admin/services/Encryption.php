@@ -1,6 +1,9 @@
 <?php namespace Admin\Services;
-
-class Encryption {
+/**
+ * 
+**/
+class Encryption
+{
 	protected $_cipher = 'aes-128';
 	protected $_mode = 'cbc';
 	protected $_handle;

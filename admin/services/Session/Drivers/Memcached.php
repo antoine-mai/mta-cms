@@ -1,12 +1,17 @@
 <?php namespace Admin\Services\Session\Drivers;
-
-use Admin\Services\Session\SessionDriver;
-use Admin\Services\Session\SessionDriverInterface;
-use Memcached as NativeMemcached;
-
-class Memcached extends SessionDriver implements SessionDriverInterface {
+/**
+ * 
+**/
+use \Admin\Services\Session\SessionDriverInterface;
+use \Admin\Services\Session\SessionDriver;
+use \Memcached as NativeMemcached;
+/**
+ * 
+**/
+class Memcached extends SessionDriver implements SessionDriverInterface
+{
 	protected $_memcached;
-	protected $_key_prefix = 'ci_session:';
+	protected $_key_prefix = 'mta_cms_admin_session:';
 	protected $_lock_key;
 
 	public function __construct(&$params)

@@ -1,9 +1,15 @@
 <?php namespace Admin\Services;
-
-use ReflectionObject;
+/**
+ * 
+**/
 use BadMethodCallException;
-
-class Driver {
+use ReflectionObject;
+/**
+ * 
+**/
+#[\AllowDynamicProperties]
+class Driver
+{
 	// From DriverLibrary
 	protected $valid_drivers = [];
 	protected $lib_name;

@@ -1,6 +1,9 @@
 <?php namespace Admin\Services\Session;
-
-abstract class SessionDriver {
+/**
+ * 
+**/
+abstract class SessionDriver
+{
 	protected $_config;
 	protected $_fingerprint;
 	protected $_lock = FALSE;

@@ -1,6 +1,9 @@
 <?php namespace Admin\Services\Session;
-
-interface SessionDriverInterface {
+/**
+ * 
+**/
+interface SessionDriverInterface
+{
 	public function open($save_path, $name);
 	public function close();
 	public function read($session_id);

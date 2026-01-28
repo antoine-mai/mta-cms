@@ -1,6 +1,9 @@
 <?php namespace Admin\Services;
-
-class Agent {
+/**
+ * 
+**/
+class Agent
+{
 	public $agent = NULL;
 	public $is_browser = FALSE;
 	public $is_robot = FALSE;

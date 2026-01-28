@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form\Fields;
-
+/**
+ * 
+**/
 class Checkbox extends BaseField
 {
     protected $checked;

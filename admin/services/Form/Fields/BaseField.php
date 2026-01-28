@@ -1,7 +1,11 @@
 <?php namespace Admin\Services\Form\Fields;
-
-use Admin\Services\Form\ValidationRules;
-
+/**
+ * 
+**/
+use \Admin\Services\Form\ValidationRules;
+/**
+ * 
+**/
 abstract class BaseField
 {
     use ValidationRules;
@@ -13,8 +17,15 @@ abstract class BaseField
     protected $rules = [];
     protected $label;
     protected $error;
+    protected $parent;
     
     protected static $error_delimiters = ['<p>', '</p>'];
+
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+        return $this;
+    }
 
     public function __construct($data = '', $value = '', $extra = '')
     {

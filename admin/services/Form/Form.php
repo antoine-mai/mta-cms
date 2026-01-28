@@ -1,5 +1,7 @@
 <?php namespace Admin\Services\Form;
-
+/**
+ * 
+**/
 class Form
 {
     use ValidationRules;
@@ -215,6 +217,7 @@ class Form
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Input($data, $value, $extra);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -223,6 +226,7 @@ class Form
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Textarea($data, $value, $extra);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -231,6 +235,7 @@ class Form
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Select($data, $options, $selected, $extra);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -239,6 +244,7 @@ class Form
     {
         $field = new Fields\Select($name, $options, $selected, $extra);
         $field->setMultiple(true);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -247,6 +253,7 @@ class Form
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Checkbox($data, $value, $checked, $extra);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -255,6 +262,7 @@ class Form
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Radio($data, $value, $checked, $extra);
+        $field->setParent($this);
         if ($name) $this->fields[$name] = $field;
         return $field->render();
     }
@@ -289,6 +297,7 @@ class Form
     public function hidden($name, $value = '', $recursing = FALSE)
     {
         $field = new Fields\Hidden($name, $value, $recursing);
+        $field->setParent($this);
         return $field->render();
     }
 
@@ -305,6 +314,7 @@ class Form
 
         if ( ! isset($this->fields[$field])) {
             $this->fields[$field] = new Fields\Input($field);
+            $this->fields[$field]->setParent($this);
         }
         
         $this->fields[$field]->setLabel($label)->setRules($rules);

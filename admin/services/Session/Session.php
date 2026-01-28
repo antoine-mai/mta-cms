@@ -1,8 +1,14 @@
 <?php namespace Admin\Services\Session;
-
-use UnexpectedValueException;
-
-class Session {
+/**
+ * 
+**/
+use \UnexpectedValueException;
+/**
+ * 
+**/
+#[\AllowDynamicProperties]
+class Session
+{
 	public $userdata;
 	protected $_driver = 'files';
 	protected $_config;

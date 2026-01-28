@@ -1,45 +1,50 @@
 <?php
 namespace Admin\Core;
 defined('ADMIN_ROOT') OR exit('No direct script access allowed');
+#[\AllowDynamicProperties]
 class Input {
 	protected $ip_address = FALSE;
 	protected $_allow_get_array = TRUE;
 	protected $_standardize_newlines;
-	protected $_enable_xss = FALSE;
-	protected $_enable_csrf = FALSE;
 	protected $headers = [];
 	protected $_raw_input_stream;
 	protected $_input_stream;
+    // Security and Utf8 references kept if needed for other things, but XSS/CSRF cleaning is being reduced
 	protected $security;
 	protected $uni;
 	public function __construct()
 	{
-		$this->_allow_get_array		= (config_item('allow_get_array') !== FALSE);
-		$this->_enable_xss		= (config_item('global_xss_filtering') === TRUE);
-		$this->_enable_csrf		= (config_item('csrf_protection') === TRUE);
-		$this->_standardize_newlines	= (bool) config_item('standardize_newlines');
-		$this->security =& load_class('Security', 'core');
+		$this->_allow_get_array		= (\Admin\Core\Common::config_item('allow_get_array') !== FALSE);
+		$this->_standardize_newlines	= (bool) \Admin\Core\Common::config_item('standardize_newlines');
+		
+        // XSS and CSRF configs removed
+        
+		$this->security =& \Admin\Core\Registry::getInstance('Security', 'core');
 		if (UTF8_ENABLED === TRUE)
 		{
-			$this->uni =& load_class('Utf8', 'core');
+			$this->uni =& \Admin\Core\Registry::getInstance('Utf8');
 		}
-		$this->_sanitize_globals();
-		if ($this->_enable_csrf === TRUE && ! is_cli())
+
+        // _sanitize_globals() call removed
+        
+		// CSRF check removed from here (should be Middleware/Security layer if needed, but requested to remove XSS related stuff)
+		/*
+		if ($this->_enable_csrf === TRUE && ! \Admin\Core\Common::is_cli())
 		{
 			$this->security->csrf_verify();
 		}
-		log_message('info', 'Input Class Initialized');
+        */
+		Error::log_message('info', 'Input Class Initialized');
 	}
-	protected function _fetch_from_array(&$array, $index = NULL, $xss_clean = NULL)
+	protected function _fetch_from_array(&$array, $index = NULL)
 	{
-		is_bool($xss_clean) OR $xss_clean = $this->_enable_xss;
 		isset($index) OR $index = array_keys($array);
 		if (is_array($index))
 		{
 			$output = [];
 			foreach ($index as $key)
 			{
-				$output[$key] = $this->_fetch_from_array($array, $key, $xss_clean);
+				$output[$key] = $this->_fetch_from_array($array, $key);
 			}
 			return $output;
 		}
@@ -71,46 +76,44 @@ class Input {
 		{
 			return NULL;
 		}
-		return ($xss_clean === TRUE)
-			? $this->security->xss_clean($value)
-			: $value;
+		return $value;
 	}
-	public function get($index = NULL, $xss_clean = NULL)
+	public function get($index = NULL)
 	{
-		return $this->_fetch_from_array($_GET, $index, $xss_clean);
+		return $this->_fetch_from_array($_GET, $index);
 	}
-	public function post($index = NULL, $xss_clean = NULL)
+	public function post($index = NULL)
 	{
-		return $this->_fetch_from_array($_POST, $index, $xss_clean);
+		return $this->_fetch_from_array($_POST, $index);
 	}
-	public function post_get($index, $xss_clean = NULL)
+	public function post_get($index)
 	{
 		return isset($_POST[$index])
-			? $this->post($index, $xss_clean)
-			: $this->get($index, $xss_clean);
+			? $this->post($index)
+			: $this->get($index);
 	}
-	public function get_post($index, $xss_clean = NULL)
+	public function get_post($index)
 	{
 		return isset($_GET[$index])
-			? $this->get($index, $xss_clean)
-			: $this->post($index, $xss_clean);
+			? $this->get($index)
+			: $this->post($index);
 	}
-	public function cookie($index = NULL, $xss_clean = NULL)
+	public function cookie($index = NULL)
 	{
-		return $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
+		return $this->_fetch_from_array($_COOKIE, $index);
 	}
-	public function server($index, $xss_clean = NULL)
+	public function server($index)
 	{
-		return $this->_fetch_from_array($_SERVER, $index, $xss_clean);
+		return $this->_fetch_from_array($_SERVER, $index);
 	}
-	public function input_stream($index = NULL, $xss_clean = NULL)
+	public function input_stream($index = NULL)
 	{
 		if ( ! is_array($this->_input_stream))
 		{
 			parse_str($this->raw_input_stream, $this->_input_stream);
 			is_array($this->_input_stream) OR $this->_input_stream = [];
 		}
-		return $this->_fetch_from_array($this->_input_stream, $index, $xss_clean);
+		return $this->_fetch_from_array($this->_input_stream, $index);
 	}
 	public function set_cookie($name, $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = NULL, $httponly = NULL, $samesite = NULL)
 	{
@@ -124,23 +127,23 @@ class Input {
 				}
 			}
 		}
-		if ($prefix === '' && config_item('cookie_prefix') !== '')
+		if ($prefix === '' && \Admin\Core\Common::config_item('cookie_prefix') !== '')
 		{
-			$prefix = config_item('cookie_prefix');
+			$prefix = \Admin\Core\Common::config_item('cookie_prefix');
 		}
-		if ($domain == '' && config_item('cookie_domain') != '')
+		if ($domain == '' && \Admin\Core\Common::config_item('cookie_domain') != '')
 		{
-			$domain = config_item('cookie_domain');
+			$domain = \Admin\Core\Common::config_item('cookie_domain');
 		}
-		if ($path === '/' && config_item('cookie_path') !== '/')
+		if ($path === '/' && \Admin\Core\Common::config_item('cookie_path') !== '/')
 		{
-			$path = config_item('cookie_path');
+			$path = \Admin\Core\Common::config_item('cookie_path');
 		}
-		$secure = ($secure === NULL && config_item('cookie_secure') !== NULL)
-			? (bool) config_item('cookie_secure')
+		$secure = ($secure === NULL && \Admin\Core\Common::config_item('cookie_secure') !== NULL)
+			? (bool) \Admin\Core\Common::config_item('cookie_secure')
 			: (bool) $secure;
-		$httponly = ($httponly === NULL && config_item('cookie_httponly') !== NULL)
-			? (bool) config_item('cookie_httponly')
+		$httponly = ($httponly === NULL && \Admin\Core\Common::config_item('cookie_httponly') !== NULL)
+			? (bool) \Admin\Core\Common::config_item('cookie_httponly')
 			: (bool) $httponly;
 		if ( ! is_numeric($expire))
 		{
@@ -150,7 +153,7 @@ class Input {
 		{
 			$expire = ($expire > 0) ? time() + $expire : 0;
 		}
-		isset($samesite) OR $samesite = config_item('cookie_samesite');
+		isset($samesite) OR $samesite = \Admin\Core\Common::config_item('cookie_samesite');
 		if (isset($samesite))
 		{
 			$samesite = ucfirst(strtolower($samesite));
@@ -162,9 +165,9 @@ class Input {
 		}
 		if ($samesite === 'None' && ! $secure)
 		{
-			log_message('error', $name.' cookie sent with SameSite=None, but without Secure attribute.');
+			Error::log_message('error', $name.' cookie sent with SameSite=None, but without Secure attribute.');
 		}
-		if ( ! is_php('7.3'))
+		if ( ! \Admin\Core\Common::is_php('7.3'))
 		{
 			$maxage = $expire - time();
 			if ($maxage < 1)
@@ -188,281 +191,7 @@ class Input {
 		];
 		setcookie($prefix.$name, $value, $setcookie_options);
 	}
-	public function ip_address()
-	{
-		if ($this->ip_address !== FALSE)
-		{
-			return $this->ip_address;
-		}
-		$proxy_ips = config_item('proxy_ips');
-		if ( ! empty($proxy_ips) && ! is_array($proxy_ips))
-		{
-			$proxy_ips = explode(',', str_replace(' ', '', $proxy_ips));
-		}
-		$this->ip_address = $this->server('REMOTE_ADDR');
-		if ($proxy_ips)
-		{
-			foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP'] as $header)
-			{
-				if (($spoof = $this->server($header)) !== NULL)
-				{
-					sscanf($spoof, '%[^,]', $spoof);
-					if ( ! $this->valid_ip($spoof))
-					{
-						$spoof = NULL;
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-			if ($spoof)
-			{
-				for ($i = 0, $c = count($proxy_ips); $i < $c; $i++)
-				{
-					if (strpos($proxy_ips[$i], '/') === FALSE)
-					{
-						if ($proxy_ips[$i] === $this->ip_address)
-						{
-							$this->ip_address = $spoof;
-							break;
-						}
-						continue;
-					}
-					isset($separator) OR $separator = $this->valid_ip($this->ip_address, 'ipv6') ? ':' : '.';
-					if (strpos($proxy_ips[$i], $separator) === FALSE)
-					{
-						continue;
-					}
-					if ( ! isset($ip, $sprintf))
-					{
-						if ($separator === ':')
-						{
-							$ip = explode(':',
-								str_replace('::',
-									str_repeat(':', 9 - substr_count($this->ip_address, ':')),
-									$this->ip_address
-								)
-							);
-							for ($j = 0; $j < 8; $j++)
-							{
-								$ip[$j] = intval($ip[$j], 16);
-							}
-							$sprintf = '%016b%016b%016b%016b%016b%016b%016b%016b';
-						}
-						else
-						{
-							$ip = explode('.', $this->ip_address);
-							$sprintf = '%08b%08b%08b%08b';
-						}
-						$ip = vsprintf($sprintf, $ip);
-					}
-					sscanf($proxy_ips[$i], '%[^/]/%d', $netaddr, $masklen);
-					if ($separator === ':')
-					{
-						$netaddr = explode(':', str_replace('::', str_repeat(':', 9 - substr_count($netaddr, ':')), $netaddr));
-						for ($j = 0; $j < 8; $j++)
-						{
-							$netaddr[$j] = intval($netaddr[$j], 16);
-						}
-					}
-					else
-					{
-						$netaddr = explode('.', $netaddr);
-					}
-					if (strncmp($ip, vsprintf($sprintf, $netaddr), $masklen) === 0)
-					{
-						$this->ip_address = $spoof;
-						break;
-					}
-				}
-			}
-		}
-		if ( ! $this->valid_ip($this->ip_address))
-		{
-			return $this->ip_address = '0.0.0.0';
-		}
-		return $this->ip_address;
-	}
-	public function valid_ip($ip, $which = '')
-	{
-		switch (strtolower($which))
-		{
-			case 'ipv4':
-				$which = FILTER_FLAG_IPV4;
-				break;
-			case 'ipv6':
-				$which = FILTER_FLAG_IPV6;
-				break;
-			default:
-				$which = 0;
-				break;
-		}
-		return (bool) filter_var($ip, FILTER_VALIDATE_IP, $which);
-	}
-	public function user_agent($xss_clean = NULL)
-	{
-		return $this->_fetch_from_array($_SERVER, 'HTTP_USER_AGENT', $xss_clean);
-	}
-	protected function _sanitize_globals()
-	{
-		if ($this->_allow_get_array === FALSE)
-		{
-			$_GET = [];
-		}
-		elseif (is_array($_GET))
-		{
-			foreach ($_GET as $key => $val)
-			{
-				$_GET[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
-			}
-		}
-		if (is_array($_POST))
-		{
-			foreach ($_POST as $key => $val)
-			{
-				$_POST[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
-			}
-		}
-		if (is_array($_COOKIE))
-		{
-			unset(
-				$_COOKIE['$Version'],
-				$_COOKIE['$Path'],
-				$_COOKIE['$Domain']
-			);
-			foreach ($_COOKIE as $key => $val)
-			{
-				if (($cookie_key = $this->_clean_input_keys($key)) !== FALSE)
-				{
-					$_COOKIE[$cookie_key] = $this->_clean_input_data($val);
-				}
-				else
-				{
-					unset($_COOKIE[$key]);
-				}
-			}
-		}
-		$_SERVER['PHP_SELF'] = strip_tags($_SERVER['PHP_SELF']);
-		log_message('debug', 'Global POST, GET and COOKIE data sanitized');
-	}
-	protected function _clean_input_data($str)
-	{
-		if (is_array($str))
-		{
-			$new_array = [];
-			foreach (array_keys($str) as $key)
-			{
-				$new_array[$this->_clean_input_keys($key)] = $this->_clean_input_data($str[$key]);
-			}
-			return $new_array;
-		}
-		if ( ! is_php('5.4') && get_magic_quotes_gpc())
-		{
-			$str = stripslashes($str);
-		}
-		if (UTF8_ENABLED === TRUE)
-		{
-			$str = $this->uni->clean_string($str);
-		}
-		$str = remove_invisible_characters($str, FALSE);
-		if ($this->_standardize_newlines === TRUE)
-		{
-			return preg_replace('/(?:\r\n|[\r\n])/', PHP_EOL, $str);
-		}
-		return $str;
-	}
-	protected function _clean_input_keys($str, $fatal = TRUE)
-	{
-		if ( ! preg_match('/^[a-z0-9:_\/|-]+$/i', $str))
-		{
-			if ($fatal === TRUE)
-			{
-				return FALSE;
-			}
-			else
-			{
-				set_status_header(503);
-				echo 'Disallowed Key Characters.';
-				exit(7); // EXIT_USER_INPUT
-			}
-		}
-		if (UTF8_ENABLED === TRUE)
-		{
-			return $this->uni->clean_string($str);
-		}
-		return $str;
-	}
-	public function request_headers($xss_clean = FALSE)
-	{
-		if ( ! empty($this->headers))
-		{
-			return $this->_fetch_from_array($this->headers, NULL, $xss_clean);
-		}
-		if (function_exists('apache_request_headers'))
-		{
-			$this->headers = apache_request_headers();
-		}
-		else
-		{
-			isset($_SERVER['CONTENT_TYPE']) && $this->headers['Content-Type'] = $_SERVER['CONTENT_TYPE'];
-			foreach ($_SERVER as $key => $val)
-			{
-				if (sscanf($key, 'HTTP_%s', $header) === 1)
-				{
-					$header = str_replace('_', ' ', strtolower($header));
-					$header = str_replace(' ', '-', ucwords($header));
-					$this->headers[$header] = $_SERVER[$key];
-				}
-			}
-		}
-		return $this->_fetch_from_array($this->headers, NULL, $xss_clean);
-	}
-	public function get_request_header($index, $xss_clean = FALSE)
-	{
-		static $headers;
-		if ( ! isset($headers))
-		{
-			empty($this->headers) && $this->request_headers();
-			foreach ($this->headers as $key => $value)
-			{
-				$headers[strtolower($key)] = $value;
-			}
-		}
-		$index = strtolower($index);
-		if ( ! isset($headers[$index]))
-		{
-			return NULL;
-		}
-		return ($xss_clean === TRUE)
-			? $this->security->xss_clean($headers[$index])
-			: $headers[$index];
-	}
-	public function is_ajax_request()
-	{
-		return ( ! empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-	}
-	public function is_cli_request()
-	{
-		return is_cli();
-	}
-	public function method($upper = FALSE)
-	{
-		return ($upper)
-			? strtoupper($this->server('REQUEST_METHOD'))
-			: strtolower($this->server('REQUEST_METHOD'));
-	}
-	public function __get($name)
-	{
-		if ($name === 'raw_input_stream')
-		{
-			isset($this->_raw_input_stream) OR $this->_raw_input_stream = file_get_contents('php://input');
-			return $this->_raw_input_stream;
-		}
-		elseif ($name === 'ip_address')
-		{
-			return $this->ip_address;
-		}
-	}
+
+
+
 }

@@ -1,6 +1,9 @@
 <?php namespace Admin\Services;
-
-class Image {
+/**
+ * 
+**/
+class Image
+{
 	public $image_library		= 'gd2';
 	public $library_path		= '';
 	public $dynamic_output		= FALSE;

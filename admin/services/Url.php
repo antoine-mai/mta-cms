@@ -1,5 +1,7 @@
 <?php namespace Admin\Services;
-
+/**
+ * 
+**/
 class Url
 {
     /**

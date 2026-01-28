@@ -2,6 +2,7 @@
 /**
  * 
 **/
+#[\AllowDynamicProperties]
 class Config
 {
 	public $config = [];
@@ -9,8 +10,17 @@ class Config
 	public $_config_paths =	[ADMIN_ROOT];
 	public function __construct()
 	{
-		$this->config =& get_config();
-		log_message('info', 'Config Class Initialized');
+		// Load main config.yaml
+        $file_path = CONFPATH.'config.yaml';
+        if (file_exists($file_path)) {
+            $yaml = new \Admin\Services\Yaml();
+            $this->config = $yaml->parse($file_path);
+        } else {
+             // Fallback or empty if not found, though widely expected
+             // \Admin\Core\Common::show_error('The configuration file does not exist.');
+        }
+
+
 	}
 	public function load($file = '', $use_sections = FALSE, $fail_gracefully = FALSE)
 	{
@@ -39,7 +49,7 @@ class Config
 					{
 						return FALSE;
 					}
-					show_error('Your '.$file_path.' file does not appear to contain a valid configuration array.');
+					\Admin\Core\Error::show_error('Your '.$file_path.' file does not appear to contain a valid configuration array.');
 				}
 				if ($use_sections === TRUE)
 				{
@@ -54,7 +64,7 @@ class Config
 				$this->is_loaded[] = $file_path;
 				$config = NULL;
 				$loaded = TRUE;
-				log_message('debug', 'Config file loaded: '.$file_path);
+				\Admin\Core\Error::log_message('debug', 'Config file loaded: '.$file_path);
 			}
 		}
 		if ($loaded === TRUE)
@@ -65,7 +75,7 @@ class Config
 		{
 			return FALSE;
 		}
-		show_error('The configuration file '.$file.'.yaml does not exist.');
+		\Admin\Core\Error::show_error('The configuration file '.$file.'.yaml does not exist.');
 	}
 	public function item($item, $index = '')
 	{
