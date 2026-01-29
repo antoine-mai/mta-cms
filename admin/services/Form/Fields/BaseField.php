@@ -29,7 +29,7 @@ abstract class BaseField
 
     public function __construct($data = '', $value = '', $extra = '')
     {
-        $this->CI =& get_instance();
+        $this->CI =& \Admin\Core\Route::getInstance();
         $this->data = $data;
         $this->value = $value;
         $this->extra = $extra;
@@ -59,21 +59,21 @@ abstract class BaseField
     public function validate($posted_value)
     {
         foreach ($this->rules as $rule) {
-            $param = FALSE;
+            $param = false;
             if (preg_match('/(.*?)\[(.*)\]/', (string)$rule, $match)) {
                 $rule = $match[1];
                 $param = $match[2];
             }
 
             if (method_exists($this, (string)$rule)) {
-                $result = $param !== FALSE ? $this->$rule($posted_value, $param) : $this->$rule($posted_value);
-                if ($result === FALSE) {
+                $result = $param !== false ? $this->$rule($posted_value, $param) : $this->$rule($posted_value);
+                if ($result === false) {
                     $this->error = $this->_get_error_message((string)$rule, $param);
                     return false;
                 }
             } elseif (function_exists((string)$rule)) {
-                $result = $param !== FALSE ? $rule($posted_value, $param) : $rule($posted_value);
-                if ($result === FALSE) {
+                $result = $param !== false ? $rule($posted_value, $param) : $rule($posted_value);
+                if ($result === false) {
                      $this->error = $this->_get_error_message((string)$rule, $param);
                      return false;
                 }
@@ -87,11 +87,11 @@ abstract class BaseField
         return $this->error;
     }
 
-    protected function _get_error_message($rule, $param = FALSE)
+    protected function _get_error_message($rule, $param = false)
     {
         // Simple error message logic, can be improved to use lang files
         $label = $this->label ?: 'Field';
-        return "The $label field failed validation: $rule" . ($param !== FALSE ? " ($param)" : "");
+        return "The $label field failed validation: $rule" . ($param !== false ? " ($param)" : "");
     }
 
     abstract public function render();
@@ -126,7 +126,7 @@ abstract class BaseField
         $att = '';
         foreach ($default as $key => $val) {
             if ($key === 'value') {
-                $val = html_escape((string)$val);
+                $val = \Admin\Core\Common::htmlEscape((string)$val);
             } elseif ($key === 'name' && ! strlen((string)$default['name'])) {
                 continue;
             }

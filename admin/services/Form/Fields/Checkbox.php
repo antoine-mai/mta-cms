@@ -6,7 +6,7 @@ class Checkbox extends BaseField
 {
     protected $checked;
 
-    public function __construct($data = '', $value = '', $checked = FALSE, $extra = '')
+    public function __construct($data = '', $value = '', $checked = false, $extra = '')
     {
         parent::__construct($data, $value, $extra);
         $this->checked = $checked;
@@ -20,7 +20,7 @@ class Checkbox extends BaseField
         {
             $this->checked = $this->data['checked'];
 
-            if ($this->checked == FALSE)
+            if ($this->checked == false)
             {
                 unset($this->data['checked']);
             }
@@ -30,7 +30,7 @@ class Checkbox extends BaseField
             }
         }
 
-        if ($this->checked == TRUE)
+        if ($this->checked == true)
         {
             $defaults['checked'] = 'checked';
         }

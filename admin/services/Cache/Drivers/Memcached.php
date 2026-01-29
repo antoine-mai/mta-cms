@@ -16,24 +16,24 @@ class Memcached extends Driver {
 
 	public function __construct()
 	{
-		$CI =& get_instance();
+		$CI =& \Admin\Core\Route::getInstance();
 		$defaults = $this->_config['default'];
-		if ($CI->config->load('memcached', TRUE, TRUE))
+		if ($CI->config->load('memcached', true, true))
 		{
 			$this->_config = $CI->config->config['memcached'];
 		}
 
-		if (class_exists('Memcached', FALSE))
+		if (class_exists('Memcached', false))
 		{
 			$this->_memcached = new NativeMemcached();
 		}
-		elseif (class_exists('Memcache', FALSE))
+		elseif (class_exists('Memcache', false))
 		{
 			$this->_memcached = new NativeMemcache();
 		}
 		else
 		{
-			log_message('error', 'Cache: Failed to create Memcache(d) object; extension not loaded?');
+			\Admin\Core\Error::logMessage('error', 'Cache: Failed to create Memcache(d) object; extension not loaded?');
 			return;
 		}
 
@@ -48,7 +48,7 @@ class Memcached extends Driver {
 				$this->_memcached->addServer(
 					(string)$cache_server['hostname'],
 					(int)$cache_server['port'],
-					TRUE,
+					true,
 					(int)$cache_server['weight']
 				);
 			}
@@ -69,9 +69,9 @@ class Memcached extends Driver {
 		return is_array($data) ? $data[0] : $data;
 	}
 
-	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	public function save($id, $data, $ttl = 60, $raw = false)
 	{
-		if ($raw !== TRUE)
+		if ($raw !== true)
 		{
 			$data = [$data, time(), $ttl];
 		}
@@ -85,7 +85,7 @@ class Memcached extends Driver {
 			return $this->_memcached->set((string)$id, $data, 0, (int)$ttl);
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	public function delete($id)
@@ -95,18 +95,18 @@ class Memcached extends Driver {
 
 	public function increment($id, $offset = 1)
 	{
-		if (($result = $this->_memcached->increment((string)$id, (int)$offset)) === FALSE)
+		if (($result = $this->_memcached->increment((string)$id, (int)$offset)) === false)
 		{
-			return $this->_memcached->add((string)$id, (int)$offset) ? (int)$offset : FALSE;
+			return $this->_memcached->add((string)$id, (int)$offset) ? (int)$offset : false;
 		}
 		return $result;
 	}
 
 	public function decrement($id, $offset = 1)
 	{
-		if (($result = $this->_memcached->decrement((string)$id, (int)$offset)) === FALSE)
+		if (($result = $this->_memcached->decrement((string)$id, (int)$offset)) === false)
 		{
-			return $this->_memcached->add((string)$id, 0) ? 0 : FALSE;
+			return $this->_memcached->add((string)$id, 0) ? 0 : false;
 		}
 		return $result;
 	}
@@ -126,7 +126,7 @@ class Memcached extends Driver {
 		$stored = $this->_memcached->get((string)$id);
 		if ( ! is_array($stored) OR count($stored) !== 3)
 		{
-			return FALSE;
+			return false;
 		}
 
 		list($data, $time, $ttl) = $stored;

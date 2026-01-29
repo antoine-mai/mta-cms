@@ -46,7 +46,7 @@ class Upload
 	{
 		empty($config) OR $this->initialize($config, false);
 		$this->_mimes =& getMimes();
-		$this->_CI =& getInstance();
+		$this->_CI =& \Admin\Core\Route::getInstance();
 		logMessage('info', 'Upload Class Initialized');
 	}
 

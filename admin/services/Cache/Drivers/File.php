@@ -7,7 +7,7 @@ class File extends Driver {
 
 	public function __construct()
 	{
-		$CI =& get_instance();
+		$CI =& \Admin\Core\Route::getInstance();
 		$CI->load->helper('file');
 		$path = $CI->config->item('cache_path');
 		$this->_cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
@@ -16,10 +16,10 @@ class File extends Driver {
 	public function get($id)
 	{
 		$data = $this->_get($id);
-		return is_array($data) ? $data['data'] : FALSE;
+		return is_array($data) ? $data['data'] : false;
 	}
 
-	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	public function save($id, $data, $ttl = 60, $raw = false)
 	{
 		$contents = [
 			'time'		=> time(),
@@ -29,56 +29,56 @@ class File extends Driver {
 		if (write_file((string)$this->_cache_path.$id, serialize($contents)))
 		{
 			chmod((string)$this->_cache_path.$id, 0640);
-			return TRUE;
+			return true;
 		}
-		return FALSE;
+		return false;
 	}
 
 	public function delete($id)
 	{
-		return is_file((string)$this->_cache_path.$id) ? unlink((string)$this->_cache_path.$id) : FALSE;
+		return is_file((string)$this->_cache_path.$id) ? unlink((string)$this->_cache_path.$id) : false;
 	}
 
 	public function increment($id, $offset = 1)
 	{
 		$data = $this->_get($id);
-		if ($data === FALSE)
+		if ($data === false)
 		{
 			$data = ['data' => 0, 'ttl' => 60];
 		}
 		elseif ( ! is_int($data['data']))
 		{
-			return FALSE;
+			return false;
 		}
 		$new_value = $data['data'] + $offset;
 		return $this->save($id, $new_value, $data['ttl'])
 			? $new_value
-			: FALSE;
+			: false;
 	}
 
 	public function decrement($id, $offset = 1)
 	{
 		$data = $this->_get($id);
-		if ($data === FALSE)
+		if ($data === false)
 		{
 			$data = ['data' => 0, 'ttl' => 60];
 		}
 		elseif ( ! is_int($data['data']))
 		{
-			return FALSE;
+			return false;
 		}
 		$new_value = $data['data'] - $offset;
 		return $this->save($id, $new_value, $data['ttl'])
 			? $new_value
-			: FALSE;
+			: false;
 	}
 
 	public function clean()
 	{
-		return delete_files((string)$this->_cache_path, FALSE, TRUE);
+		return delete_files((string)$this->_cache_path, false, true);
 	}
 
-	public function cache_info($type = NULL)
+	public function cache_info($type = null)
 	{
 		return get_dir_file_info((string)$this->_cache_path);
 	}
@@ -87,7 +87,7 @@ class File extends Driver {
 	{
 		if ( ! is_file((string)$this->_cache_path.$id))
 		{
-			return FALSE;
+			return false;
 		}
 		$data = unserialize((string)file_get_contents((string)$this->_cache_path.$id));
 		if (is_array($data))
@@ -95,14 +95,14 @@ class File extends Driver {
 			$mtime = filemtime((string)$this->_cache_path.$id);
 			if ( ! isset($data['ttl'], $data['time']))
 			{
-				return FALSE;
+				return false;
 			}
 			return [
 				'expire' => $data['time'] + $data['ttl'],
 				'mtime'	 => $mtime
 			];
 		}
-		return FALSE;
+		return false;
 	}
 
 	public function is_supported()
@@ -114,13 +114,13 @@ class File extends Driver {
 	{
 		if ( ! is_file((string)$this->_cache_path.$id))
 		{
-			return FALSE;
+			return false;
 		}
 		$data = unserialize((string)file_get_contents((string)$this->_cache_path.$id));
 		if ($data['ttl'] > 0 && time() > $data['time'] + $data['ttl'])
 		{
 			file_exists((string)$this->_cache_path.$id) && unlink((string)$this->_cache_path.$id);
-			return FALSE;
+			return false;
 		}
 		return $data;
 	}

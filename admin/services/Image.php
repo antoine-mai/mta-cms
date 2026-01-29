@@ -927,7 +927,7 @@ class Image
 
 	public function set_error($msg)
 	{
-		$CI =& getInstance();
+		$CI =& \Admin\Core\Route::getInstance();
 		$CI->lang->load('imglib');
 		if (is_array($msg))
 		{

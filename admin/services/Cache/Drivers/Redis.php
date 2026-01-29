@@ -9,7 +9,7 @@ class Redis extends Driver
 	protected static $_default_config = [
 		'socket_type' => 'tcp',
 		'host' => '127.0.0.1',
-		'password' => NULL,
+		'password' => null,
 		'port' => 6379,
 		'timeout' => 0
 	];
@@ -23,7 +23,7 @@ class Redis extends Driver
 	{
 		if ( ! $this->is_supported())
 		{
-			log_message('error', 'Cache: Failed to create Redis object; extension not loaded?');
+			\Admin\Core\Error::logMessage('error', 'Cache: Failed to create Redis object; extension not loaded?');
 			return;
 		}
 
@@ -41,8 +41,8 @@ class Redis extends Driver
 			}
 		}
 
-		$CI =& get_instance();
-		if ($CI->config->load('redis', TRUE, TRUE))
+		$CI =& \Admin\Core\Route::getInstance();
+		if ($CI->config->load('redis', true, true))
 		{
 			$config = array_merge(self::$_default_config, $CI->config->item('redis'));
 		}
@@ -65,39 +65,39 @@ class Redis extends Driver
 
 			if ( ! $success)
 			{
-				log_message('error', 'Cache: Redis connection failed. Check your configuration.');
+				\Admin\Core\Error::logMessage('error', 'Cache: Redis connection failed. Check your configuration.');
 			}
 
 			if (isset($config['password']) && ! $this->_redis->auth((string)$config['password']))
 			{
-				log_message('error', 'Cache: Redis authentication failed.');
+				\Admin\Core\Error::logMessage('error', 'Cache: Redis authentication failed.');
 			}
 		}
 		catch (RedisException $e)
 		{
-			log_message('error', 'Cache: Redis connection refused ('.$e->getMessage().')');
+			\Admin\Core\Error::logMessage('error', 'Cache: Redis connection refused ('.$e->getMessage().')');
 		}
 	}
 
 	public function get($key)
 	{
 		$value = $this->_redis->get((string)$key);
-		if ($value !== FALSE && $this->_redis->sIsMember('_ci_redis_serialized', (string)$key))
+		if ($value !== false && $this->_redis->sIsMember('_ci_redis_serialized', (string)$key))
 		{
 			return unserialize((string)$value);
 		}
 		return $value;
 	}
 
-	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	public function save($id, $data, $ttl = 60, $raw = false)
 	{
 		if (is_array($data) OR is_object($data))
 		{
 			if ( ! $this->_redis->sIsMember('_ci_redis_serialized', (string)$id) && ! $this->_redis->sAdd('_ci_redis_serialized', (string)$id))
 			{
-				return FALSE;
+				return false;
 			}
-			isset($this->_serialized[$id]) OR $this->_serialized[$id] = TRUE;
+			isset($this->_serialized[$id]) OR $this->_serialized[$id] = true;
 			$data = serialize($data);
 		}
 		else
@@ -111,10 +111,10 @@ class Redis extends Driver
 	{
 		if ($this->_redis->{static::$_delete_name}((string)$key) !== 1)
 		{
-			return FALSE;
+			return false;
 		}
 		$this->_redis->{static::$_sRemove_name}('_ci_redis_serialized', (string)$key);
-		return TRUE;
+		return true;
 	}
 
 	public function increment($id, $offset = 1)
@@ -132,7 +132,7 @@ class Redis extends Driver
 		return $this->_redis->flushDB();
 	}
 
-	public function cache_info($type = NULL)
+	public function cache_info($type = null)
 	{
 		return $this->_redis->info();
 	}
@@ -140,14 +140,14 @@ class Redis extends Driver
 	public function get_metadata($key)
 	{
 		$value = $this->get($key);
-		if ($value !== FALSE)
+		if ($value !== false)
 		{
 			return [
 				'expire' => time() + $this->_redis->ttl((string)$key),
 				'data' => $value
 			];
 		}
-		return FALSE;
+		return false;
 	}
 
 	public function is_supported()

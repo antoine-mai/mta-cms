@@ -56,7 +56,7 @@ class Driver
 			showError($msg);
 		}
 
-		$CI = getInstance();
+		$CI = \Admin\Core\Route::getInstance();
 		$paths = $CI->load->get_package_paths(true);
 		
         // Try PSR-4 first

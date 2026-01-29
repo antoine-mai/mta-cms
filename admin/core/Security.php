@@ -3,7 +3,6 @@
 /**
  * Security Class
  */
-#[\AllowDynamicProperties]
 class Security
 {
     /**
@@ -145,11 +144,11 @@ class Security
         }
 
         if ($excludeUris = Common::configItem('csrf_exclude_uris')) {
-            $request = \Admin\Core\Request\Request::createFromGlobals();
+            $request = &Registry::getInstance('Request');
             $pathInfo = ltrim($request->getPathInfo(), '/');
 
             foreach ($excludeUris as $excluded) {
-                if (preg_match('#^' . $excluded . '$#i' . (UTF8_ENABLED ? 'u' : ''), $pathInfo)) {
+                if (preg_match('#^' . $excluded . '$#i' . (defined('UTF8_ENABLED') && UTF8_ENABLED ? 'u' : ''), $pathInfo)) {
                     return $this;
                 }
             }
@@ -191,31 +190,18 @@ class Security
             return false;
         }
 
-        if (Common::isPhp('7.3')) {
-            setcookie(
-                $this->csrfCookieName,
-                $this->csrfHash,
-                [
-                    'expires'  => $expire,
-                    'path'     => Common::configItem('cookie_path'),
-                    'domain'   => Common::configItem('cookie_domain'),
-                    'secure'   => $secureCookie,
-                    'httponly' => Common::configItem('cookie_httponly'),
-                    'samesite' => 'Strict'
-                ]
-            );
-        } else {
-            $domain = trim((string)Common::configItem('cookie_domain'));
-            header('Set-Cookie: ' . $this->csrfCookieName . '=' . $this->csrfHash
-                    . '; Expires=' . gmdate('D, d-M-Y H:i:s T', $expire)
-                    . '; Max-Age=' . $this->csrfExpire
-                    . '; Path=' . rawurlencode((string)Common::configItem('cookie_path'))
-                    . ($domain === '' ? '' : '; Domain=' . $domain)
-                    . ($secureCookie ? '; Secure' : '')
-                    . (Common::configItem('cookie_httponly') ? '; HttpOnly' : '')
-                    . '; SameSite=Strict'
-            );
-        }
+        setcookie(
+            $this->csrfCookieName,
+            $this->csrfHash,
+            [
+                'expires'  => $expire,
+                'path'     => Common::configItem('cookie_path'),
+                'domain'   => Common::configItem('cookie_domain'),
+                'secure'   => $secureCookie,
+                'httponly' => Common::configItem('cookie_httponly'),
+                'samesite' => 'Strict'
+            ]
+        );
 
         Error::logMessage('info', 'CSRF cookie sent');
         return $this;
@@ -364,53 +350,9 @@ class Security
     public function xssHash()
     {
         if ($this->xssHash === null) {
-            $rand = $this->getRandomBytes(16);
-            $this->xssHash = ($rand === false)
-                ? md5(uniqid((string)mt_rand(), true))
-                : bin2hex($rand);
+            $this->xssHash = bin2hex(random_bytes(16));
         }
         return $this->xssHash;
-    }
-
-    /**
-     * Get random bytes
-     *
-     * @param	int	$length
-     * @return	string|bool
-     */
-    public function getRandomBytes($length)
-    {
-        if (empty($length) || !ctype_digit((string)$length)) {
-            return false;
-        }
-
-        if (function_exists('random_bytes')) {
-            try {
-                return random_bytes((int)$length);
-            } catch (\Exception $e) {
-                Error::logMessage('error', $e->getMessage());
-                return false;
-            }
-        }
-
-        if (defined('MCRYPT_DEV_URANDOM') && ($output = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM)) !== false) {
-            return $output;
-        }
-
-        if (is_readable('/dev/urandom') && ($fp = fopen('/dev/urandom', 'rb')) !== false) {
-            Common::isPhp('5.4') && stream_set_chunk_size($fp, $length);
-            $output = fread($fp, $length);
-            fclose($fp);
-            if ($output !== false) {
-                return $output;
-            }
-        }
-
-        if (function_exists('openssl_random_pseudo_bytes')) {
-            return openssl_random_pseudo_bytes($length);
-        }
-
-        return false;
     }
 
     /**
@@ -428,17 +370,10 @@ class Security
 
         static $entities;
         isset($charset) or $charset = $this->charset;
-        $flag = Common::isPhp('5.4') ? ENT_COMPAT | ENT_HTML5 : ENT_COMPAT;
+        $flag = ENT_COMPAT | ENT_HTML5;
 
         if (!isset($entities)) {
             $entities = array_map('strtolower', get_html_translation_table(HTML_ENTITIES, $flag, $charset));
-            if ($flag === ENT_COMPAT) {
-                $entities[':'] = '&colon;';
-                $entities['('] = '&lpar;';
-                $entities[')'] = '&rpar;';
-                $entities["\n"] = '&NewLine;';
-                $entities["\t"] = '&Tab;';
-            }
         }
 
         do {
@@ -454,15 +389,12 @@ class Security
                 $str = str_replace(array_keys($replace), array_values($replace), (string)$str);
             }
 
-            $str = html_entityDecode(
+            $str = html_entity_decode(
                 preg_replace('/(&#(?:x0*[0-9a-f]{2,5}(?![0-9a-f;])|(?:0*\d{2,4}(?![0-9;]))))/iS', '$1;', (string)$str),
                 $flag,
                 $charset
             );
 
-            if ($flag === ENT_COMPAT) {
-                $str = str_replace(array_values($entities), array_keys($entities), (string)$str);
-            }
         } while ($strCompare !== $str);
 
         return $str;
@@ -643,18 +575,6 @@ class Security
     }
 
     /**
-     * Do never allowed
-     */
-    protected function doNeverAllowed($str)
-    {
-        $str = str_replace(array_keys($this->neverAllowedStr), $this->neverAllowedStr, (string)$str);
-        foreach ($this->neverAllowedRegex as $regex) {
-            $str = preg_replace('#' . $regex . '#is', '[removed]', (string)$str);
-        }
-        return $str;
-    }
-
-    /**
      * CSRF Set Hash
      */
     protected function csrfSetHash()
@@ -664,10 +584,7 @@ class Security
                 && preg_match('#^[0-9a-f]{32}$#iS', $_COOKIE[$this->csrfCookieName]) === 1) {
                 return $this->csrfHash = $_COOKIE[$this->csrfCookieName];
             }
-            $rand = $this->getRandomBytes(16);
-            $this->csrfHash = ($rand === false)
-                ? md5(uniqid((string)mt_rand(), true))
-                : bin2hex($rand);
+            $this->csrfHash = bin2hex(random_bytes(16));
         }
         return $this->csrfHash;
     }

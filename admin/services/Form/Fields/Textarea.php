@@ -23,7 +23,7 @@ class Textarea extends BaseField
         }
 
         return '<textarea '.$this->_parse_form_attributes($this->data, $defaults).$this->_attributes_to_string($this->extra).'>'
-            .html_escape((string)$val)
+            .\Admin\Core\Common::htmlEscape((string)$val)
             ."</textarea>\n";
     }
 }

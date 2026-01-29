@@ -1,5 +1,4 @@
 <?php namespace Admin\Core;
-
 /**
  * Common Class
  *

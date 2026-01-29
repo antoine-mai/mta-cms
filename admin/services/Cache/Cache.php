@@ -17,7 +17,7 @@ class Cache extends Driver
 		'wincache'
 	];
 
-	protected $_cache_path = NULL;
+	protected $_cache_path = null;
 	protected $_adapter = 'dummy';
 	protected $_backup_driver = 'dummy';
 	public $key_prefix = '';
@@ -32,12 +32,12 @@ class Cache extends Driver
 		{
 			if ( ! $this->is_supported($this->_backup_driver))
 			{
-				log_message('error', 'Cache adapter "'.$this->_adapter.'" and backup "'.$this->_backup_driver.'" are both unavailable. Cache is now using "Dummy" adapter.');
+				\Admin\Core\Error::logMessage('error', 'Cache adapter "'.$this->_adapter.'" and backup "'.$this->_backup_driver.'" are both unavailable. Cache is now using "Dummy" adapter.');
 				$this->_adapter = 'dummy';
 			}
 			else
 			{
-				log_message('debug', 'Cache adapter "'.$this->_adapter.'" is unavailable. Falling back to "'.$this->_backup_driver.'" backup adapter.');
+				\Admin\Core\Error::logMessage('debug', 'Cache adapter "'.$this->_adapter.'" is unavailable. Falling back to "'.$this->_backup_driver.'" backup adapter.');
 				$this->_adapter = $this->_backup_driver;
 			}
 		}
@@ -48,7 +48,7 @@ class Cache extends Driver
 		return $this->{$this->_adapter}->get((string)$this->key_prefix.$id);
 	}
 
-	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	public function save($id, $data, $ttl = 60, $raw = false)
 	{
 		return $this->{$this->_adapter}->save((string)$this->key_prefix.$id, $data, $ttl, $raw);
 	}

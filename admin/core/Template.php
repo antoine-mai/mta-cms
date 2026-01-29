@@ -1,134 +1,185 @@
 <?php namespace Admin\Core;
 /**
- * 
-**/
-#[\AllowDynamicProperties]
+ * Template Class
+ *
+ * Responsible for loading views and processing templates.
+ */
 class Template
 {
-    protected $view_paths = [ADMIN_ROOT . 'template/' => true];
-    protected $cached_vars = [];
-    protected $ob_level;
+    /**
+     * List of paths to load views from
+     *
+     * @var array
+     */
+    protected $viewPaths = [ADMIN_ROOT . 'template/' => true];
 
+    /**
+     * Cached variables for views
+     *
+     * @var array
+     */
+    protected $cachedVars = [];
+
+    /**
+     * Nesting level of the output buffering mechanism
+     *
+     * @var int
+     */
+    protected $obLevel;
+
+    /**
+     * @var \Admin\Core\Config
+     */
+    protected $config;
+
+    /**
+     * @var \Admin\Core\Uri
+     */
+    protected $uri;
+
+    /**
+     * @var \Admin\Core\Router
+     */
+    protected $router;
+
+    /**
+     * @var \Admin\Core\Output
+     */
+    protected $output;
+
+    /**
+     * @var \Admin\Core\Security
+     */
+    protected $security;
+
+    /**
+     * @var \Admin\Core\Language
+     */
+    protected $lang;
+
+    /**
+     * @var \Admin\Core\Loader
+     */
+    protected $load;
+
+    /**
+     * Constructor
+     */
     public function __construct()
     {
-        $this->ob_level = ob_get_level();
-        \Admin\Core\Error::logMessage('info', 'Template Class Initialized');
+        $this->obLevel = ob_get_level();
+        
+        // Inject core components for use in views ($this->config, $this->load, etc.)
+        $this->config   = &Registry::getInstance('Config');
+        $this->uri      = &Registry::getInstance('Uri');
+        $this->router   = &Registry::getInstance('Router');
+        $this->output   = &Registry::getInstance('Output');
+        $this->security = &Registry::getInstance('Security');
+        $this->lang     = &Registry::getInstance('Language');
+        $this->load     = &Registry::getInstance('Loader');
+
+        Error::logMessage('info', 'Template Class Initialized');
     }
 
+    /**
+     * Load view
+     *
+     * @param	string	$view
+     * @param	array	$vars
+     * @param	bool	$return
+     * @return	string|Template
+     */
     public function load($view, $vars = [], $return = false)
     {
-        return $this->_load(['view' => $view, 'vars' => $this->prepare_vars($vars), 'return' => $return]);
+        return $this->internalLoad(['view' => $view, 'vars' => $this->prepareVars($vars), 'return' => $return]);
     }
 
-    protected function _load($data)
+    /**
+     * Internal load method
+     *
+     * @param	array	$data
+     * @return	string|Template
+     */
+    protected function internalLoad($data)
     {
-        foreach (['view', 'vars', 'path', 'return'] as $val)
-        {
+        foreach (['view', 'vars', 'path', 'return'] as $val) {
             $$val = isset($data[$val]) ? $data[$val] : false;
         }
 
-        $file_exists = false;
-        if (is_string($path) && $path !== '')
-        {
+        $fileExists = false;
+        if (is_string($path) && $path !== '') {
             $x = explode('/', $path);
             $file = end($x);
-        }
-        else
-        {
-            $ext = pathinfo($view, PATHINFO_EXTENSION);
-            $file = ($ext === '') ? $view.'.php' : $view;
-            foreach ($this->view_paths as $view_file => $cascade)
-            {
-                if (file_exists($view_file.$file))
-                {
-                    $path = $view_file.$file;
-                    $file_exists = true;
+        } else {
+            $ext = pathinfo((string)$view, PATHINFO_EXTENSION);
+            $file = ($ext === '') ? $view . '.php' : $view;
+            foreach ($this->viewPaths as $viewFile => $cascade) {
+                if (file_exists($viewFile . $file)) {
+                    $path = $viewFile . $file;
+                    $fileExists = true;
                     break;
                 }
-                if ( ! $cascade)
-                {
+                if (!$cascade) {
                     break;
                 }
             }
         }
 
-        if ( ! $file_exists && ! file_exists($path))
-        {
-            \Admin\Core\Error::showError('Unable to load the requested file: '.$file);
+        if (!$fileExists && !file_exists((string)$path)) {
+            Error::showError('Unable to load the requested file: ' . $file);
         }
 
-        // Make the CI request object available to views
-        $CI =& getInstance();
-        foreach (get_object_vars($CI) as $key => $var)
-        {
-            if ( ! isset($this->$key))
-            {
-                $this->$key =& $CI->$key;
-            }
-        }
-
-        empty($vars) OR $this->cached_vars = array_merge($this->cached_vars, $vars);
-        extract($this->cached_vars);
+        empty($vars) or $this->cachedVars = array_merge($this->cachedVars, $vars);
+        extract($this->cachedVars);
 
         ob_start();
 
-        if ( ! \Admin\Core\Common::isPhp('5.4') && ! ini_get('short_open_tag') && \Admin\Core\Common::configItem('rewrite_short_tags') === true)
-        {
-            echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', file_get_contents($path))));
-        }
-        else
-        {
-            include($path); 
+        if (!Common::isPhp('5.4') && !ini_get('short_open_tag') && Common::configItem('rewrite_short_tags') === true) {
+            echo eval('?>' . preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', (string)file_get_contents((string)$path))));
+        } else {
+            include($path);
         }
 
-        \Admin\Core\Error::logMessage('info', 'File loaded: '.$path);
+        Error::logMessage('info', 'File loaded: ' . $path);
 
-        if ($return === true)
-        {
+        if ($return === true) {
             $buffer = ob_get_contents();
             @ob_end_clean();
             return $buffer;
         }
 
-        if (ob_get_level() > $this->ob_level + 1)
-        {
+        if (ob_get_level() > $this->obLevel + 1) {
             ob_end_flush();
-        }
-        else
-        {
-            // For now, adhere to old Output buffering if it exists, or just flush
-            // If we are strictly using Response objects now, this might change, 
-            // but for backward compat, we might still want to capture it.
-            // However, the user is moving to Response, so $return=true is the main use case.
-            // But if user does NOT use return=true, we should probably output.
-            
-            if (isset($CI->output)) {
-                $CI->output->appendOutput(ob_get_contents());
+        } else {
+            if (isset($this->output)) {
+                $this->output->appendOutput(ob_get_contents());
             } else {
-                 echo ob_get_contents();
+                echo ob_get_contents();
             }
-           
+
             @ob_end_clean();
         }
 
         return $this;
     }
 
-	protected function prepare_vars($vars)
-	{
-		if ( ! is_array($vars))
-		{
-			$vars = is_object($vars)
-				? get_object_vars($vars)
-				: [];
-		}
-		foreach (array_keys($vars) as $key)
-		{
-			if (strncmp($key, 'ci_', 3) === 0)
-			{
-				unset($vars[$key]);
-			}
-		}
-		return $vars;
-	}
+    /**
+     * Prepare variables for views
+     *
+     * @param	mixed	$vars
+     * @return	array
+     */
+    protected function prepareVars($vars)
+    {
+        if (!is_array($vars)) {
+            $vars = is_object($vars) ? get_object_vars($vars) : [];
+        }
+
+        foreach (array_keys($vars) as $key) {
+            if (strncmp((string)$key, 'ci_', 3) === 0) {
+                unset($vars[$key]);
+            }
+        }
+        return $vars;
+    }
 }

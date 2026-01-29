@@ -2,8 +2,7 @@
 /**
  * 
 **/
-#[\AllowDynamicProperties]
-class Log
+class Logging
 {
 	protected $_log_path;
 	protected $_file_permissions = 0644;

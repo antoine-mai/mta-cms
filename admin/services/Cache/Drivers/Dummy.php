@@ -5,46 +5,46 @@ use Admin\Services\Driver;
 class Dummy extends Driver {
 	public function get($id)
 	{
-		return FALSE;
+		return false;
 	}
 
-	public function save($id, $data, $ttl = 60, $raw = FALSE)
+	public function save($id, $data, $ttl = 60, $raw = false)
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function delete($id)
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function increment($id, $offset = 1)
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function decrement($id, $offset = 1)
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function clean()
 	{
-		return TRUE;
+		return true;
 	}
 
-	public function cache_info($type = NULL)
+	public function cache_info($type = null)
 	{
-		return FALSE;
+		return false;
 	}
 
 	public function get_metadata($id)
 	{
-		return FALSE;
+		return false;
 	}
 
 	public function is_supported()
 	{
-		return TRUE;
+		return true;
 	}
 }

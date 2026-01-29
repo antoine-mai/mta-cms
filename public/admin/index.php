@@ -5,6 +5,6 @@ define ('ROOT_DIR', dirname(__DIR__, 2));
 define ('ADMIN_ROOT', ROOT_DIR . '/admin/');
 define ('CONFPATH', ROOT_DIR . '/config/admin/');
 require_once ADMIN_ROOT . 'autoload.php';
-require_once ADMIN_ROOT . 'core/Admin.php';
+require_once ADMIN_ROOT . 'core/Startup.php';
 
-\Admin\Core\Admin::run();
+\Admin\Core\Startup::run();

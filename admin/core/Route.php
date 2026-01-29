@@ -1,56 +1,73 @@
 <?php namespace Admin\Core;
+
 /**
+ * Route Class
  * 
-**/
-#[\AllowDynamicProperties]
+ * Base class for all route controllers.
+ */
 class Route
 {
-	private static $instance;
-	public $load;
+    /**
+     * Singleton instance
+     *
+     * @var Route
+     */
+    private static $instance;
+
+    /**
+     * Core components
+     */
+    public $load;
     public $config;
     public $uri;
     public $router;
     public $output;
     public $security;
-    public $input;
     public $lang;
     public $utf8;
 
-	public function __construct()
-	{
-		self::$instance =& $this;
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        self::$instance = &$this;
 
-        $this->config   =& \Admin\Core\Registry::getInstance('Config', 'core');
-        $this->utf8     =& \Admin\Core\Registry::getInstance('Utf8');
-        $this->router   =& \Admin\Core\Registry::getInstance('Router', 'core');
-        $this->output   =& \Admin\Core\Registry::getInstance('Output', 'core');
-        $this->security =& \Admin\Core\Registry::getInstance('Security', 'core');
-        $this->input    =& \Admin\Core\Registry::getInstance('Input', 'core');
-        $this->lang     =& \Admin\Core\Registry::getInstance('Lang', 'core');
+        $this->config   = &Registry::getInstance('Config', 'core');
+        $this->uri      = &Registry::getInstance('Uri', 'core');
+        $this->utf8     = &Registry::getInstance('Utf8');
+        $this->router   = &Registry::getInstance('Router', 'core');
+        $this->output   = &Registry::getInstance('Output', 'core');
+        $this->security = &Registry::getInstance('Security', 'core');
+        $this->lang     = &Registry::getInstance('Language', 'core');
+
+        $this->load = &Registry::getInstance('Loader', 'core');
         
-		$this->load =& \Admin\Core\Registry::getInstance('Loader', 'core');
-		$this->load->initialize();
-		Error::logMessage('info', 'Route Class Initialized');
-	}
-	public static function &getInstance()
-	{
-		return self::$instance;
-	}
+        Error::logMessage('info', 'Route Class Initialized');
+    }
 
-
+    /**
+     * Get singleton instance
+     *
+     * @return Route
+     */
+    public static function &getInstance()
+    {
+        return self::$instance;
+    }
 
     /**
      * Renders a view.
      *
      * @param string $view       The view name
      * @param array  $parameters An array of parameters to pass to the view
-     * @param Response $response A response instance
+     * @param \Admin\Core\Response\Response $response A response instance
      *
-     * @return Response
+     * @return \Admin\Core\Response\Response
      */
     protected function render(string $view, array $parameters = [], ?\Admin\Core\Response\Response $response = null): \Admin\Core\Response\Response
     {
-        $content = $this->load->template($view, $parameters, true);
+        $content = (string)$this->load->template($view, $parameters, true);
 
         if (null === $response) {
             $response = new \Admin\Core\Response\Response();

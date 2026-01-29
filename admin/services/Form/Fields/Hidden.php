@@ -6,7 +6,7 @@ class Hidden extends BaseField
 {
     protected $recursing;
 
-    public function __construct($name, $value = '', $recursing = FALSE)
+    public function __construct($name, $value = '', $recursing = false)
     {
         parent::__construct($name, $value);
         $this->recursing = $recursing;
@@ -16,7 +16,7 @@ class Hidden extends BaseField
     {
         static $form;
 
-        if ($this->recursing === FALSE)
+        if ($this->recursing === false)
         {
             $form = "\n";
         }
@@ -25,7 +25,7 @@ class Hidden extends BaseField
         {
             foreach ($this->data as $key => $val)
             {
-                $h = new self($key, $val, TRUE);
+                $h = new self($key, $val, true);
                 $form .= $h->render();
             }
             return $form;
@@ -33,14 +33,14 @@ class Hidden extends BaseField
 
         if ( ! is_array($this->value))
         {
-            $form .= '<input type="hidden" name="'.$this->data.'" value="'.html_escape((string)$this->value)."\" />\n";
+            $form .= '<input type="hidden" name="'.$this->data.'" value="'.\Admin\Core\Common::htmlEscape((string)$this->value)."\" />\n";
         }
         else
         {
             foreach ($this->value as $k => $v)
             {
                 $k = is_int($k) ? '' : $k;
-                $h = new self($this->data.'['.$k.']', $v, TRUE);
+                $h = new self($this->data.'['.$k.']', $v, true);
                 $form .= $h->render();
             }
         }

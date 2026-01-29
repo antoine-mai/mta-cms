@@ -60,7 +60,7 @@ class Registry
             // Call constructor manually
             if ($reflection->hasMethod('__construct')) {
                 $constructor = $reflection->getConstructor();
-                if ($constructor->isPublic()) {
+                if ($constructor && $constructor->isPublic()) {
                     if (isset($param)) {
                         $instance->__construct($param);
                     } else {

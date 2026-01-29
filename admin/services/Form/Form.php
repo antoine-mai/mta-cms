@@ -1,12 +1,16 @@
 <?php namespace Admin\Services\Form;
+
+use Admin\Core\Registry;
+
 /**
+ * Form Class
  * 
-**/
+ * Handles form generation and validation.
+ */
 class Form
 {
     use ValidationRules;
 
-    protected $CI;
     protected $fields = [];
     protected $error_array = [];
     protected $error_prefix = '<p>';
@@ -14,7 +18,6 @@ class Form
 
     public function __construct()
     {
-        $this->CI =& get_instance();
     }
 
     /**
@@ -27,25 +30,28 @@ class Form
      */
     public function open($action = '', $attributes = [], $hidden = [])
     {
+        $config = Registry::getInstance('Config');
+        $uri = Registry::getInstance('Uri');
+
         if ( ! $action)
         {
-            $action = $this->CI->config->site_url($this->CI->uri->uri_string());
+            $action = $config->siteUrl($uri->uriString());
         }
-        elseif (strpos((string)$action, '://') === FALSE)
+        elseif (strpos((string)$action, '://') === false)
         {
-            $action = $this->CI->config->site_url((string)$action);
+            $action = $config->siteUrl((string)$action);
         }
 
         $attributes = $this->_attributes_to_string($attributes);
 
-        if (stripos((string)$attributes, 'method=') === FALSE)
+        if (stripos((string)$attributes, 'method=') === false)
         {
             $attributes .= ' method="post"';
         }
 
-        if (stripos((string)$attributes, 'accept-charset=') === FALSE)
+        if (stripos((string)$attributes, 'accept-charset=') === false)
         {
-            $attributes .= ' accept-charset="'.strtolower((string)config_item('charset')).'"';
+            $attributes .= ' accept-charset="'.strtolower((string)Registry::getInstance('Config')->item('charset')).'"';
         }
 
         $form = '<form action="'.$action.'"'.$attributes.">\n";
@@ -54,12 +60,13 @@ class Form
         {
             foreach ($hidden as $name => $value)
             {
-                $form .= '<input type="hidden" name="'.(string)$name.'" value="'.html_escape((string)$value).'" />'."\n";
+                $form .= '<input type="hidden" name="'.(string)$name.'" value="'.\Admin\Core\Common::htmlEscape((string)$value).'" />'."\n";
             }
         }
 
-        if ($this->CI->config->item('csrf_protection') === TRUE && strpos((string)$action, (string)$this->CI->config->base_url()) !== FALSE && ! stripos((string)$form, 'method="get"'))
+        if ($config->item('csrf_protection') === true && strpos((string)$action, (string)$config->baseUrl()) !== false && ! stripos((string)$form, 'method="get"'))
         {
+            $security = Registry::getInstance('Security');
             $noise = random_bytes(1);
             list(, $noise) = unpack('c', $noise);
 
@@ -76,8 +83,8 @@ class Form
             $form .= sprintf(
                 '%s<input type="hidden" name="%s" value="%s" />%s%s',
                 $prepend,
-                $this->CI->security->get_csrf_token_name(),
-                $this->CI->security->get_csrf_hash(),
+                $security->getCsrfTokenName(),
+                $security->getCsrfHash(),
                 $append,
                 "\n"
             );
@@ -188,7 +195,7 @@ class Form
         {
             if ($key === 'value')
             {
-                $val = html_escape((string)$val);
+                $val = \Admin\Core\Common::htmlEscape((string)$val);
             }
             elseif ($key === 'name' && ! strlen((string)$default['name']))
             {
@@ -249,7 +256,7 @@ class Form
         return $field->render();
     }
 
-    public function checkbox($data = '', $value = '', $checked = FALSE, $extra = '')
+    public function checkbox($data = '', $value = '', $checked = false, $extra = '')
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Checkbox($data, $value, $checked, $extra);
@@ -258,7 +265,7 @@ class Form
         return $field->render();
     }
 
-    public function radio($data = '', $value = '', $checked = FALSE, $extra = '')
+    public function radio($data = '', $value = '', $checked = false, $extra = '')
     {
         $name = is_array($data) ? (isset($data['name']) ? $data['name'] : '') : $data;
         $field = new Fields\Radio($data, $value, $checked, $extra);
@@ -294,7 +301,7 @@ class Form
         return $field->render();
     }
 
-    public function hidden($name, $value = '', $recursing = FALSE)
+    public function hidden($name, $value = '', $recursing = false)
     {
         $field = new Fields\Hidden($name, $value, $recursing);
         $field->setParent($this);
@@ -324,7 +331,7 @@ class Form
     public function run()
     {
         $this->error_array = [];
-        $validation_array = $_POST;
+        $validation_array = Registry::getInstance('Request')->request->all();
         
         foreach ($this->fields as $name => $field) {
             $value = isset($validation_array[$name]) ? $validation_array[$name] : null;
@@ -336,11 +343,11 @@ class Form
         return empty($this->error_array);
     }
 
-    public function set_value($field, $default = '', $html_escape = TRUE)
+    public function set_value($field, $default = '', $html_escape = true)
     {
-        $value = $this->CI->input->post($field, FALSE);
-        isset($value) OR $value = $default;
-        return ($html_escape) ? html_escape((string)$value) : $value;
+        $value = Registry::getInstance('Request')->get($field);
+        isset($value) or $value = $default;
+        return ($html_escape) ? \Admin\Core\Common::htmlEscape((string)$value) : $value;
     }
 
     public function error($field = '', $prefix = '', $suffix = '')

@@ -10,7 +10,7 @@ class Parser
 
 	public function __construct()
 	{
-		$this->CI =& getInstance();
+		$this->CI =& \Admin\Core\Route::getInstance();
 		logMessage('info', 'Parser Class Initialized');
 	}
 

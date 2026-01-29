@@ -1,5 +1,7 @@
 <?php namespace Admin\Services;
 
+use Admin\Core\Registry;
+
 /**
  * Url Class
  * 
@@ -18,7 +20,7 @@ class Url
      */
     public function siteUrl($uri = '', $protocol = null)
     {
-        return getInstance()->config->siteUrl($uri, $protocol);
+        return Registry::getInstance('Config')->siteUrl($uri, $protocol);
     }
 
     /**
@@ -32,7 +34,7 @@ class Url
      */
     public function baseUrl($uri = '', $protocol = null)
     {
-        return getInstance()->config->baseUrl($uri, $protocol);
+        return Registry::getInstance('Config')->baseUrl($uri, $protocol);
     }
 
     /**
@@ -45,8 +47,9 @@ class Url
      */
     public function currentUrl()
     {
-        $CI = &getInstance();
-        return $CI->config->siteUrl($CI->uri->uriString());
+        $config = Registry::getInstance('Config');
+        $uri = Registry::getInstance('Uri');
+        return $config->siteUrl($uri->uriString());
     }
 
     /**
@@ -58,7 +61,7 @@ class Url
      */
     public function uriString()
     {
-        return getInstance()->uri->uriString();
+        return Registry::getInstance('Uri')->uriString();
     }
 
     /**

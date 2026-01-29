@@ -66,12 +66,12 @@ class Select extends BaseField
         }
 
         $extra = $this->_attributes_to_string($this->extra);
-        if ($this->multiple && stripos($extra, 'multiple') === FALSE)
+        if ($this->multiple && stripos($extra, 'multiple') === false)
         {
             $extra .= ' multiple="multiple"';
         }
         
-        $multiple = (count($selected) > 1 && stripos($extra, 'multiple') === FALSE) ? ' multiple="multiple"' : '';
+        $multiple = (count($selected) > 1 && stripos($extra, 'multiple') === false) ? ' multiple="multiple"' : '';
 
         $form = '<select '.rtrim($this->_parse_form_attributes($data, $defaults)).$extra.$multiple.">\n";
 
@@ -86,12 +86,12 @@ class Select extends BaseField
                     continue;
                 }
 
-                $form .= '<optgroup label="'.html_escape($key)."\">\n";
+                $form .= '<optgroup label="'.\Admin\Core\Common::htmlEscape($key)."\">\n";
 
                 foreach ($val as $optgroup_key => $optgroup_val)
                 {
                     $sel = in_array((string)$optgroup_key, array_map('strval', $selected)) ? ' selected="selected"' : '';
-                    $form .= '<option value="'.html_escape((string)$optgroup_key).'"'.$sel.'>'
+                    $form .= '<option value="'.\Admin\Core\Common::htmlEscape((string)$optgroup_key).'"'.$sel.'>'
                         .(string) $optgroup_val."</option>\n";
                 }
 
@@ -99,7 +99,7 @@ class Select extends BaseField
             }
             else
             {
-                $form .= '<option value="'.html_escape($key).'"'
+                $form .= '<option value="'.\Admin\Core\Common::htmlEscape($key).'"'
                     .(in_array($key, array_map('strval', $selected)) ? ' selected="selected"' : '').'>'
                     .(string) $val."</option>\n";
             }

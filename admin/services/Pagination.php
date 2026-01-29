@@ -1,7 +1,13 @@
 <?php namespace Admin\Services;
+
+use Admin\Core\Registry;
+use Admin\Core\Error;
+
 /**
+ * Pagination Class
  * 
-**/
+ * Handles generation of pagination links.
+ */
 class Pagination
 {
 	protected $baseUrl		= '';
@@ -40,22 +46,23 @@ class Pagination
 	protected $reuse_query_string = false;
 	protected $use_global_url_suffix = false;
 	protected $data_page_attr = 'data-ci-pagination-page';
-	protected $CI;
 
 	public function __construct($params = [])
 	{
-		$this->CI =& getInstance();
-		$this->CI->load->language('pagination');
+		$loader = Registry::getInstance('Loader');
+		$lang = Registry::getInstance('Language');
+
+		$loader->language('pagination');
 		foreach (['first_link', 'next_link', 'prev_link', 'last_link'] as $key)
 		{
-			if (($val = $this->CI->lang->line('pagination_'.$key)) !== false)
+			if (($val = $lang->line('pagination_'.$key)) !== false)
 			{
 				$this->$key = $val;
 			}
 		}
-		isset($params['attributes']) OR $params['attributes'] = [];
+		isset($params['attributes']) or $params['attributes'] = [];
 		$this->initialize($params);
-		logMessage('info', 'Pagination Class Initialized');
+		Error::logMessage('info', 'Pagination Class Initialized');
 	}
 
 	public function initialize(array $params = [])
@@ -67,7 +74,7 @@ class Pagination
 		}
 		if (isset($params['anchor_class']))
 		{
-			empty($params['anchor_class']) OR $attributes['class'] = $params['anchor_class'];
+			empty($params['anchor_class']) or $attributes['class'] = $params['anchor_class'];
 			unset($params['anchor_class']);
 		}
 		foreach ($params as $key => $val)
@@ -77,20 +84,22 @@ class Pagination
 				$this->$key = $val;
 			}
 		}
-		if ($this->CI->config->item('enable_query_strings') === true)
+
+		$config = Registry::getInstance('Config');
+		if ($config->item('enable_query_strings') === true)
 		{
 			$this->page_query_string = true;
 		}
 		if ($this->use_global_url_suffix === true)
 		{
-			$this->suffix = $this->CI->config->item('url_suffix');
+			$this->suffix = $config->item('url_suffix');
 		}
 		return $this;
 	}
 
 	public function create_links()
 	{
-		if ($this->total_rows == 0 OR $this->per_page == 0)
+		if ($this->total_rows == 0 or $this->per_page == 0)
 		{
 			return '';
 		}
@@ -102,11 +111,14 @@ class Pagination
 		$this->num_links = (int) $this->num_links;
 		if ($this->num_links < 0)
 		{
-			showError('Your number of links must be a non-negative number.');
+			Error::showError('Your number of links must be a non-negative number.');
 		}
+
+		$request = Registry::getInstance('Request');
+
 		if ($this->reuse_query_string === true)
 		{
-			$get = $this->CI->input->get();
+			$get = $request->query->all();
 			unset($get['c'], $get['m'], $get[(string)$this->query_string_segment]);
 		}
 		else
@@ -147,16 +159,17 @@ class Pagination
 		$base_page = ($this->use_page_numbers) ? 1 : 0;
 		if ($this->page_query_string === true)
 		{
-			$this->cur_page = $this->CI->input->get((string)$this->query_string_segment);
+			$this->cur_page = $request->get((string)$this->query_string_segment);
 		}
 		elseif (empty($this->cur_page))
 		{
+			$uri = Registry::getInstance('Uri');
 			if ($this->uri_segment == 0)
 			{
-				$this->uri_segment = count($this->CI->uri->segment_array());
+				$this->uri_segment = count($uri->segmentArray());
 			}
-			$this->cur_page = $this->CI->uri->segment((int)$this->uri_segment);
-			if ($this->prefix !== '' OR $this->suffix !== '')
+			$this->cur_page = $uri->segment((int)$this->uri_segment);
+			if ($this->prefix !== '' or $this->suffix !== '')
 			{
 				$this->cur_page = str_replace([$this->prefix, $this->suffix], '', (string)$this->cur_page);
 			}
@@ -165,7 +178,7 @@ class Pagination
 		{
 			$this->cur_page = (string) $this->cur_page;
 		}
-		if ( ! ctype_digit((string)$this->cur_page) OR ($this->use_page_numbers && (int) $this->cur_page === 0))
+		if ( ! ctype_digit((string)$this->cur_page) or ($this->use_page_numbers && (int) $this->cur_page === 0))
 		{
 			$this->cur_page = $base_page;
 		}
@@ -260,7 +273,7 @@ class Pagination
 
 	protected function _parse_attributes($attributes)
 	{
-		isset($attributes['rel']) OR $attributes['rel'] = true;
+		isset($attributes['rel']) or $attributes['rel'] = true;
 		$this->_link_types = ($attributes['rel'])
 			? ['start' => 'start', 'prev' => 'prev', 'next' => 'next']
 			: [];

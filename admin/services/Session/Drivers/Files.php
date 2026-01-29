@@ -1,257 +1,253 @@
 <?php namespace Admin\Services\Session\Drivers;
+
+use Admin\Services\Session\Interfaces\DriverInterface;
+use Admin\Services\Session\Driver;
+
 /**
- * 
-**/
-use \Admin\Services\Session\SessionDriverInterface;
-use \Admin\Services\Session\SessionDriver;
-/**
- * 
-**/
-class Files extends SessionDriver implements SessionDriverInterface
+ * Files Session Driver
+ */
+class Files extends Driver implements DriverInterface
 {
-	protected $_save_path;
-	protected $_file_handle;
-	protected $_file_path;
-	protected $_file_new;
-	protected $_sid_regexp;
-	protected static $func_overload;
+    protected $savePath;
+    protected $fileHandle;
+    protected $filePath;
+    protected $fileNew;
+    protected $sidRegexp;
+    protected static $funcOverload;
 
-	public function __construct(&$params)
-	{
-		parent::__construct($params);
-		if (isset($this->_config['save_path']))
-		{
-			$this->_config['save_path'] = rtrim((string)$this->_config['save_path'], '/\\');
-			ini_set('session.save_path', (string)$this->_config['save_path']);
-		}
-		else
-		{
-			log_message('debug', 'Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.');
-			$this->_config['save_path'] = rtrim((string)ini_get('session.save_path'), '/\\');
-		}
+    /**
+     * Constructor
+     *
+     * @param array $params
+     */
+    public function __construct(array &$params)
+    {
+        parent::__construct($params);
 
-		$this->_sid_regexp = $this->_config['_sid_regexp'];
-		isset(self::$func_overload) OR self::$func_overload = ( ! is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-	}
+        if (isset($this->config['save_path'])) {
+            $this->config['save_path'] = rtrim((string)$this->config['save_path'], '/\\');
+            ini_set('session.save_path', (string)$this->config['save_path']);
+        } else {
+            \Admin\Core\Error::logMessage('debug', 'Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.');
+            $this->config['save_path'] = rtrim((string)ini_get('session.save_path'), '/\\');
+        }
 
-	public function open($save_path, $name)
-	{
-		if ( ! is_dir((string)$save_path))
-		{
-			if ( ! mkdir((string)$save_path, 0700, TRUE))
-			{
-				log_message('error', "Session: Configured save path '".$this->_config['save_path']."' is not a directory, doesn't exist or cannot be created.");
-				return $this->_failure;
-			}
-		}
-		elseif ( ! is_writable((string)$save_path))
-		{
-			log_message('error', "Session: Configured save path '".$this->_config['save_path']."' is not writable by the PHP process.");
-			return $this->_failure;
-		}
+        $this->sidRegexp = $this->config['_sid_regexp'];
+        if (self::$funcOverload === null) {
+            self::$funcOverload = (!\Admin\Core\Common::isPhp('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
+        }
+    }
 
-		$this->_config['save_path'] = $save_path;
-		$this->_file_path = $this->_config['save_path'].DIRECTORY_SEPARATOR
-			.(string)$name
-			.($this->_config['match_ip'] ? md5((string)$_SERVER['REMOTE_ADDR']) : '');
+    /**
+     * Open session
+     */
+    public function open(string $savePath, string $name): bool
+    {
+        if (!is_dir((string)$savePath)) {
+            if (!mkdir((string)$savePath, 0700, true)) {
+                \Admin\Core\Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not a directory, doesn't exist or cannot be created.");
+                return $this->failure;
+            }
+        } elseif (!is_writable((string)$savePath)) {
+            \Admin\Core\Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not writable by the PHP process.");
+            return $this->failure;
+        }
 
-		$this->php5_validate_id();
-		return $this->_success;
-	}
+        $this->config['save_path'] = $savePath;
+        $this->filePath = $this->config['save_path'] . DIRECTORY_SEPARATOR
+            . (string)$name
+            . ($this->config['match_ip'] ? md5((string)$_SERVER['REMOTE_ADDR']) : '');
 
-	public function read($session_id)
-	{
-		if ($this->_file_handle === NULL)
-		{
-			$this->_file_new = ! file_exists((string)$this->_file_path.$session_id);
-			if (($this->_file_handle = fopen((string)$this->_file_path.$session_id, 'c+b')) === FALSE)
-			{
-				log_message('error', "Session: Unable to open file '".$this->_file_path.$session_id."'.");
-				return $this->_failure;
-			}
+        return $this->success;
+    }
 
-			if (flock($this->_file_handle, LOCK_EX) === FALSE)
-			{
-				log_message('error', "Session: Unable to obtain lock for file '".$this->_file_path.$session_id."'.");
-				fclose($this->_file_handle);
-				$this->_file_handle = NULL;
-				return $this->_failure;
-			}
+    /**
+     * Read session data
+     */
+    public function read(string $sessionId): string|false
+    {
+        if ($this->fileHandle === null) {
+            $this->fileNew = !file_exists((string)$this->filePath . $sessionId);
+            if (($this->fileHandle = fopen((string)$this->filePath . $sessionId, 'c+b')) === false) {
+                \Admin\Core\Error::logMessage('error', "Session: Unable to open file '" . $this->filePath . $sessionId . "'.");
+                return $this->failure;
+            }
 
-			$this->_session_id = $session_id;
+            if (flock($this->fileHandle, LOCK_EX) === false) {
+                \Admin\Core\Error::logMessage('error', "Session: Unable to obtain lock for file '" . $this->filePath . $sessionId . "'.");
+                fclose($this->fileHandle);
+                $this->fileHandle = null;
+                return $this->failure;
+            }
 
-			if ($this->_file_new)
-			{
-				chmod((string)$this->_file_path.$session_id, 0600);
-				$this->_fingerprint = md5('');
-				return '';
-			}
+            $this->sessionId = $sessionId;
 
-			clearstatcache(TRUE, (string)$this->_file_path.$session_id);
-		}
-		elseif ($this->_file_handle === FALSE)
-		{
-			return $this->_failure;
-		}
-		else
-		{
-			rewind($this->_file_handle);
-		}
+            if ($this->fileNew) {
+                chmod((string)$this->filePath . $sessionId, 0600);
+                $this->fingerprint = md5('');
+                return '';
+            }
 
-		$session_data = '';
-		for ($read = 0, $length = (int)filesize((string)$this->_file_path.$session_id); $read < $length; $read += self::strlen($buffer))
-		{
-			if (($buffer = fread($this->_file_handle, $length - $read)) === FALSE)
-			{
-				break;
-			}
-			$session_data .= $buffer;
-		}
+            clearstatcache(true, (string)$this->filePath . $sessionId);
+        } elseif ($this->fileHandle === false) {
+            return $this->failure;
+        } else {
+            rewind($this->fileHandle);
+        }
 
-		$this->_fingerprint = md5($session_data);
-		return $session_data;
-	}
+        $sessionData = '';
+        $fileSize = (int)filesize((string)$this->filePath . $sessionId);
+        for ($read = 0; $read < $fileSize; $read += self::strlen($buffer)) {
+            if (($buffer = fread($this->fileHandle, $fileSize - $read)) === false) {
+                break;
+            }
+            $sessionData .= $buffer;
+        }
 
-	public function write($session_id, $session_data)
-	{
-		if ($session_id !== $this->_session_id && ($this->close() === $this->_failure OR $this->read($session_id) === $this->_failure))
-		{
-			return $this->_failure;
-		}
+        $this->fingerprint = md5($sessionData);
+        return $sessionData;
+    }
 
-		if ( ! is_resource($this->_file_handle))
-		{
-			return $this->_failure;
-		}
-		elseif ($this->_fingerprint === md5((string)$session_data))
-		{
-			return ( ! $this->_file_new && ! touch((string)$this->_file_path.$session_id))
-				? $this->_failure
-				: $this->_success;
-		}
+    /**
+     * Write session data
+     */
+    public function write(string $sessionId, string $sessionData): bool
+    {
+        if ($sessionId !== $this->sessionId && ($this->close() === $this->failure || $this->read($sessionId) === $this->failure)) {
+            return $this->failure;
+        }
 
-		if ( ! $this->_file_new)
-		{
-			ftruncate($this->_file_handle, 0);
-			rewind($this->_file_handle);
-		}
+        if (!is_resource($this->fileHandle)) {
+            return $this->failure;
+        } elseif ($this->fingerprint === md5((string)$sessionData)) {
+            return (!$this->fileNew && !touch((string)$this->filePath . $sessionId))
+                ? $this->failure
+                : $this->success;
+        }
 
-		if (($length = strlen((string)$session_data)) > 0)
-		{
-			for ($written = 0; $written < $length; $written += $result)
-			{
-				if (($result = fwrite($this->_file_handle, substr((string)$session_data, $written))) === FALSE)
-				{
-					break;
-				}
-			}
+        if (!$this->fileNew) {
+            ftruncate($this->fileHandle, 0);
+            rewind($this->fileHandle);
+        }
 
-			if ( ! is_int($result))
-			{
-				$this->_fingerprint = md5(substr((string)$session_data, 0, $written));
-				log_message('error', 'Session: Unable to write data.');
-				return $this->_failure;
-			}
-		}
+        if (($length = strlen((string)$sessionData)) > 0) {
+            $result = 0;
+            for ($written = 0; $written < $length; $written += $result) {
+                if (($result = fwrite($this->fileHandle, substr((string)$sessionData, (int)$written))) === false) {
+                    break;
+                }
+            }
 
-		$this->_fingerprint = md5((string)$session_data);
-		return $this->_success;
-	}
+            if (!is_int($result)) {
+                $this->fingerprint = md5(substr((string)$sessionData, 0, (int)$written));
+                \Admin\Core\Error::logMessage('error', 'Session: Unable to write data.');
+                return $this->failure;
+            }
+        }
 
-	public function close()
-	{
-		if (is_resource($this->_file_handle))
-		{
-			flock($this->_file_handle, LOCK_UN);
-			fclose($this->_file_handle);
-			$this->_file_handle = $this->_file_new = $this->_session_id = NULL;
-		}
+        $this->fingerprint = md5((string)$sessionData);
+        return $this->success;
+    }
 
-		return $this->_success;
-	}
+    /**
+     * Close session
+     */
+    public function close(): bool
+    {
+        if (is_resource($this->fileHandle)) {
+            flock($this->fileHandle, LOCK_UN);
+            fclose($this->fileHandle);
+            $this->fileHandle = $this->fileNew = $this->sessionId = null;
+        }
 
-	public function destroy($session_id)
-	{
-		if ($this->close() === $this->_success)
-		{
-			if (file_exists((string)$this->_file_path.$session_id))
-			{
-				$this->_cookie_destroy();
-				return unlink((string)$this->_file_path.$session_id)
-					? $this->_success
-					: $this->_failure;
-			}
+        return $this->success;
+    }
 
-			return $this->_success;
-		}
-		elseif ($this->_file_path !== NULL)
-		{
-			clearstatcache();
-			if (file_exists((string)$this->_file_path.$session_id))
-			{
-				$this->_cookie_destroy();
-				return unlink((string)$this->_file_path.$session_id)
-					? $this->_success
-					: $this->_failure;
-			}
+    /**
+     * Destroy session
+     */
+    public function destroy(string $sessionId): bool
+    {
+        if ($this->close() === $this->success) {
+            if (file_exists((string)$this->filePath . $sessionId)) {
+                $this->cookieDestroy();
+                return unlink((string)$this->filePath . $sessionId)
+                    ? $this->success
+                    : $this->failure;
+            }
 
-			return $this->_success;
-		}
+            return $this->success;
+        } elseif ($this->filePath !== null) {
+            clearstatcache();
+            if (file_exists((string)$this->filePath . $sessionId)) {
+                $this->cookieDestroy();
+                return unlink((string)$this->filePath . $sessionId)
+                    ? $this->success
+                    : $this->failure;
+            }
 
-		return $this->_failure;
-	}
+            return $this->success;
+        }
 
-	public function gc($maxlifetime)
-	{
-		if ( ! is_dir((string)$this->_config['save_path']) OR ($directory = opendir((string)$this->_config['save_path'])) === FALSE)
-		{
-			log_message('debug', "Session: Garbage collector couldn't list files under directory '".$this->_config['save_path']."'.");
-			return $this->_failure;
-		}
+        return $this->failure;
+    }
 
-		$ts = time() - (int)$maxlifetime;
-		$pattern = ($this->_config['match_ip'] === TRUE)
-			? '[0-9a-f]{32}'
-			: '';
+    /**
+     * Garbage Collection
+     */
+    public function gc(int $maxlifetime): int|false
+    {
+        if (!is_dir((string)$this->config['save_path']) || ($directory = opendir((string)$this->config['save_path'])) === false) {
+            \Admin\Core\Error::logMessage('debug', "Session: Garbage collector couldn't list files under directory '" . $this->config['save_path'] . "'.");
+            return 0; // In PHP 8, it should return an int (number of deleted items or just 0/something)
+        }
 
-		$pattern = sprintf(
-			'#\A%s'.$pattern.$this->_sid_regexp.'\z#',
-			preg_quote((string)$this->_config['cookie_name'])
-		);
+        $ts = time() - (int)$maxlifetime;
+        $pattern = ($this->config['match_ip'] === true) ? '[0-9a-f]{32}' : '';
+        $pattern = sprintf('#\A%s' . $pattern . $this->sidRegexp . '\z#', preg_quote((string)$this->config['cookie_name']));
 
-		while (($file = readdir($directory)) !== FALSE)
-		{
-			if ( ! preg_match($pattern, $file)
-				OR ! is_file($this->_config['save_path'].DIRECTORY_SEPARATOR.$file)
-				OR ($mtime = filemtime((string)$this->_config['save_path'].DIRECTORY_SEPARATOR.$file)) === FALSE
-				OR $mtime > $ts)
-			{
-				continue;
-			}
+        $count = 0;
+        while (($file = readdir($directory)) !== false) {
+            if (
+                !preg_match($pattern, (string)$file)
+                || !is_file($this->config['save_path'] . DIRECTORY_SEPARATOR . $file)
+                || ($mtime = filemtime((string)$this->config['save_path'] . DIRECTORY_SEPARATOR . $file)) === false
+                || $mtime > $ts
+            ) {
+                continue;
+            }
 
-			unlink((string)$this->_config['save_path'].DIRECTORY_SEPARATOR.$file);
-		}
+            unlink((string)$this->config['save_path'] . DIRECTORY_SEPARATOR . $file);
+            $count++;
+        }
 
-		closedir($directory);
-		return $this->_success;
-	}
+        closedir($directory);
+        return $count;
+    }
 
-	public function updateTimestamp($id, $data)
-	{
-		return touch((string)$this->_file_path.$id);
-	}
+    /**
+     * Update Timestamp
+     */
+    public function updateTimestamp(string $sessionId, string $data): bool
+    {
+        return touch((string)$this->filePath . $sessionId);
+    }
 
-	public function validateId($id)
-	{
-		$result = is_file((string)$this->_file_path.$id);
-		clearstatcache(TRUE, (string)$this->_file_path.$id);
-		return $result;
-	}
+    /**
+     * Validate ID
+     */
+    public function validateId(string $sessionId): bool
+    {
+        $result = is_file((string)$this->filePath . $sessionId);
+        clearstatcache(true, (string)$this->filePath . $sessionId);
+        return $result;
+    }
 
-	protected static function strlen($str)
-	{
-		return (self::$func_overload)
-			? mb_strlen((string)$str, '8bit')
-			: strlen((string)$str);
-	}
+    /**
+     * Internal strlen
+     */
+    protected static function strlen($str)
+    {
+        return (self::$funcOverload) ? mb_strlen((string)$str, '8bit') : strlen((string)$str);
+    }
 }

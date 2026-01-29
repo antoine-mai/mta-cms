@@ -25,7 +25,7 @@ class Error
 
     public static function logMessage($level, $message)
     {
-        $log = &Registry::getInstance('Log', 'core');
+        $log = &Registry::getInstance('Logging', 'core');
         $log->writeLog($level, $message);
     }
 

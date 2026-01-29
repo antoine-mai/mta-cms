@@ -1,4 +1,6 @@
 <?php namespace Admin\Services\Form;
+
+use Admin\Core\Registry;
 /**
  * 
 **/
@@ -6,7 +8,7 @@ trait ValidationRules
 {
     public function required($str)
     {
-        return is_array($str) ? (empty($str) === FALSE) : (trim((string)$str) !== '');
+        return is_array($str) ? (empty($str) === false) : (trim((string)$str) !== '');
     }
 
     public function regex_match($str, $regex)
@@ -29,42 +31,42 @@ trait ValidationRules
 
     public function min_length($str, $val)
     {
-        if ( ! is_numeric($val)) return FALSE;
+        if ( ! is_numeric($val)) return false;
         return ($val <= mb_strlen((string)$str));
     }
 
     public function max_length($str, $val)
     {
-        if ( ! is_numeric($val)) return FALSE;
+        if ( ! is_numeric($val)) return false;
         return ($val >= mb_strlen((string)$str));
     }
 
     public function exact_length($str, $val)
     {
-        if ( ! is_numeric($val)) return FALSE;
+        if ( ! is_numeric($val)) return false;
         return (mb_strlen((string)$str) === (int)$val);
     }
 
     public function valid_url($str)
     {
-        if (empty($str)) return FALSE;
+        if (empty($str)) return false;
         elseif (preg_match('/^(?:([^:]*)\:)?\/\/(.+)$/', (string)$str, $matches)) {
-            if (empty($matches[2])) return FALSE;
-            elseif ( ! in_array(strtolower($matches[1]), ['http', 'https'], TRUE)) return FALSE;
+            if (empty($matches[2])) return false;
+            elseif ( ! in_array(strtolower($matches[1]), ['http', 'https'], true)) return false;
             $str = $matches[2];
         }
-        if (ctype_digit((string)$str)) return FALSE;
-        if (preg_match('/^\[([^\]]+)\]/', (string)$str, $matches) && filter_var($matches[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== FALSE) {
+        if (ctype_digit((string)$str)) return false;
+        if (preg_match('/^\[([^\]]+)\]/', (string)$str, $matches) && filter_var($matches[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
             $str = 'ipv6.host'.substr((string)$str, strlen($matches[1]) + 2);
         }
-        return (filter_var('http://'.$str, FILTER_VALIDATE_URL) !== FALSE);
+        return (filter_var('http://'.$str, FILTER_VALIDATE_URL) !== false);
     }
 
     public function valid_email($str)
     {
         if (function_exists('idn_to_ascii') && preg_match('#\A([^@]+)@(.+)\z#', (string)$str, $matches)) {
             $domain = defined('INTL_IDNA_VARIANT_UTS46') ? idn_to_ascii($matches[2], 0, INTL_IDNA_VARIANT_UTS46) : idn_to_ascii($matches[2]);
-            if ($domain !== FALSE) $str = $matches[1].'@'.$domain;
+            if ($domain !== false) $str = $matches[1].'@'.$domain;
         }
         return (bool) filter_var($str, FILTER_VALIDATE_EMAIL);
     }
@@ -106,27 +108,27 @@ trait ValidationRules
 
     public function greater_than($str, $min)
     {
-        return is_numeric($str) ? ((float)$str > (float)$min) : FALSE;
+        return is_numeric($str) ? ((float)$str > (float)$min) : false;
     }
 
     public function greater_than_equal_to($str, $min)
     {
-        return is_numeric($str) ? ((float)$str >= (float)$min) : FALSE;
+        return is_numeric($str) ? ((float)$str >= (float)$min) : false;
     }
 
     public function less_than($str, $max)
     {
-        return is_numeric($str) ? ((float)$str < (float)$max) : FALSE;
+        return is_numeric($str) ? ((float)$str < (float)$max) : false;
     }
 
     public function less_than_equal_to($str, $max)
     {
-        return is_numeric($str) ? ((float)$str <= (float)$max) : FALSE;
+        return is_numeric($str) ? ((float)$str <= (float)$max) : false;
     }
 
     public function in_list($value, $list)
     {
-        return in_array($value, explode(',', (string)$list), TRUE);
+        return in_array($value, explode(',', (string)$list), true);
     }
 
     public function is_natural($str)
@@ -142,10 +144,10 @@ trait ValidationRules
     public function is_unique($str, $field)
     {
         sscanf((string)$field, '%[^.].%[^.]', $table, $column);
-        $CI =& get_instance();
-        return isset($CI->db)
-            ? ($CI->db->limit(1)->get_where((string)$table, [$column => $str])->num_rows() === 0)
-            : FALSE;
+        $db = Registry::getInstance('Database');
+        return isset($db)
+            ? ($db->limit(1)->get_where((string)$table, [$column => $str])->num_rows() === 0)
+            : false;
     }
 
     public function valid_base64($str)

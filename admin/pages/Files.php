@@ -1,4 +1,4 @@
-<?php namespace Admin\Routes;
+<?php namespace Admin\Pages;
 /**
  * 
 **/

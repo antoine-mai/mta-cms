@@ -1,398 +1,182 @@
 <?php namespace Admin\Core;
+
 /**
- * 
-**/
-#[\AllowDynamicProperties]
+ * Output Class
+ *
+ * Responsible for sending final output to the browser.
+ */
 class Output
 {
-	public $final_output = '';
-	public $cache_expiration = 0;
-	public $headers = [];
-	public $mimes =	[];
-	protected $mime_type = 'text/html';
-	public $enable_profiler = false;
-	protected $_zlib_oc = false;
-	protected $_compress_output = false;
-	protected $_profiler_sections =	[];
-	public $parse_exec_vars = true;
-	protected static $func_overload;
-	public function __construct()
-	{
-		$this->_zlib_oc = (bool) ini_get('zlib.output_compression');
-		$this->_compress_output = (
-			$this->_zlib_oc === false
-			&& \Admin\Core\Common::configItem('compress_output') === true
-			&& extension_loaded('zlib')
-		);
-		isset(self::$func_overload) OR self::$func_overload = ( ! \Admin\Core\Common::isPhp('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-		$this->mimes =& \Admin\Core\Common::getMimes();
-		Error::logMessage('info', 'Output Class Initialized');
-	}
-	public function getOutput()
-	{
-		return $this->final_output;
-	}
-	public function setOutput($output)
-	{
-		$this->final_output = $output;
-		return $this;
-	}
-	public function appendOutput($output)
-	{
-		$this->final_output .= $output;
-		return $this;
-	}
-	public function setHeader($header, $replace = true)
-	{
-		if ($this->_zlib_oc && strncasecmp($header, 'content-length', 14) === 0)
-		{
-			return $this;
-		}
-		$this->headers[] = [$header, $replace];
-		return $this;
-	}
-	public function setContentType($mime_type, $charset = null)
-	{
-		if (strpos($mime_type, '/') === false)
-		{
-			$extension = ltrim($mime_type, '.');
-			if (isset($this->mimes[$extension]))
-			{
-				$mime_type =& $this->mimes[$extension];
-				if (is_array($mime_type))
-				{
-					$mime_type = current($mime_type);
-				}
-			}
-		}
-		$this->mime_type = $mime_type;
-		if (empty($charset))
-		{
-			$charset = \Admin\Core\Common::configItem('charset');
-		}
-		$header = 'Content-Type: '.$mime_type
-			.(empty($charset) ? '' : '; charset='.$charset);
-		$this->headers[] = [$header, true];
-		return $this;
-	}
-	public function get_content_type()
-	{
-		for ($i = 0, $c = count($this->headers); $i < $c; $i++)
-		{
-			if (sscanf($this->headers[$i][0], 'Content-Type: %[^;]', $content_type) === 1)
-			{
-				return $content_type;
-			}
-		}
-		return 'text/html';
-	}
-	public function get_header($header)
-	{
-		$header_lines = array_map(function ($headers)
-		{
-			return array_shift($headers);
-		}, $this->headers);
-		$headers = array_merge(
-			$header_lines,
-			headers_list()
-		);
-		if (empty($headers) OR empty($header))
-		{
-			return null;
-		}
-		for ($c = count($headers) - 1; $c > -1; $c--)
-		{
-			if (strncasecmp($header, $headers[$c], $l = self::strlen($header)) === 0)
-			{
-				return trim(self::substr($headers[$c], $l+1));
-			}
-		}
-		return null;
-	}
-	public function setStatusHeader($code = 200, $text = '')
-	{
-		setStatusHeader($code, $text);
-		return $this;
-	}
-	public function enable_profiler($val = true)
-	{
-		$this->enable_profiler = is_bool($val) ? $val : true;
-		return $this;
-	}
-	public function set_profiler_sections($sections)
-	{
-		if (isset($sections['query_toggle_count']))
-		{
-			$this->_profiler_sections['query_toggle_count'] = (int) $sections['query_toggle_count'];
-			unset($sections['query_toggle_count']);
-		}
-		foreach ($sections as $section => $enable)
-		{
-			$this->_profiler_sections[$section] = ($enable !== false);
-		}
-		return $this;
-	}
-	public function cache($time)
-	{
-		$this->cache_expiration = is_numeric($time) ? $time : 0;
-		return $this;
-	}
-	public function display($output = '')
-	{
-		$CFG =& Registry::getInstance('Config', 'core');
-		if (class_exists('Controller', false))
-		{
-			$CI =& getInstance();
-		}
-		if ($output === '')
-		{
-			$output =& $this->final_output;
-		}
-		if ($this->cache_expiration > 0 && isset($CI) && ! method_exists($CI, '_output'))
-		{
-			$this->writeCache($output);
-		}
-		$elapsed = 0;
-		if ($this->parse_exec_vars === true)
-		{
-			$memory	= round(memory_get_usage() / 1024 / 1024, 2).'MB';
-			$output = str_replace(['{elapsed_time}', '{memory_usage}'], [$elapsed, $memory], $output);
-		}
-		if (isset($CI) // This means that we're not serving a cache file, if we were, it would already be compressed
-			&& $this->_compress_output === true
-			&& isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
-		{
-			ob_start('ob_gzhandler');
-		}
-		if (count($this->headers) > 0)
-		{
-			foreach ($this->headers as $header)
-			{
-				@header($header[0], $header[1]);
-			}
-		}
-		if ( ! isset($CI))
-		{
-			if ($this->_compress_output === true)
-			{
-				if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
-				{
-					header('Content-Encoding: gzip');
-					header('Content-Length: '.self::strlen($output));
-				}
-				else
-				{
-					$output = gzinflate(self::substr($output, 10, -8));
-				}
-			}
-			echo $output;
-			Error::logMessage('info', 'Final output sent to browser');
-			Error::logMessage('debug', 'Total execution time: '.$elapsed);
-			return;
-		}
-		if ($this->enable_profiler === true)
-		{
-			$CI->load->library('profiler');
-			if ( ! empty($this->_profiler_sections))
-			{
-				$CI->profiler->set_sections($this->_profiler_sections);
-			}
-			$output = preg_replace('|</body>.*?</html>|is', '', $output, -1, $count).$CI->profiler->run();
-			if ($count > 0)
-			{
-				$output .= '</body></html>';
-			}
-		}
-		if (method_exists($CI, '_output'))
-		{
-			$CI->_output($output);
-		}
-		else
-		{
-			echo $output; // Send it to the browser!
-		}
-		Error::logMessage('info', 'Final output sent to browser');
-		Error::logMessage('debug', 'Total execution time: '.$elapsed);
-	}
-	public function writeCache($output)
-	{
-		$CI =& getInstance();
-		$path = $CI->config->item('cache_path');
-		$cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
-		if ( ! is_dir($cache_path) OR ! \Admin\Core\Common::isReallyWritable($cache_path))
-		{
-			Error::logMessage('error', 'Unable to write cache file: '.$cache_path);
-			return;
-		}
-		$uri = $CI->config->item('baseUrl')
-			.$CI->config->item('index_page')
-			.$CI->uri->uri_string();
-		if (($cache_query_string = $CI->config->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
-		{
-			if (is_array($cache_query_string))
-			{
-				$uri .= '?'.http_build_query(array_intersect_key($_GET, array_flip($cache_query_string)));
-			}
-			else
-			{
-				$uri .= '?'.$_SERVER['QUERY_STRING'];
-			}
-		}
-		$cache_path .= md5($uri);
-		if ( ! $fp = @fopen($cache_path, 'w+b'))
-		{
-			Error::logMessage('error', 'Unable to write cache file: '.$cache_path);
-			return;
-		}
-		if ( ! flock($fp, LOCK_EX))
-		{
-			Error::logMessage('error', 'Unable to secure a file lock for file at: '.$cache_path);
-			fclose($fp);
-			return;
-		}
-		if ($this->_compress_output === true)
-		{
-			$output = gzencode($output);
-			if ($this->get_header('content-type') === null)
-			{
-				$this->setContentType($this->mime_type);
-			}
-		}
-		$expire = time() + ($this->cache_expiration * 60);
-		$cache_info = serialize([
-			'expire'	=> $expire,
-			'headers'	=> $this->headers
-		]);
-		$output = $cache_info.'ENDCI--->'.$output;
-		for ($written = 0, $length = self::strlen($output); $written < $length; $written += $result)
-		{
-			if (($result = fwrite($fp, self::substr($output, $written))) === false)
-			{
-				break;
-			}
-		}
-		flock($fp, LOCK_UN);
-		fclose($fp);
-		if ( ! is_int($result))
-		{
-			@unlink($cache_path);
-			Error::logMessage('error', 'Unable to write the complete cache content at: '.$cache_path);
-			return;
-		}
-		chmod($cache_path, 0640);
-		Error::logMessage('debug', 'Cache file written: '.$cache_path);
-		$this->set_cache_header($_SERVER['REQUEST_TIME'], $expire);
-	}
-	public function display_cache(&$CFG, &$URI)
-	{
-		$cache_path = ($CFG->item('cache_path') === '') ? ADMIN_ROOT.'cache/' : $CFG->item('cache_path');
-		$uri = $CFG->item('baseUrl').$CFG->item('index_page').$URI->uri_string;
-		if (($cache_query_string = $CFG->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
-		{
-			if (is_array($cache_query_string))
-			{
-				$uri .= '?'.http_build_query(array_intersect_key($_GET, array_flip($cache_query_string)));
-			}
-			else
-			{
-				$uri .= '?'.$_SERVER['QUERY_STRING'];
-			}
-		}
-		$filepath = $cache_path.md5($uri);
-		if ( ! file_exists($filepath) OR ! $fp = @fopen($filepath, 'rb'))
-		{
-			return false;
-		}
-		flock($fp, LOCK_SH);
-		$cache = (filesize($filepath) > 0) ? fread($fp, filesize($filepath)) : '';
-		flock($fp, LOCK_UN);
-		fclose($fp);
-		if ( ! preg_match('/^(.*)ENDCI--->/', $cache, $match))
-		{
-			return false;
-		}
-		$cache_info = unserialize($match[1]);
-		$expire = $cache_info['expire'];
-		$last_modified = filemtime($filepath);
-		if ($_SERVER['REQUEST_TIME'] >= $expire && \Admin\Core\Common::isReallyWritable($cache_path))
-		{
-			@unlink($filepath);
-			Error::logMessage('debug', 'Cache file has expired. File deleted.');
-			return false;
-		}
-		$this->set_cache_header($last_modified, $expire);
-		foreach ($cache_info['headers'] as $header)
-		{
-			$this->setHeader($header[0], $header[1]);
-		}
-		$this->display(self::substr($cache, self::strlen($match[0])));
-		Error::logMessage('debug', 'Cache file is current. Sending it to browser.');
-		return true;
-	}
-	public function delete_cache($uri = '')
-	{
-		$CI =& getInstance();
-		$cache_path = $CI->config->item('cache_path');
-		if ($cache_path === '')
-		{
-			$cache_path = ADMIN_ROOT.'cache/';
-		}
-		if ( ! is_dir($cache_path))
-		{
-			Error::logMessage('error', 'Unable to find cache path: '.$cache_path);
-			return false;
-		}
-		if (empty($uri))
-		{
-			$uri = $CI->uri->uri_string();
-			if (($cache_query_string = $CI->config->item('cache_query_string')) && ! empty($_SERVER['QUERY_STRING']))
-			{
-				if (is_array($cache_query_string))
-				{
-					$uri .= '?'.http_build_query(array_intersect_key($_GET, array_flip($cache_query_string)));
-				}
-				else
-				{
-					$uri .= '?'.$_SERVER['QUERY_STRING'];
-				}
-			}
-		}
-		$cache_path .= md5($CI->config->item('baseUrl').$CI->config->item('index_page').ltrim($uri, '/'));
-		if ( ! @unlink($cache_path))
-		{
-			Error::logMessage('error', 'Unable to delete cache file for '.$uri);
-			return false;
-		}
-		return true;
-	}
-	public function set_cache_header($last_modified, $expiration)
-	{
-		$max_age = $expiration - $_SERVER['REQUEST_TIME'];
-		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $last_modified <= strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']))
-		{
-			$this->setStatusHeader(304);
-			exit;
-		}
-		header('Pragma: public');
-		header('Cache-Control: max-age='.$max_age.', public');
-		header('Expires: '.gmdate('D, d M Y H:i:s', $expiration).' GMT');
-		header('Last-modified: '.gmdate('D, d M Y H:i:s', $last_modified).' GMT');
-	}
-	protected static function strlen($str)
-	{
-		return (self::$func_overload)
-			? mb_strlen($str, '8bit')
-			: strlen($str);
-	}
-	protected static function substr($str, $start, $length = null)
-	{
-		if (self::$func_overload)
-		{
-			isset($length) OR $length = ($start >= 0 ? self::strlen($str) - $start : -$start);
-			return mb_substr($str, $start, $length, '8bit');
-		}
-		return isset($length)
-			? substr($str, $start, $length)
-			: substr($str, $start);
-	}
+    /**
+     * Final output string
+     *
+     * @var string
+     */
+    public $finalOutput = '';
+
+    /**
+     * List of custom headers
+     *
+     * @var array
+     */
+    public $headers = [];
+
+    /**
+     * List of mime types
+     *
+     * @var array
+     */
+    public $mimes = [];
+
+    /**
+     * Current mime type
+     *
+     * @var string
+     */
+    protected $mimeType = 'text/html';
+
+    /**
+     * Whether to compress output
+     *
+     * @var bool
+     */
+    protected $compressOutput = false;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->compressOutput = (
+            ini_get('zlib.output_compression') === false
+            && Common::configItem('compress_output') === true
+            && extension_loaded('zlib')
+        );
+
+        $this->mimes = &Common::getMimes();
+        Error::logMessage('info', 'Output Class Initialized');
+    }
+
+    /**
+     * Get final output
+     *
+     * @return	string
+     */
+    public function getOutput()
+    {
+        return $this->finalOutput;
+    }
+
+    /**
+     * Set final output
+     *
+     * @param	string	$output
+     * @return	Output
+     */
+    public function setOutput($output)
+    {
+        $this->finalOutput = $output;
+        return $this;
+    }
+
+    /**
+     * Append to final output
+     *
+     * @param	string	$output
+     * @return	Output
+     */
+    public function appendOutput($output)
+    {
+        $this->finalOutput .= $output;
+        return $this;
+    }
+
+    /**
+     * Set HTTP header
+     *
+     * @param	string	$header
+     * @param	bool	$replace
+     * @return	Output
+     */
+    public function setHeader($header, $replace = true)
+    {
+        $this->headers[] = [$header, $replace];
+        return $this;
+    }
+
+    /**
+     * Set Content-Type header
+     *
+     * @param	string	$mimeType
+     * @param	string	$charset
+     * @return	Output
+     */
+    public function setContentType($mimeType, $charset = null)
+    {
+        if (strpos((string)$mimeType, '/') === false) {
+            $extension = ltrim((string)$mimeType, '.');
+            if (isset($this->mimes[$extension])) {
+                $mimeType = &$this->mimes[$extension];
+                if (is_array($mimeType)) {
+                    $mimeType = current($mimeType);
+                }
+            }
+        }
+
+        $this->mimeType = $mimeType;
+        if (empty($charset)) {
+            $charset = Common::configItem('charset');
+        }
+
+        $header = 'Content-Type: ' . $mimeType . (empty($charset) ? '' : '; charset=' . $charset);
+        $this->headers[] = [$header, true];
+        return $this;
+    }
+
+    /**
+     * Get current Content-Type
+     *
+     * @return	string
+     */
+    public function getContentType()
+    {
+        for ($i = 0, $c = count($this->headers); $i < $c; $i++) {
+            if (sscanf((string)$this->headers[$i][0], 'Content-Type: %[^;]', $contentType) === 1) {
+                return $contentType;
+            }
+        }
+        return 'text/html';
+    }
+
+    /**
+     * Set Status Header
+     */
+    public function setStatusHeader($code = 200, $text = '')
+    {
+        Error::setStatusHeader($code, $text);
+        return $this;
+    }
+
+    /**
+     * Display final output
+     */
+    public function display($output = '')
+    {
+        if ($output === '') {
+            $output = &$this->finalOutput;
+        }
+
+        if ($this->compressOutput === true && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+            ob_start('ob_gzhandler');
+        }
+
+        if (count($this->headers) > 0) {
+            foreach ($this->headers as $header) {
+                @header((string)$header[0], (bool)$header[1]);
+            }
+        }
+
+        echo $output;
+        Error::logMessage('info', 'Final output sent to browser');
+    }
 }

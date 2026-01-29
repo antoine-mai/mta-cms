@@ -7,7 +7,7 @@ defined('ADMIN_ROOT') OR exit('No direct script access allowed');
 <p>Message:  <?php echo $message; ?></p>
 <p>Filename: <?php echo $filepath; ?></p>
 <p>Line Number: <?php echo $line; ?></p>
-<?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === TRUE): ?>
+<?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === true): ?>
 	<p>Backtrace:</p>
 	<?php foreach (debug_backtrace() as $error): ?>
 		<?php if (isset($error['file']) && strpos($error['file'], realpath(ADMIN_ROOT)) !== 0): ?>

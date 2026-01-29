@@ -5,7 +5,6 @@
  *
  * This class contains functions that enable config files to be managed.
  */
-#[\AllowDynamicProperties]
 class Config
 {
     /**
