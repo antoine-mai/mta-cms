@@ -1,8 +1,7 @@
 <?php namespace Admin\Core;
-
 /**
  * Security Class
- */
+**/
 class Security
 {
     /**
@@ -62,14 +61,14 @@ class Security
      *
      * @var string
      */
-    protected $csrfTokenName = 'ci_csrf_token';
+    protected $csrfTokenName = 'mta_csrf_token';
 
     /**
      * CSRF Cookie name
      *
      * @var string
      */
-    protected $csrfCookieName = 'ci_csrf_token';
+    protected $csrfCookieName = 'mta_csrf_token';
 
     /**
      * List of never allowed strings

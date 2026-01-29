@@ -371,7 +371,7 @@ class Request
             return $this->clientIp;
         }
 
-        $config = \Admin\Core\Registry::getInstance('Config', 'core');
+        $config = \Admin\Core\Registry::getInstance('Config');
         $proxy_ips = $config->item('proxy_ips');
 
         if ( ! empty($proxy_ips) && ! is_array($proxy_ips))

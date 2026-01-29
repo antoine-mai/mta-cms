@@ -1,16 +1,15 @@
 <?php namespace Admin\Core;
-
 /**
- * Route Class
+ * Controller Class
  * 
  * Base class for all route controllers.
- */
-class Route
+**/
+class Controller
 {
     /**
      * Singleton instance
      *
-     * @var Route
+     * @var Controller
      */
     private static $instance;
 
@@ -33,23 +32,23 @@ class Route
     {
         self::$instance = &$this;
 
-        $this->config   = &Registry::getInstance('Config', 'core');
-        $this->uri      = &Registry::getInstance('Uri', 'core');
+        $this->config   = &Registry::getInstance('Config');
+        $this->uri      = &Registry::getInstance('Uri');
         $this->utf8     = &Registry::getInstance('Utf8');
-        $this->router   = &Registry::getInstance('Router', 'core');
-        $this->output   = &Registry::getInstance('Output', 'core');
-        $this->security = &Registry::getInstance('Security', 'core');
-        $this->lang     = &Registry::getInstance('Language', 'core');
+        $this->router   = &Registry::getInstance('Router');
+        $this->output   = &Registry::getInstance('Output');
+        $this->security = &Registry::getInstance('Security');
+        $this->lang     = &Registry::getInstance('Language');
 
-        $this->load = &Registry::getInstance('Loader', 'core');
+        $this->load = &Registry::getInstance('Loader');
         
-        Error::logMessage('info', 'Route Class Initialized');
+        Error::logMessage('info', 'Controller Class Initialized');
     }
 
     /**
      * Get singleton instance
      *
-     * @return Route
+     * @return Controller
      */
     public static function &getInstance()
     {

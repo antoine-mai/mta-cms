@@ -1,5 +1,7 @@
 <?php namespace Admin\Core;
-
+/**
+ * 
+**/
 class Error
 {
     public static function showError($message, $status_code = 500, $heading = 'An Error Was Encountered')
@@ -11,21 +13,21 @@ class Error
         } else {
             $exit_status = 1; // EXIT_ERROR
         }
-        $_error = &Registry::getInstance('Exceptions', 'core');
+        $_error = &Registry::getInstance('Exceptions');
         echo $_error->showError($heading, $message, 'error_general', $status_code);
         exit($exit_status);
     }
 
     public static function show404($page = '', $log_error = true)
     {
-        $_error = &Registry::getInstance('Exceptions', 'core');
+        $_error = &Registry::getInstance('Exceptions');
         $_error->show404($page, $log_error);
         exit(4); // EXIT_UNKNOWN_FILE
     }
 
     public static function logMessage($level, $message)
     {
-        $log = &Registry::getInstance('Logging', 'core');
+        $log = &Registry::getInstance('Logging');
         $log->writeLog($level, $message);
     }
 
@@ -111,7 +113,7 @@ class Error
         if (($severity & error_reporting()) !== $severity) {
             return;
         }
-        $_error = &Registry::getInstance('Exceptions', 'core');
+        $_error = &Registry::getInstance('Exceptions');
         $_error->logException($severity, $message, $filepath, $line);
         if (str_ireplace(['off', 'none', 'no', 'false', 'null'], '', ini_get('display_errors'))) {
             $_error->showPhpError($severity, $message, $filepath, $line);
@@ -123,7 +125,7 @@ class Error
 
     public static function exceptionHandler($exception)
     {
-        $_error = &Registry::getInstance('Exceptions', 'core');
+        $_error = &Registry::getInstance('Exceptions');
         $_error->logException('error', 'Exception: ' . $exception->getMessage(), $exception->getFile(), $exception->getLine());
         self::setStatusHeader(500);
         if (str_ireplace(['off', 'none', 'no', 'false', 'null'], '', ini_get('display_errors'))) {

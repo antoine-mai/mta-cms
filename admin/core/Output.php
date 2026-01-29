@@ -1,10 +1,9 @@
 <?php namespace Admin\Core;
-
 /**
  * Output Class
  *
  * Responsible for sending final output to the browser.
- */
+**/
 class Output
 {
     /**

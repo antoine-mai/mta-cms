@@ -3,7 +3,7 @@
  * Common Class
  *
  * Contains common utility functions used throughout the application.
- */
+**/
 class Common
 {
     /**
@@ -43,7 +43,7 @@ class Common
      */
     public static function isReallyWritable($file)
     {
-        if (DIRECTORY_SEPARATOR === '/' && (self::isPhp('5.4') || !ini_get('safe_mode'))) {
+        if (DIRECTORY_SEPARATOR === '/') {
             return is_writable($file);
         }
 
@@ -72,7 +72,7 @@ class Common
      */
     public static function configItem($item)
     {
-        $config = &Registry::getInstance('Config', 'core');
+        $config = &Registry::getInstance('Config');
         return $config->item($item);
     }
 

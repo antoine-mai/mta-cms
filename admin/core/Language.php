@@ -1,10 +1,9 @@
 <?php namespace Admin\Core;
-
 /**
- * Lang Class
+ * Language Class
  *
  * Handles language file loading and line retrieval.
- */
+**/
 class Language
 {
     /**
@@ -55,7 +54,7 @@ class Language
         $langfile .= '.php';
 
         if (empty($idiom) || !preg_match('/^[a-z_-]+$/i', (string)$idiom)) {
-            $config = &Registry::getInstance('Config', 'core');
+            $config = &Registry::getInstance('Config');
             $idiom = $config->item('language');
             if (empty($idiom)) {
                 $idiom = 'english';

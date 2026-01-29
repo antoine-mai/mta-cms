@@ -1,10 +1,9 @@
 <?php namespace Admin\Core;
-
 /**
  * Loader Class
  *
  * Responsible for loading core, services, routes, and managing templates.
- */
+**/
 class Loader
 {
     /**
@@ -146,7 +145,7 @@ class Loader
      */
     public function language($file, $idiom = '', $return = false)
     {
-        $lang = &Registry::getInstance('Language', 'core');
+        $lang = &Registry::getInstance('Language');
         return $lang->load($file, $idiom, $return);
     }
 

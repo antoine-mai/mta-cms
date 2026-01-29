@@ -1,4 +1,16 @@
 <?php namespace Admin\Core;
+
+/**
+ * 
+**/
+use \Admin\Core\Config;
+use \Admin\Core\Uri;
+use \Admin\Core\Controller;
+use \Admin\Core\Output;
+use \Admin\Core\Security;
+use \Admin\Core\Language;
+use \Admin\Core\Loader;
+
 /**
  * Template Class
  *
@@ -28,37 +40,37 @@ class Template
     protected $obLevel;
 
     /**
-     * @var \Admin\Core\Config
+     * @var Config
      */
     protected $config;
 
     /**
-     * @var \Admin\Core\Uri
+     * @var Uri
      */
     protected $uri;
 
     /**
-     * @var \Admin\Core\Router
+     * @var Router
      */
     protected $router;
 
     /**
-     * @var \Admin\Core\Output
+     * @var Output
      */
     protected $output;
 
     /**
-     * @var \Admin\Core\Security
+     * @var Security
      */
     protected $security;
 
     /**
-     * @var \Admin\Core\Language
+     * @var Language
      */
     protected $lang;
 
     /**
-     * @var \Admin\Core\Loader
+     * @var Loader
      */
     protected $load;
 
@@ -134,11 +146,7 @@ class Template
 
         ob_start();
 
-        if (!Common::isPhp('5.4') && !ini_get('short_open_tag') && Common::configItem('rewrite_short_tags') === true) {
-            echo eval('?>' . preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', (string)file_get_contents((string)$path))));
-        } else {
-            include($path);
-        }
+        include($path);
 
         Error::logMessage('info', 'File loaded: ' . $path);
 
@@ -176,7 +184,7 @@ class Template
         }
 
         foreach (array_keys($vars) as $key) {
-            if (strncmp((string)$key, 'ci_', 3) === 0) {
+            if (strncmp((string)$key, 'mta_', 4) === 0) {
                 unset($vars[$key]);
             }
         }

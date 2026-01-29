@@ -41,10 +41,10 @@ class Redis extends Driver
 			}
 		}
 
-		$CI =& \Admin\Core\Route::getInstance();
-		if ($CI->config->load('redis', true, true))
+		$mta =& \Admin\Core\Controller::getInstance();
+		if ($mta->config->load('redis', true, true))
 		{
-			$config = array_merge(self::$_default_config, $CI->config->item('redis'));
+			$config = array_merge(self::$_default_config, $mta->config->item('redis'));
 		}
 		else
 		{
@@ -82,7 +82,7 @@ class Redis extends Driver
 	public function get($key)
 	{
 		$value = $this->_redis->get((string)$key);
-		if ($value !== false && $this->_redis->sIsMember('_ci_redis_serialized', (string)$key))
+		if ($value !== false && $this->_redis->sIsMember('_mta_redis_serialized', (string)$key))
 		{
 			return unserialize((string)$value);
 		}
@@ -93,7 +93,7 @@ class Redis extends Driver
 	{
 		if (is_array($data) OR is_object($data))
 		{
-			if ( ! $this->_redis->sIsMember('_ci_redis_serialized', (string)$id) && ! $this->_redis->sAdd('_ci_redis_serialized', (string)$id))
+			if ( ! $this->_redis->sIsMember('_mta_redis_serialized', (string)$id) && ! $this->_redis->sAdd('_mta_redis_serialized', (string)$id))
 			{
 				return false;
 			}
@@ -102,7 +102,7 @@ class Redis extends Driver
 		}
 		else
 		{
-			$this->_redis->{static::$_sRemove_name}('_ci_redis_serialized', (string)$id);
+			$this->_redis->{static::$_sRemove_name}('_mta_redis_serialized', (string)$id);
 		}
 		return $this->_redis->set((string)$id, $data, (int)$ttl);
 	}
@@ -113,7 +113,7 @@ class Redis extends Driver
 		{
 			return false;
 		}
-		$this->_redis->{static::$_sRemove_name}('_ci_redis_serialized', (string)$key);
+		$this->_redis->{static::$_sRemove_name}('_mta_redis_serialized', (string)$key);
 		return true;
 	}
 

@@ -1,11 +1,9 @@
 <?php namespace Admin\Core;
-
 /**
  * Exceptions Class
  *
  * Handles display and logging of errors and exceptions.
- */
-#[\AllowDynamicProperties]
+**/
 class Exceptions
 {
     /**

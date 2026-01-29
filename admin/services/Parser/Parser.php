@@ -1,22 +1,24 @@
 <?php namespace Admin\Services;
 /**
- * 
+ * Parser Class
+ *
+ * simple template parser class.
 **/
-class Parser
+class Parser implements Interfaces\ParserInterface
 {
 	public $l_delim = '{';
 	public $r_delim = '}';
-	protected $CI;
+	protected $mta;
 
 	public function __construct()
 	{
-		$this->CI =& \Admin\Core\Route::getInstance();
+		$this->mta =& \Admin\Core\Controller::getInstance();
 		logMessage('info', 'Parser Class Initialized');
 	}
 
 	public function parse($template, $data, $return = false)
 	{
-		$template = $this->CI->load->view((string)$template, $data, true);
+		$template = $this->mta->load->view((string)$template, $data, true);
 		return $this->_parse((string)$template, $data, $return);
 	}
 
@@ -45,7 +47,7 @@ class Parser
 		$template = strtr((string)$template, $replace);
 		if ($return === false)
 		{
-			$this->CI->output->appendOutput($template);
+			$this->mta->output->appendOutput($template);
 		}
 		return (string)$template;
 	}

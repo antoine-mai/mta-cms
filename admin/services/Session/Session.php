@@ -1,6 +1,11 @@
 <?php namespace Admin\Services\Session;
 
-use UnexpectedValueException;
+/**
+ * 
+**/
+use \Admin\Core\Console;
+use \Admin\Core\Error;
+use \Admin\Core\Common;
 
 /**
  * Session Class
@@ -44,20 +49,17 @@ class Session
      */
     public function __construct(array $params = [])
     {
-        if (\Admin\Core\Console::isCli()) {
-            \Admin\Core\Error::logMessage('debug', 'Session: Initialization under CLI aborted.');
+        if (Console::isCli()) {
+            Error::logMessage('debug', 'Session: Initialization under CLI aborted.');
             return;
         } elseif ((bool)ini_get('session.auto_start')) {
-            \Admin\Core\Error::logMessage('error', 'Session: session.auto_start is enabled in php.ini. Aborting.');
+            Error::logMessage('error', 'Session: session.auto_start is enabled in php.ini. Aborting.');
             return;
         } elseif (!empty($params['driver'])) {
             $this->driver = $params['driver'];
             unset($params['driver']);
-        } elseif ($driver = \Admin\Core\Common::configItem('sess_driver')) {
+        } elseif ($driver = Common::configItem('sess_driver')) {
             $this->driver = $driver;
-        } elseif (\Admin\Core\Common::configItem('sess_use_database')) {
-            \Admin\Core\Error::logMessage('debug', 'Session: "sess_driver" is empty; using BC fallback to "sess_use_database".');
-            $this->driver = 'database';
         }
 
         $class = $this->loadClasses($this->driver);
@@ -81,12 +83,12 @@ class Session
         session_start();
 
         if ((empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest')
-            && ($regenerateTime = \Admin\Core\Common::configItem('sess_time_to_update')) > 0
+            && ($regenerateTime = Common::configItem('sess_time_to_update')) > 0
         ) {
-            if (!isset($_SESSION['__ci_last_regenerate'])) {
-                $_SESSION['__ci_last_regenerate'] = time();
-            } elseif ($_SESSION['__ci_last_regenerate'] < (time() - $regenerateTime)) {
-                $this->sessRegenerate((bool)\Admin\Core\Common::configItem('sess_regenerate_destroy'));
+            if (!isset($_SESSION['__mta_last_regenerate'])) {
+                $_SESSION['__mta_last_regenerate'] = time();
+            } elseif ($_SESSION['__mta_last_regenerate'] < (time() - $regenerateTime)) {
+                $this->sessRegenerate((bool)Common::configItem('sess_regenerate_destroy'));
             }
         } elseif (isset($_COOKIE[$this->config['cookie_name']]) && $_COOKIE[$this->config['cookie_name']] === session_id()) {
             $expires = empty($this->config['cookie_lifetime']) ? 0 : time() + $this->config['cookie_lifetime'];
@@ -105,12 +107,12 @@ class Session
             );
 
             if (!$this->config['cookie_secure'] && $this->config['cookie_samesite'] === 'None') {
-                \Admin\Core\Error::logMessage('error', "Session: '" . $this->config['cookie_name'] . "' cookie sent with SameSite=None, but without Secure attribute.'");
+                Error::logMessage('error', "Session: '" . $this->config['cookie_name'] . "' cookie sent with SameSite=None, but without Secure attribute.'");
             }
         }
 
         $this->initVars();
-        \Admin\Core\Error::logMessage('info', "Session: Class initialized using '" . $this->driver . "' driver.");
+        Error::logMessage('info', "Session: Class initialized using '" . $this->driver . "' driver.");
     }
 
     /**
@@ -127,7 +129,7 @@ class Session
             return $class;
         }
 
-        $prefix = \Admin\Core\Common::configItem('subclass_prefix');
+        $prefix = Common::configItem('subclass_prefix');
         $class = 'Session_' . $driver . '_driver';
         
         if (!class_exists($class, false)) {
@@ -138,7 +140,7 @@ class Session
         }
 
         if (!class_exists($class, false)) {
-            throw new UnexpectedValueException("Session: Configured driver '" . $driver . "' was not found. Aborting.");
+            throw new \UnexpectedValueException("Session: Configured driver '" . $driver . "' was not found. Aborting.");
         }
 
         $subclass = $prefix . $class;
@@ -163,25 +165,25 @@ class Session
      */
     protected function configure(&$params)
     {
-        $expiration = \Admin\Core\Common::configItem('sess_expiration');
+        $expiration = Common::configItem('sess_expiration');
         if (isset($params['cookie_lifetime'])) {
             $params['cookie_lifetime'] = (int)$params['cookie_lifetime'];
         } else {
-            $params['cookie_lifetime'] = (!isset($expiration) && \Admin\Core\Common::configItem('sess_expire_on_close'))
+            $params['cookie_lifetime'] = (!isset($expiration) && Common::configItem('sess_expire_on_close'))
                 ? 0 : (int)$expiration;
         }
 
-        isset($params['cookie_name']) or $params['cookie_name'] = \Admin\Core\Common::configItem('sess_cookie_name');
+        isset($params['cookie_name']) or $params['cookie_name'] = Common::configItem('sess_cookie_name');
         if (empty($params['cookie_name'])) {
             $params['cookie_name'] = ini_get('session.name');
         } else {
             ini_set('session.name', (string)$params['cookie_name']);
         }
 
-        isset($params['cookie_path']) or $params['cookie_path'] = \Admin\Core\Common::configItem('cookie_path');
-        isset($params['cookie_domain']) or $params['cookie_domain'] = \Admin\Core\Common::configItem('cookie_domain');
-        isset($params['cookie_secure']) or $params['cookie_secure'] = (bool)\Admin\Core\Common::configItem('cookie_secure');
-        isset($params['cookie_samesite']) or $params['cookie_samesite'] = \Admin\Core\Common::configItem('sess_samesite');
+        isset($params['cookie_path']) or $params['cookie_path'] = Common::configItem('cookie_path');
+        isset($params['cookie_domain']) or $params['cookie_domain'] = Common::configItem('cookie_domain');
+        isset($params['cookie_secure']) or $params['cookie_secure'] = (bool)Common::configItem('cookie_secure');
+        isset($params['cookie_samesite']) or $params['cookie_samesite'] = Common::configItem('sess_samesite');
 
         if (!isset($params['cookie_samesite'])) {
             $params['cookie_samesite'] = ini_get('session.cookie_samesite');
@@ -210,8 +212,8 @@ class Session
             ini_set('session.gc_maxlifetime', (string)$expiration);
         }
 
-        $params['match_ip'] = (bool)(isset($params['match_ip']) ? $params['match_ip'] : \Admin\Core\Common::configItem('sess_match_ip'));
-        isset($params['save_path']) or $params['save_path'] = \Admin\Core\Common::configItem('sess_save_path');
+        $params['match_ip'] = (bool)(isset($params['match_ip']) ? $params['match_ip'] : Common::configItem('sess_match_ip'));
+        isset($params['save_path']) or $params['save_path'] = Common::configItem('sess_save_path');
         $this->config = $params;
 
         ini_set('session.use_trans_sid', '0');
@@ -258,18 +260,18 @@ class Session
      */
     protected function initVars()
     {
-        if (!empty($_SESSION['__ci_vars'])) {
+        if (!empty($_SESSION['__mta_vars'])) {
             $currentTime = time();
-            foreach ($_SESSION['__ci_vars'] as $key => &$value) {
+            foreach ($_SESSION['__mta_vars'] as $key => &$value) {
                 if ($value === 'new') {
-                    $_SESSION['__ci_vars'][$key] = 'old';
+                    $_SESSION['__mta_vars'][$key] = 'old';
                 } elseif ($value === 'old' || $value < $currentTime) {
-                    unset($_SESSION[$key], $_SESSION['__ci_vars'][$key]);
+                    unset($_SESSION[$key], $_SESSION['__mta_vars'][$key]);
                 }
             }
 
-            if (empty($_SESSION['__ci_vars'])) {
-                unset($_SESSION['__ci_vars']);
+            if (empty($_SESSION['__mta_vars'])) {
+                unset($_SESSION['__mta_vars']);
             }
         }
 
@@ -291,8 +293,8 @@ class Session
                 }
             }
             $new = array_fill_keys($key, 'new');
-            $_SESSION['__ci_vars'] = isset($_SESSION['__ci_vars'])
-                ? array_merge($_SESSION['__ci_vars'], $new)
+            $_SESSION['__mta_vars'] = isset($_SESSION['__mta_vars'])
+                ? array_merge($_SESSION['__mta_vars'], $new)
                 : $new;
             return true;
         }
@@ -301,7 +303,7 @@ class Session
             return false;
         }
 
-        $_SESSION['__ci_vars'][(string)$key] = 'new';
+        $_SESSION['__mta_vars'][(string)$key] = 'new';
         return true;
     }
 
@@ -312,13 +314,13 @@ class Session
      */
     public function getFlashKeys()
     {
-        if (!isset($_SESSION['__ci_vars'])) {
+        if (!isset($_SESSION['__mta_vars'])) {
             return [];
         }
 
         $keys = [];
-        foreach (array_keys($_SESSION['__ci_vars']) as $key) {
-            is_int($_SESSION['__ci_vars'][$key]) or $keys[] = $key;
+        foreach (array_keys($_SESSION['__mta_vars']) as $key) {
+            is_int($_SESSION['__mta_vars'][$key]) or $keys[] = $key;
         }
 
         return $keys;
@@ -332,19 +334,19 @@ class Session
      */
     public function unmarkFlash($key)
     {
-        if (empty($_SESSION['__ci_vars'])) {
+        if (empty($_SESSION['__mta_vars'])) {
             return;
         }
 
         is_array($key) or $key = [$key];
         foreach ($key as $k) {
-            if (isset($_SESSION['__ci_vars'][$k]) && !is_int($_SESSION['__ci_vars'][$k])) {
-                unset($_SESSION['__ci_vars'][$k]);
+            if (isset($_SESSION['__mta_vars'][$k]) && !is_int($_SESSION['__mta_vars'][$k])) {
+                unset($_SESSION['__mta_vars'][$k]);
             }
         }
 
-        if (empty($_SESSION['__ci_vars'])) {
-            unset($_SESSION['__ci_vars']);
+        if (empty($_SESSION['__mta_vars'])) {
+            unset($_SESSION['__mta_vars']);
         }
     }
 
@@ -375,8 +377,8 @@ class Session
                 $temp[$k] = $v;
             }
 
-            $_SESSION['__ci_vars'] = isset($_SESSION['__ci_vars'])
-                ? array_merge($_SESSION['__ci_vars'], $temp)
+            $_SESSION['__mta_vars'] = isset($_SESSION['__mta_vars'])
+                ? array_merge($_SESSION['__mta_vars'], $temp)
                 : $temp;
             return true;
         }
@@ -385,7 +387,7 @@ class Session
             return false;
         }
 
-        $_SESSION['__ci_vars'][(string)$key] = $expire;
+        $_SESSION['__mta_vars'][(string)$key] = $expire;
         return true;
     }
 
@@ -396,13 +398,13 @@ class Session
      */
     public function getTempKeys()
     {
-        if (!isset($_SESSION['__ci_vars'])) {
+        if (!isset($_SESSION['__mta_vars'])) {
             return [];
         }
 
         $keys = [];
-        foreach (array_keys($_SESSION['__ci_vars']) as $key) {
-            is_int($_SESSION['__ci_vars'][$key]) && $keys[] = $key;
+        foreach (array_keys($_SESSION['__mta_vars']) as $key) {
+            is_int($_SESSION['__mta_vars'][$key]) && $keys[] = $key;
         }
 
         return $keys;
@@ -416,19 +418,19 @@ class Session
      */
     public function unmarkTemp($key)
     {
-        if (empty($_SESSION['__ci_vars'])) {
+        if (empty($_SESSION['__mta_vars'])) {
             return;
         }
 
         is_array($key) or $key = [$key];
         foreach ($key as $k) {
-            if (isset($_SESSION['__ci_vars'][$k]) && is_int($_SESSION['__ci_vars'][$k])) {
-                unset($_SESSION['__ci_vars'][$k]);
+            if (isset($_SESSION['__mta_vars'][$k]) && is_int($_SESSION['__mta_vars'][$k])) {
+                unset($_SESSION['__mta_vars'][$k]);
             }
         }
 
-        if (empty($_SESSION['__ci_vars'])) {
-            unset($_SESSION['__ci_vars']);
+        if (empty($_SESSION['__mta_vars'])) {
+            unset($_SESSION['__mta_vars']);
         }
     }
 
@@ -481,7 +483,7 @@ class Session
      */
     public function sessRegenerate($destroy = false)
     {
-        $_SESSION['__ci_last_regenerate'] = time();
+        $_SESSION['__mta_last_regenerate'] = time();
         session_regenerate_id($destroy);
     }
 
@@ -511,7 +513,7 @@ class Session
 
         $userdata = [];
         $exclude = array_merge(
-            ['__ci_vars'],
+            ['__mta_vars'],
             $this->getFlashKeys(),
             $this->getTempKeys()
         );
@@ -585,14 +587,14 @@ class Session
     public function flashdata($key = null)
     {
         if (isset($key)) {
-            return (isset($_SESSION['__ci_vars'], $_SESSION['__ci_vars'][$key], $_SESSION[$key]) && !is_int($_SESSION['__ci_vars'][$key]))
+            return (isset($_SESSION['__mta_vars'], $_SESSION['__mta_vars'][$key], $_SESSION[$key]) && !is_int($_SESSION['__mta_vars'][$key]))
                 ? $_SESSION[$key]
                 : null;
         }
 
         $flashdata = [];
-        if (!empty($_SESSION['__ci_vars'])) {
-            foreach ($_SESSION['__ci_vars'] as $k => &$v) {
+        if (!empty($_SESSION['__mta_vars'])) {
+            foreach ($_SESSION['__mta_vars'] as $k => &$v) {
                 is_int($v) or $flashdata[$k] = $_SESSION[$k];
             }
         }
@@ -626,14 +628,14 @@ class Session
     public function tempdata($key = null)
     {
         if (isset($key)) {
-            return (isset($_SESSION['__ci_vars'], $_SESSION['__ci_vars'][$key], $_SESSION[$key]) && is_int($_SESSION['__ci_vars'][$key]))
+            return (isset($_SESSION['__mta_vars'], $_SESSION['__mta_vars'][$key], $_SESSION[$key]) && is_int($_SESSION['__mta_vars'][$key]))
                 ? $_SESSION[$key]
                 : null;
         }
 
         $tempdata = [];
-        if (!empty($_SESSION['__ci_vars'])) {
-            foreach ($_SESSION['__ci_vars'] as $k => &$v) {
+        if (!empty($_SESSION['__mta_vars'])) {
+            foreach ($_SESSION['__mta_vars'] as $k => &$v) {
                 is_int($v) && $tempdata[$k] = $_SESSION[$k];
             }
         }

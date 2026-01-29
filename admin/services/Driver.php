@@ -7,7 +7,6 @@ use ReflectionObject;
 /**
  * 
 **/
-#[\AllowDynamicProperties]
 class Driver
 {
 	// From DriverLibrary
@@ -56,8 +55,8 @@ class Driver
 			showError($msg);
 		}
 
-		$CI = \Admin\Core\Route::getInstance();
-		$paths = $CI->load->get_package_paths(true);
+		$mta = \Admin\Core\Controller::getInstance();
+		$paths = $mta->load->get_package_paths(true);
 		
         // Try PSR-4 first
         $namespace = get_class($this);
@@ -82,7 +81,7 @@ class Driver
                             $basepath = ADMIN_ROOT.'libraries/'.$this->lib_name.'/drivers/'.$child_name.'.php';
                             if ( ! file_exists((string)$basepath))
                             {
-                                $msg = 'Unable to load the requested class: CI_'.$child_name;
+                                $msg = 'Unable to load the requested class: MTA_'.$child_name;
                                 logMessage('error', $msg);
                                 showError($msg);
                             }

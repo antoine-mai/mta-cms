@@ -7,9 +7,9 @@ class File extends Driver {
 
 	public function __construct()
 	{
-		$CI =& \Admin\Core\Route::getInstance();
-		$CI->load->helper('file');
-		$path = $CI->config->item('cache_path');
+		$mta =& \Admin\Core\Controller::getInstance();
+		$mta->load->helper('file');
+		$path = $mta->config->item('cache_path');
 		$this->_cache_path = ($path === '') ? ADMIN_ROOT.'cache/' : $path;
 	}
 

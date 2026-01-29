@@ -1,10 +1,9 @@
 <?php namespace Admin\Core;
-
 /**
  * URI Class
  *
  * Parses URIs and determines routing.
- */
+**/
 class Uri
 {
     /**

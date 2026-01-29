@@ -1,10 +1,13 @@
 <?php namespace Admin\Core;
-
 /**
  * Config Class
  *
  * This class contains functions that enable config files to be managed.
- */
+**/
+use \Admin\Services\Yaml;
+/**
+ * 
+**/
 class Config
 {
     /**
@@ -55,7 +58,7 @@ class Config
             Error::showError('The configuration file ' . $file . '.yaml does not exist in ' . ROOT_DIR . '/config/admin/');
         }
 
-        $yaml = new \Admin\Services\Yaml();
+        $yaml = new Yaml();
         $config = $yaml->parse($file_path);
 
         if (!is_array($config)) {
@@ -116,7 +119,7 @@ class Config
         }
 
         // To save accurately, we load the file data independently
-        $yaml = new \Admin\Services\Yaml();
+        $yaml = new Yaml();
         $fileData = $yaml->parse($file_path);
         
         $fileData[$item] = $value;

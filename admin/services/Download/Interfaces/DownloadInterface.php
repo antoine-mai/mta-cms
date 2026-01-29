@@ -1,0 +1,6 @@
+<?php namespace Admin\Services\Download\Interfaces;
+
+interface DownloadInterface
+{
+    public function force($filename = '', $data = '', $set_mime = false);
+}

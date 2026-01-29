@@ -2,7 +2,6 @@
 /**
  * 
 **/
-#[\AllowDynamicProperties]
 class Response
 {
     /**

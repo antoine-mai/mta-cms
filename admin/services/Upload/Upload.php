@@ -1,11 +1,15 @@
 <?php namespace Admin\Services;
 /**
+ * Upload Class
  * 
+ * File Uploading Class
 **/
-use \ReflectionClass;
+
 /**
- * 
-**/
+ * Upload Class
+ *
+ * Handles file uploads, validation, and processing.
+ */
 class Upload
 {
 	public $max_size = 0;
@@ -40,19 +44,19 @@ class Upload
 	public $client_name = '';
 	protected $_file_name_override = '';
 	protected $_mimes = [];
-	protected $_CI;
+	protected $_mta;
 
 	public function __construct($config = [])
 	{
 		empty($config) OR $this->initialize($config, false);
 		$this->_mimes =& getMimes();
-		$this->_CI =& \Admin\Core\Route::getInstance();
+		$this->_mta =& \Admin\Core\Controller::getInstance();
 		logMessage('info', 'Upload Class Initialized');
 	}
 
 	public function initialize(array $config = [], $reset = true)
 	{
-		$reflection = new ReflectionClass($this);
+		$reflection = new \ReflectionClass($this);
 		if ($reset === true)
 		{
 			$defaults = $reflection->getDefaultProperties();
@@ -218,7 +222,7 @@ class Upload
 			return false;
 		}
 
-		$this->file_name = $this->_CI->security->sanitizeFilename((string)$this->file_name);
+		$this->file_name = $this->_mta->security->sanitizeFilename((string)$this->file_name);
 
 		if ($this->max_filename > 0)
 		{
@@ -597,16 +601,16 @@ class Upload
 			return false;
 		}
 
-		return $this->_CI->security->xssClean($data, true);
+		return $this->_mta->security->xssClean($data, true);
 	}
 
 	public function set_error($msg, $log_level = 'error')
 	{
-		$this->_CI->lang->load('upload');
+		$this->_mta->lang->load('upload');
 		is_array($msg) OR $msg = [$msg];
 		foreach ($msg as $val)
 		{
-			$msg_text = ($this->_CI->lang->line($val) === false) ? $val : $this->_CI->lang->line($val);
+			$msg_text = ($this->_mta->lang->line($val) === false) ? $val : $this->_mta->lang->line($val);
 			$this->error_msg[] = $msg_text;
 			logMessage($log_level, $msg_text);
 		}

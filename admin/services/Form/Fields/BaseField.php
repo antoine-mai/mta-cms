@@ -10,7 +10,7 @@ abstract class BaseField
 {
     use ValidationRules;
 
-    protected $CI;
+    protected $mta;
     protected $data;
     protected $value;
     protected $extra;
@@ -29,7 +29,7 @@ abstract class BaseField
 
     public function __construct($data = '', $value = '', $extra = '')
     {
-        $this->CI =& \Admin\Core\Route::getInstance();
+        $this->mta =& \Admin\Core\Controller::getInstance();
         $this->data = $data;
         $this->value = $value;
         $this->extra = $extra;

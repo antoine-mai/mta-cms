@@ -1,8 +1,7 @@
 <?php namespace Admin\Core;
-
 /**
  * Registry class to manage singleton instances of core classes/services
- */
+**/
 class Registry
 {
     /**
@@ -14,11 +13,10 @@ class Registry
      * Get a singleton instance of a class
      * 
      * @param string $class Class name (short name or namespaced)
-     * @param string $directory Legacy directory hint (deprecated but supported for compatibility)
      * @param mixed $param Optional parameters for constructor
      * @return object
      */
-    public static function &getInstance($class, $directory = 'libraries', $param = null)
+    public static function &getInstance($class, $param = null)
     {
         // Normalize class name for cache key
         $cleanClass = str_replace(['Admin\\Core\\', 'Admin\\Services\\'], '', $class);
@@ -42,6 +40,10 @@ class Registry
         // 3. Try Services namespace
         elseif (class_exists('Admin\\Services\\' . $cleanClass)) {
             $fqcn = 'Admin\\Services\\' . $cleanClass;
+        }
+        // 4. Try Services sub-namespace (Folder/File pattern)
+        elseif (class_exists('Admin\\Services\\' . $cleanClass . '\\' . $cleanClass)) {
+            $fqcn = 'Admin\\Services\\' . $cleanClass . '\\' . $cleanClass;
         }
 
         if ($fqcn === false) {

@@ -8,7 +8,7 @@ use Admin\Core\Error;
  * 
  * Handles generation of pagination links.
  */
-class Pagination
+class Pagination implements Interfaces\PaginationInterface
 {
 	protected $baseUrl		= '';
 	protected $prefix = '';

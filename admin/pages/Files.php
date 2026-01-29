@@ -2,17 +2,13 @@
 /**
  * 
 **/
-use Admin\Core\Route;
+use \Admin\Core\Response\Response;
+use \Admin\Core\Request\Request;
+use \Admin\Core\Controller;
 /**
  * 
 **/
-use Admin\Core\Request\Request;
-use Admin\Core\Response\Response;
-
-/**
- * 
-**/
-class Files extends Route
+class Files extends Controller
 {
 	public function index(Request $request): Response
 	{

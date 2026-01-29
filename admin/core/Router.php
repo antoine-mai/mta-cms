@@ -3,8 +3,7 @@
  * Router Class
  *
  * Parses URIs and determines routing.
- */
-#[\AllowDynamicProperties]
+**/
 class Router
 {
     /**
@@ -77,7 +76,7 @@ class Router
      */
     public function __construct($routing = null)
     {
-        $this->config = &Registry::getInstance('Config', 'core');
+        $this->config = &Registry::getInstance('Config');
         $this->enableQueryStrings = (!Console::isCli() && $this->config->item('enable_query_strings') === true);
 
         if (is_array($routing) && isset($routing['directory'])) {

@@ -16,11 +16,11 @@ class Memcached extends Driver {
 
 	public function __construct()
 	{
-		$CI =& \Admin\Core\Route::getInstance();
+		$mta =& \Admin\Core\Controller::getInstance();
 		$defaults = $this->_config['default'];
-		if ($CI->config->load('memcached', true, true))
+		if ($mta->config->load('memcached', true, true))
 		{
-			$this->_config = $CI->config->config['memcached'];
+			$this->_config = $mta->config->config['memcached'];
 		}
 
 		if (class_exists('Memcached', false))

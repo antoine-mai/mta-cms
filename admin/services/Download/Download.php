@@ -1,8 +1,10 @@
 <?php namespace Admin\Services;
 /**
- * 
+ * Download Class
+ *
+ * Provides functions to force file downloads.
 **/
-class Download
+class Download implements Interfaces\DownloadInterface
 {
     /**
      * Force Download

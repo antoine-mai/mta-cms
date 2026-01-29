@@ -1,5 +1,11 @@
 <?php namespace Admin\Core;
-
+/**
+ * Console Class
+ *
+ * @package		Admin\Core
+ * @category	Console
+ * @author		Antoine
+**/
 class Console
 {
     /**

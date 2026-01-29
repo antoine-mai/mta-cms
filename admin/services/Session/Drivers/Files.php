@@ -1,7 +1,11 @@
 <?php namespace Admin\Services\Session\Drivers;
 
-use Admin\Services\Session\Interfaces\DriverInterface;
-use Admin\Services\Session\Driver;
+/**
+ * 
+**/
+use \Admin\Services\Session\Interfaces\DriverInterface;
+use \Admin\Services\Session\Driver;
+use \Admin\Core\Error;
 
 /**
  * Files Session Driver
@@ -13,7 +17,6 @@ class Files extends Driver implements DriverInterface
     protected $filePath;
     protected $fileNew;
     protected $sidRegexp;
-    protected static $funcOverload;
 
     /**
      * Constructor
@@ -28,14 +31,11 @@ class Files extends Driver implements DriverInterface
             $this->config['save_path'] = rtrim((string)$this->config['save_path'], '/\\');
             ini_set('session.save_path', (string)$this->config['save_path']);
         } else {
-            \Admin\Core\Error::logMessage('debug', 'Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.');
+            Error::logMessage('debug', 'Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.');
             $this->config['save_path'] = rtrim((string)ini_get('session.save_path'), '/\\');
         }
 
         $this->sidRegexp = $this->config['_sid_regexp'];
-        if (self::$funcOverload === null) {
-            self::$funcOverload = (!\Admin\Core\Common::isPhp('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
-        }
     }
 
     /**
@@ -45,11 +45,11 @@ class Files extends Driver implements DriverInterface
     {
         if (!is_dir((string)$savePath)) {
             if (!mkdir((string)$savePath, 0700, true)) {
-                \Admin\Core\Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not a directory, doesn't exist or cannot be created.");
+                Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not a directory, doesn't exist or cannot be created.");
                 return $this->failure;
             }
         } elseif (!is_writable((string)$savePath)) {
-            \Admin\Core\Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not writable by the PHP process.");
+            Error::logMessage('error', "Session: Configured save path '" . $this->config['save_path'] . "' is not writable by the PHP process.");
             return $this->failure;
         }
 
@@ -69,12 +69,12 @@ class Files extends Driver implements DriverInterface
         if ($this->fileHandle === null) {
             $this->fileNew = !file_exists((string)$this->filePath . $sessionId);
             if (($this->fileHandle = fopen((string)$this->filePath . $sessionId, 'c+b')) === false) {
-                \Admin\Core\Error::logMessage('error', "Session: Unable to open file '" . $this->filePath . $sessionId . "'.");
+                Error::logMessage('error', "Session: Unable to open file '" . $this->filePath . $sessionId . "'.");
                 return $this->failure;
             }
 
             if (flock($this->fileHandle, LOCK_EX) === false) {
-                \Admin\Core\Error::logMessage('error', "Session: Unable to obtain lock for file '" . $this->filePath . $sessionId . "'.");
+                Error::logMessage('error', "Session: Unable to obtain lock for file '" . $this->filePath . $sessionId . "'.");
                 fclose($this->fileHandle);
                 $this->fileHandle = null;
                 return $this->failure;
@@ -97,7 +97,7 @@ class Files extends Driver implements DriverInterface
 
         $sessionData = '';
         $fileSize = (int)filesize((string)$this->filePath . $sessionId);
-        for ($read = 0; $read < $fileSize; $read += self::strlen($buffer)) {
+        for ($read = 0; $read < $fileSize; $read += strlen($buffer)) {
             if (($buffer = fread($this->fileHandle, $fileSize - $read)) === false) {
                 break;
             }
@@ -140,7 +140,7 @@ class Files extends Driver implements DriverInterface
 
             if (!is_int($result)) {
                 $this->fingerprint = md5(substr((string)$sessionData, 0, (int)$written));
-                \Admin\Core\Error::logMessage('error', 'Session: Unable to write data.');
+                Error::logMessage('error', 'Session: Unable to write data.');
                 return $this->failure;
             }
         }
@@ -198,8 +198,8 @@ class Files extends Driver implements DriverInterface
     public function gc(int $maxlifetime): int|false
     {
         if (!is_dir((string)$this->config['save_path']) || ($directory = opendir((string)$this->config['save_path'])) === false) {
-            \Admin\Core\Error::logMessage('debug', "Session: Garbage collector couldn't list files under directory '" . $this->config['save_path'] . "'.");
-            return 0; // In PHP 8, it should return an int (number of deleted items or just 0/something)
+            Error::logMessage('debug', "Session: Garbage collector couldn't list files under directory '" . $this->config['save_path'] . "'.");
+            return 0;
         }
 
         $ts = time() - (int)$maxlifetime;
@@ -241,13 +241,5 @@ class Files extends Driver implements DriverInterface
         $result = is_file((string)$this->filePath . $sessionId);
         clearstatcache(true, (string)$this->filePath . $sessionId);
         return $result;
-    }
-
-    /**
-     * Internal strlen
-     */
-    protected static function strlen($str)
-    {
-        return (self::$funcOverload) ? mb_strlen((string)$str, '8bit') : strlen((string)$str);
     }
 }
