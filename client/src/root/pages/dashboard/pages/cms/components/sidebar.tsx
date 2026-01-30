@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { Folder, ChevronRight, ChevronDown, FileText, Plus, Tags, Globe } from 'lucide-react'
+import { Folder, ChevronRight, ChevronDown, FileText, Plus, Tags } from 'lucide-react'
 
 interface Category {
     id: number;
@@ -149,7 +149,6 @@ export default function Sidebar() {
                     <div className="space-y-1">
                         <ManagementItem path="/dashboard/cms/posts" icon={FileText} title="Posts" />
                         <ManagementItem path="/dashboard/cms/tags" icon={Tags} title="Tags" />
-                        <ManagementItem path="/dashboard/cms/sites" icon={Globe} title="Sites" />
                     </div>
                 </div>
             </div>

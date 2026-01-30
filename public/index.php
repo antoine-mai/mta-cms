@@ -21,9 +21,9 @@ require ROOT_DIR . '/server/startup.php';
 function isInstalled(): bool
 {
     $envPath = ROOT_DIR . '/.env';
-    $defaultUser = 'admin';
+    $defaultUser = 'root';
     // Legacy insecure default to check against
-    $insecurePass = 'admin@123';
+    $insecurePass = 'root@123';
 
     if (!file_exists($envPath)) {
         // Generate random strong password
@@ -34,8 +34,9 @@ function isInstalled(): bool
         }
 
         $content = 'DATABASE_URL="sqlite:///%kernel.project_dir%/storage/data/app.db"' . "\n";
-        $content .= 'ADMIN_USER=' . $defaultUser . "\n";
-        $content .= 'ADMIN_PASS=' . $randomPass . "\n";
+        $content .= 'ROOT_PASS=' . $randomPass . "\n";
+        $content .= 'ROOT_USER=' . $defaultUser . "\n";
+        
         file_put_contents($envPath, $content);
         
         // Return false to trigger redirect on first run so user goes to admin
@@ -45,8 +46,8 @@ function isInstalled(): bool
     $envContent = file_get_contents($envPath);
     
     // Check if legacy insecure credentials are still in use
-    if (preg_match('/ADMIN_USER\s*=\s*' . preg_quote($defaultUser, '/') . '\s*(\n|$)/', $envContent) && 
-        preg_match('/ADMIN_PASS\s*=\s*' . preg_quote($insecurePass, '/') . '\s*(\n|$)/', $envContent)) {
+    if (preg_match('/ROOT_USER\s*=\s*' . preg_quote($defaultUser, '/') . '\s*(\n|$)/', $envContent) && 
+        preg_match('/ROOT_PASS\s*=\s*' . preg_quote($insecurePass, '/') . '\s*(\n|$)/', $envContent)) {
         return false;
     }
 
@@ -54,7 +55,7 @@ function isInstalled(): bool
 }
 
 if (!isInstalled()) {
-    header('Location: /admin');
+    header('Location: /root');
     exit;
 }
 

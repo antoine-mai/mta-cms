@@ -13,6 +13,7 @@ export default function Header() {
     const isDashboardActive = location.pathname.startsWith('/dashboard')
     const isBackupActive = location.pathname.startsWith('/backup')
     const isFilesActive = location.pathname.startsWith('/files')
+    const isBuilderActive = location.pathname.startsWith('/builder')
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -37,21 +38,34 @@ export default function Header() {
     return (
         <header
             className="sticky top-0 z-50 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="px-6 lg:px-8 h-[56px] flex items-center justify-between">
-                <div className="flex items-center gap-10">
-                    <div className="flex items-center gap-3">
-                        <div className="size-8 text-indigo-600 dark:text-indigo-500">
-                            <Link to="/">
-                                <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                            </Link>
-                        </div>
+            <div className="h-[56px] flex items-center justify-between pr-6 lg:pr-8">
+                <div className="flex items-center h-full">
+                    {/* Logo Section - Matches Sidebar Width */}
+                    <div className="w-[56px] h-full flex items-center justify-center border-r border-slate-200 dark:border-slate-800">
+                        <Link to="/" className="size-8 text-indigo-600 dark:text-indigo-500 flex items-center justify-center">
+                            <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </Link>
                     </div>
-                    <nav className="hidden md:flex items-center gap-1">
-                        <Link className={`${commonClass} ${isDashboardActive ? activeClass : inactiveClass}`} to="/dashboard">Dashboard</Link>
-                        <Link className={`${commonClass} ${isFilesActive ? activeClass : inactiveClass}`} to="/files">Files</Link>
-                        <Link className={`${commonClass} ${isBackupActive ? activeClass : inactiveClass}`} to="/backup">Backup</Link>
+
+                    <nav className="hidden md:flex items-center gap-1 ml-6">
+                        <Link className={`${commonClass} ${isDashboardActive ? activeClass : inactiveClass} flex items-center gap-2`} to="/dashboard">
+                            <span className="material-symbols-outlined text-[20px]">dashboard</span>
+                            Dashboard
+                        </Link>
+                        <Link className={`${commonClass} ${isFilesActive ? activeClass : inactiveClass} flex items-center gap-2`} to="/files">
+                            <span className="material-symbols-outlined text-[20px]">folder</span>
+                            Files
+                        </Link>
+                        <Link className={`${commonClass} ${isBackupActive ? activeClass : inactiveClass} flex items-center gap-2`} to="/backup">
+                            <span className="material-symbols-outlined text-[20px]">backup</span>
+                            Backup
+                        </Link>
+                        <Link className={`${commonClass} ${isBuilderActive ? activeClass : inactiveClass} flex items-center gap-2`} to="/builder">
+                            <span className="material-symbols-outlined text-[20px]">handyman</span>
+                            Builder
+                        </Link>
                     </nav>
                 </div>
 

@@ -84,14 +84,29 @@ class Common
     public static function &getMimes()
     {
         if (empty(self::$mimes)) {
-            $config = &\Root\Core\Registry::getInstance('Config');
-            $filePath = $config->getRootDir() . '/server/config/mimes.yaml';
-            if (file_exists($filePath)) {
-                $yaml = new \Root\Services\Yaml();
-                self::$mimes = $yaml->parse($filePath);
-            } else {
-                self::$mimes = [];
-            }
+            self::$mimes = [
+                'jpg'  => ['image/jpeg', 'image/pjpeg'],
+                'jpeg' => ['image/jpeg', 'image/pjpeg'],
+                'png'  => ['image/png', 'image/x-png'],
+                'gif'  => 'image/gif',
+                'txt'  => 'text/plain',
+                'zip'  => [
+                    'application/x-zip',
+                    'application/zip',
+                    'application/x-zip-compressed',
+                    'application/s-compressed',
+                    'multipart/x-zip'
+                ],
+                'json' => ['application/json', 'text/json'],
+                'php'  => [
+                    'application/x-httpd-php',
+                    'application/php',
+                    'application/x-php',
+                    'text/php',
+                    'text/x-php',
+                    'application/x-httpd-php-source'
+                ]
+            ];
         }
         return self::$mimes;
     }

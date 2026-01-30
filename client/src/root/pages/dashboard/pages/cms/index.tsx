@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
 import Sidebar from './components/sidebar'
+import { CmsRoutes } from './routes'
 
 export default function CmsPage() {
     return (
@@ -7,7 +7,7 @@ export default function CmsPage() {
             <Sidebar />
 
             <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/50">
-                <Outlet />
+                <CmsRoutes />
             </main>
         </div>
     )

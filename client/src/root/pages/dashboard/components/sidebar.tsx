@@ -5,9 +5,10 @@ export default function Sidebar() {
     const currentPath = location.pathname
 
     const menuItems = [
-        { path: '/dashboard/overview', icon: 'dashboard', title: 'Overview' },
-        { path: '/dashboard/cms', icon: 'article', title: 'CMS' },
+        { path: '/dashboard', icon: 'dashboard', title: 'Overview' },
+        { path: '/dashboard/sites', icon: 'language', title: 'Sites' },
         { path: '/dashboard/pages', icon: 'description', title: 'Pages' },
+        { path: '/dashboard/cms', icon: 'article', title: 'CMS' },
         { path: '/dashboard/ecommerce', icon: 'shopping_cart', title: 'Ecommerce' }
     ]
 

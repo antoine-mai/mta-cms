@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
 import Sidebar from './components/sidebar'
+import { EcommerceRoutes } from './routes'
 
 export default function EcommercePage() {
     return (
@@ -7,7 +7,7 @@ export default function EcommercePage() {
             <Sidebar />
 
             <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/50">
-                <Outlet />
+                <EcommerceRoutes />
             </main>
         </div>
     )

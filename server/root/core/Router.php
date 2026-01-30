@@ -240,8 +240,9 @@ class Router
 
         // 1. API and Post routes -> Standard Filesystem Mapping
         $cleanUri = $uri;
-        if (strpos($cleanUri, '/root') === 0) {
-             $cleanUri = substr($cleanUri, 5);
+        $baseFolder = basename(dirname($_SERVER['SCRIPT_NAME'] ?? 'root'));
+        if (strpos($cleanUri, '/' . $baseFolder) === 0) {
+             $cleanUri = substr($cleanUri, strlen($baseFolder) + 1);
              if ($cleanUri === '' || $cleanUri === false) $cleanUri = '/';
         }
         

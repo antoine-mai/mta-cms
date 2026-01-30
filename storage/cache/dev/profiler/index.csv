@@ -195,3 +195,15 @@ c9a3c1,127.0.0.1,GET,http://localhost:8200/assets/index-C4IdCPQI.js,1769761289,8
 355f0f,127.0.0.1,GET,http://localhost:8200/assets/react-vendor-DweroVZ6.js,1769761289,,404,request
 4dbc32,127.0.0.1,GET,http://localhost:8200/assets/monaco-vendor-Bo5OUYwx.js,1769761289,b234a6,404,request
 b234a6,127.0.0.1,GET,http://localhost:8200/assets/monaco-vendor-Bo5OUYwx.js,1769761289,,404,request
+ff0b29,127.0.0.1,GET,http://localhost:8200/,1769765907,,200,request
+cc7d3f,127.0.0.1,GET,http://localhost:8200/assets/monaco-vendor-Bo5OUYwx.js,1769765907,dbd559,404,request
+dbd559,127.0.0.1,GET,http://localhost:8200/assets/monaco-vendor-Bo5OUYwx.js,1769765907,,404,request
+2fbc65,127.0.0.1,GET,http://localhost:8200/assets/rolldown-runtime-y2wrX6ue.js,1769765907,a358f6,404,request
+a358f6,127.0.0.1,GET,http://localhost:8200/assets/rolldown-runtime-y2wrX6ue.js,1769765907,,404,request
+082e43,127.0.0.1,GET,http://localhost:8200/assets/react-vendor-DweroVZ6.js,1769765907,624c27,404,request
+40833a,127.0.0.1,GET,http://localhost:8200/assets/index-VDaF1VRZ.css,1769765908,05150e,404,request
+624c27,127.0.0.1,GET,http://localhost:8200/assets/react-vendor-DweroVZ6.js,1769765907,,404,request
+05150e,127.0.0.1,GET,http://localhost:8200/assets/index-VDaF1VRZ.css,1769765908,,404,request
+5c3e2f,127.0.0.1,GET,http://localhost:8200/assets/index-C4IdCPQI.js,1769765907,3161f3,404,request
+3161f3,127.0.0.1,GET,http://localhost:8200/assets/index-C4IdCPQI.js,1769765907,,404,request
+0cd61f,127.0.0.1,GET,http://localhost:8200/.well-known/appspecific/com.chrome.devtools.json,1769766142,,200,request

@@ -46,10 +46,49 @@ class Config
     public function __construct()
     {
         // Initialize path properties first so load() can use them if needed
-        $this->rootDir = defined('ROOT_DIR') ? ROOT_DIR : dirname(__DIR__, 3);
-        $this->rootPath = defined('ROOT_PATH') ? ROOT_PATH : $this->rootDir . '/server/root/';
+        $this->rootDir = defined('ROOT_DIR') ? ROOT_DIR : realpath(dirname(__DIR__, 3));
+        $this->rootPath = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__) . '/';
 
-        $this->load('root', false, true);
+        // Hardcoded Default Configuration (previously in root.yaml)
+        $this->config = [
+            'language' => 'english',
+            'charset'  => 'UTF-8',
+            'log' => [
+                'path'           => "../../storage/log/root/",
+                'dateFormat'     => "Y-m-d H:i:s",
+                'filePermissions' => 0644,
+                'fileExtension'  => "",
+                'threshold'      => 0
+            ],
+            'cachePath' => "../../storage/cache/root/",
+            'sess' => [
+                'driver'            => 'files',
+                'cookieName'        => 'mta_cms_root_session',
+                'samesite'          => 'Lax',
+                'expiration'        => 7200,
+                'matchIp'           => false,
+                'timeToUpdate'      => 300,
+                'regenerateDestroy' => false
+            ],
+            'cookie' => [
+                'prefix'   => "",
+                'domain'   => "",
+                'path'     => "/",
+                'secure'   => false,
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ],
+            'csrf' => [
+                'protection' => false,
+                'tokenName'  => 'csrf_test_name',
+                'cookieName' => 'csrf_cookie_name',
+                'expire'     => 7200,
+                'regenerate' => true,
+                'excludeUris' => []
+            ],
+            'proxyIps' => "",
+            'routes'   => []
+        ];
     }
 
     /**
@@ -73,6 +112,24 @@ class Config
     }
 
     /**
+     * Get Config Path
+     * 
+     * @return string
+     */
+    protected function _getConfigPath()
+    {
+        // Assume config is a sibling of the 'root' folder's parent or within project server/config
+        $frameworkParent = dirname($this->rootPath);
+        $candidate = $frameworkParent . '/config/';
+        
+        if (is_dir($candidate)) {
+            return $candidate;
+        }
+
+        return $this->rootDir . '/server/config/';
+    }
+
+    /**
      * Load Config File
      *
      * @param	string	$file           Configuration file name
@@ -83,7 +140,8 @@ class Config
     public function load($file = 'config', $useSections = false, $failGracefully = false)
     {
         $file = str_replace('.php', '', $file);
-        $file_path = $this->rootDir . '/server/config/' . $file . '.yaml';
+        $config_dir = $this->_getConfigPath();
+        $file_path = $config_dir . $file . '.yaml';
 
         if (in_array($file_path, $this->isLoaded, true)) {
             return true;
@@ -93,7 +151,7 @@ class Config
             if ($failGracefully === true) {
                 return false;
             }
-            trigger_error('The configuration file ' . $file . '.yaml does not exist in ' . $this->rootDir . '/server/config/', E_USER_ERROR);
+            trigger_error('The configuration file ' . $file . '.yaml does not exist in ' . $config_dir, E_USER_ERROR);
         }
 
         $yaml = new Yaml();
@@ -116,9 +174,6 @@ class Config
 
         $this->isLoaded[] = $file_path;
         
-        if ($file !== 'config') {
-        }
-
         return true;
     }
 
@@ -145,7 +200,7 @@ class Config
     public function set($item, $value, $file = 'config')
     {
         $file = str_replace('.php', '', $file);
-        $file_path = $this->rootDir . '/server/config/' . $file . '.yaml';
+        $file_path = $this->_getConfigPath() . $file . '.yaml';
 
         // Update in-memory flat config
         $this->config[$item] = $value;

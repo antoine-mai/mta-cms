@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Cloud, Save, Key, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Cloud, Save, Key, CheckCircle2 } from 'lucide-react'
 
 interface CloudProvider {
     id: string
@@ -104,47 +104,44 @@ export default function CloudSettingsPage() {
     }
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl overflow-hidden m-6 font-display">
             {/* Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Cloud Settings</h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Configure cloud storage providers for backup</p>
+            <div className="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 bg-white dark:bg-slate-900 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
+                        <Cloud className="w-5 h-5 text-white" />
                     </div>
-
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-500 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 hover:scale-105 disabled:scale-100 flex items-center gap-2"
-                    >
-                        {saving ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Saving...
-                            </>
-                        ) : saveStatus === 'success' ? (
-                            <>
-                                <CheckCircle2 className="w-5 h-5" />
-                                Saved!
-                            </>
-                        ) : saveStatus === 'error' ? (
-                            <>
-                                <AlertCircle className="w-5 h-5" />
-                                Error
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-5 h-5" />
-                                Save Settings
-                            </>
-                        )}
-                    </button>
+                    <div>
+                        <h2 className="font-bold text-lg text-slate-900 dark:text-white">Cloud Storage</h2>
+                    </div>
                 </div>
+
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:from-slate-400 disabled:to-slate-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:scale-105 active:scale-95 disabled:scale-100 flex items-center gap-2 text-sm"
+                >
+                    {saving ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                        </>
+                    ) : saveStatus === 'success' ? (
+                        <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            Saved!
+                        </>
+                    ) : (
+                        <>
+                            <Save className="w-4 h-4" />
+                            Save
+                        </>
+                    )}
+                </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            {/* Content area - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30 dark:bg-slate-900/20 custom-scrollbar">
                 <div className="max-w-4xl space-y-6">
                     {providers.map((provider) => (
                         <div

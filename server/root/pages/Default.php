@@ -12,7 +12,8 @@ class DefaultPage extends Controller
 {
     public function index(Request $request): Response
     {
-		$distPath = $this->config->getRootDir() . '/public/root/dist/root.html';
+		$folderName = basename(dirname($_SERVER['SCRIPT_NAME'] ?? 'root'));
+		$distPath = $this->config->getRootDir() . '/public/' . $folderName . '/dist/root.html';
 
 		if (file_exists($distPath)) {
 			$content = file_get_contents($distPath);

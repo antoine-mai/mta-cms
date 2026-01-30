@@ -1,1 +1,0 @@
-import{dt as e}from"./react-vendor-JXP-I5sL.js";var t=e();function n(){return(0,t.jsxs)(`div`,{className:`max-w-7xl mx-auto`,children:[(0,t.jsx)(`h1`,{className:`text-3xl font-bold text-slate-900 dark:text-white mb-6`,children:`Customers`}),(0,t.jsx)(`p`,{className:`text-slate-500 dark:text-slate-400`,children:`Manage your customer database.`})]})}export{n as default};
