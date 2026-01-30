@@ -1,0 +1,32 @@
+import { Settings as SettingsIcon } from 'lucide-react'
+
+export default function SettingsPage() {
+    return (
+        <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Backup Settings</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Configure backup schedule and retention policies</p>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-4xl">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-4">
+                                <SettingsIcon className="w-10 h-10 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Settings Coming Soon</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Configure backup schedule, retention, and other settings
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}

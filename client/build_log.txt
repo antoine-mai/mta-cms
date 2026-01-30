@@ -1,7 +1,0 @@
-
-> client@0.0.0 build
-> tsc -b && vite build
-
-src/pages/files/components/sidebar.tsx(4,29): error TS2307: Cannot find module '../services/api' or its corresponding type declarations.
-src/pages/files/hooks/use-files.ts(2,29): error TS2307: Cannot find module '../services/api' or its corresponding type declarations.
-src/pages/files/hooks/use-files.ts(4,10): error TS1484: 'FileActionType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.

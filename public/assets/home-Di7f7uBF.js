@@ -1,1 +1,0 @@
-import{d as e}from"./react-vendor-DweroVZ6.js";var t=e();function n(){return(0,t.jsx)(`main`,{className:`flex-1 flex flex-col min-w-0 bg-background-main relative`,children:`home`})}export{n as default};

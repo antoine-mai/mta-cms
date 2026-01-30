@@ -7,15 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
 {
     public static $files = array (
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
-        '89efb1254ef2d1c5d80096acd12c4098' => __DIR__ . '/..' . '/twig/twig/src/Resources/core.php',
-        'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
-        'c7baa00073ee9c61edf148c51917cfb4' => __DIR__ . '/..' . '/twig/twig/src/Resources/escaper.php',
-        'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
@@ -23,10 +19,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
     );
 
     public static $prefixLengthsPsr4 = array (
-        'T' =>
-        array (
-            'Twig\\' => 5,
-        ),
         'S' =>
         array (
             'Symfony\\Runtime\\Symfony\\Component\\' => 34,
@@ -36,7 +28,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Grapheme\\' => 31,
             'Symfony\\Polyfill\\Ctype\\' => 23,
-            'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\EventDispatcher\\' => 34,
             'Symfony\\Contracts\\Cache\\' => 24,
@@ -57,13 +48,9 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Component\\Config\\' => 25,
             'Symfony\\Component\\Cache\\' => 24,
-            'Symfony\\Bundle\\WebProfilerBundle\\' => 33,
-            'Symfony\\Bundle\\TwigBundle\\' => 26,
             'Symfony\\Bundle\\MonologBundle\\' => 29,
             'Symfony\\Bundle\\FrameworkBundle\\' => 31,
-            'Symfony\\Bridge\\Twig\\' => 20,
             'Symfony\\Bridge\\Monolog\\' => 23,
-            'Symfony\\Bridge\\Doctrine\\' => 24,
         ),
         'P' =>
         array (
@@ -76,20 +63,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
         array (
             'Monolog\\' => 8,
         ),
-        'D' =>
-        array (
-            'Doctrine\\SqlFormatter\\' => 22,
-            'Doctrine\\Persistence\\' => 21,
-            'Doctrine\\ORM\\' => 13,
-            'Doctrine\\Instantiator\\' => 22,
-            'Doctrine\\Inflector\\' => 19,
-            'Doctrine\\Deprecations\\' => 22,
-            'Doctrine\\DBAL\\' => 14,
-            'Doctrine\\Common\\Lexer\\' => 22,
-            'Doctrine\\Common\\Collections\\' => 28,
-            'Doctrine\\Common\\' => 16,
-            'Doctrine\\Bundle\\DoctrineBundle\\' => 31,
-        ),
         'A' =>
         array (
             'App\\' => 4,
@@ -97,10 +70,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
     );
 
     public static $prefixDirsPsr4 = array (
-        'Twig\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/twig/twig/src',
-        ),
         'Symfony\\Runtime\\Symfony\\Component\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/runtime/Internal',
@@ -128,10 +97,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
         'Symfony\\Polyfill\\Ctype\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
-        ),
-        'Symfony\\Contracts\\Translation\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/translation-contracts',
         ),
         'Symfony\\Contracts\\Service\\' =>
         array (
@@ -213,14 +178,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
         array (
             0 => __DIR__ . '/..' . '/symfony/cache',
         ),
-        'Symfony\\Bundle\\WebProfilerBundle\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/web-profiler-bundle',
-        ),
-        'Symfony\\Bundle\\TwigBundle\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/twig-bundle',
-        ),
         'Symfony\\Bundle\\MonologBundle\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/monolog-bundle/src',
@@ -229,17 +186,9 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
         array (
             0 => __DIR__ . '/..' . '/symfony/framework-bundle',
         ),
-        'Symfony\\Bridge\\Twig\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/twig-bridge',
-        ),
         'Symfony\\Bridge\\Monolog\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/monolog-bridge',
-        ),
-        'Symfony\\Bridge\\Doctrine\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/doctrine-bridge',
         ),
         'Psr\\Log\\' =>
         array (
@@ -260,50 +209,6 @@ class ComposerStaticInit9a74e8b4d58347fd58ced38f787de619
         'Monolog\\' =>
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
-        ),
-        'Doctrine\\SqlFormatter\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/sql-formatter/src',
-        ),
-        'Doctrine\\Persistence\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/persistence/src/Persistence',
-        ),
-        'Doctrine\\ORM\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/orm/src',
-        ),
-        'Doctrine\\Instantiator\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
-        ),
-        'Doctrine\\Inflector\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/inflector/src',
-        ),
-        'Doctrine\\Deprecations\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/deprecations/src',
-        ),
-        'Doctrine\\DBAL\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/dbal/src',
-        ),
-        'Doctrine\\Common\\Lexer\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/lexer/src',
-        ),
-        'Doctrine\\Common\\Collections\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/collections/src',
-        ),
-        'Doctrine\\Common\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/event-manager/src',
-        ),
-        'Doctrine\\Bundle\\DoctrineBundle\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/doctrine-bundle/src',
         ),
         'App\\' =>
         array (

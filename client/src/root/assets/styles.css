@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-primary: #007acc;
+    --color-primary-hover: #0062a3;
+    --color-background-light: #f3f3f3;
+    --color-background-dark: #1e1e1e;
+
+    /* Adding some other common variables used in the config */
+    --color-background-main: #f3f3f3;
+    --color-sidebar-slim: #ffffff;
+    --color-sidebar-wide: #ffffff;
+    --color-card-bg: #ffffff;
+    --color-border-light: #e2e8f0;
+    --color-text-main: #000000;
+    --color-text-secondary: #3b3b3b;
+    --color-text-muted: #717171;
+}
+
+.dark {
+    --color-background-main: #1e1e1e;
+    --color-sidebar-slim: #252526;
+    --color-sidebar-wide: #252526;
+    --color-card-bg: #252526;
+    --color-border-light: #3c3c3c;
+    --color-text-main: #cccccc;
+    --color-text-secondary: #aaaaaa;
+    --color-text-muted: #858585;
+}
+
+@layer base {
+
+    html,
+    body {
+        @apply h-full;
+    }
+}

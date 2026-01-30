@@ -23,7 +23,7 @@ module.exports = {
             },
             fontFamily: {
                 "sans": ["Inter", "sans-serif"],
-                "display": ["Manrope", "sans-serif"]
+                "display": ["Inter", "sans-serif"]
             },
             borderRadius: {
                 "DEFAULT": "0.25rem",
