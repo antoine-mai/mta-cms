@@ -7,6 +7,7 @@ export default function Sidebar() {
     const menuItems = [
         { path: '/dashboard/overview', icon: 'dashboard', title: 'Overview' },
         { path: '/dashboard/cms', icon: 'article', title: 'CMS' },
+        { path: '/dashboard/pages', icon: 'description', title: 'Pages' },
         { path: '/dashboard/ecommerce', icon: 'shopping_cart', title: 'Ecommerce' }
     ]
 

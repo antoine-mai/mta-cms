@@ -141,16 +141,6 @@ export default function Sidebar() {
                     )}
                 </div>
 
-                {/* Pages Section */}
-                <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-                    <div className="px-3 mb-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Pages</h3>
-                    </div>
-                    <div className="space-y-1">
-                        <ManagementItem path="/dashboard/cms/pages" icon={FileText} title="Pages" />
-                    </div>
-                </div>
-
                 {/* Content Section */}
                 <div className="p-4">
                     <div className="px-3 mb-2">

@@ -68,10 +68,10 @@ export default function Router() {
                                     <Route index element={<Navigate to="categories" replace />} />
                                     <Route path="categories" element={<DashboardCmsCategories />} />
                                     <Route path="posts" element={<DashboardCmsPosts />} />
-                                    <Route path="pages" element={<DashboardCmsPages />} />
                                     <Route path="tags" element={<DashboardCmsTags />} />
                                     <Route path="sites" element={<DashboardCmsSites />} />
                                 </Route>
+                                <Route path="pages" element={<DashboardCmsPages />} />
                                 <Route path="ecommerce" element={<DashboardEcommerce />}>
                                     <Route index element={<DashboardEcommerceCategories />} />
                                     <Route path="attribute-sets" element={<DashboardEcommerceAttributeSets />} />
